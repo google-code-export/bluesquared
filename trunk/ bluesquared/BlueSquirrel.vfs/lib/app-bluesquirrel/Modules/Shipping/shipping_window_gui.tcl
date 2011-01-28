@@ -143,7 +143,7 @@ proc shippingGUI {} {
                         
                         
     ttk::button $frame2a.add -text "Add to List" -command {
-            ;# Guard against the user inadertantly hitting <Enter> or "Add" button without anything in the entry fields
+            ;# Guard against the user inadvertantly hitting <Enter> or "Add" button without anything in the entry fields
             if {[info exists GS_textVar(destQty)] eq 0} {return}
             
             Shipping_Code::addMaster $GS_textVar(destQty) $GS_textVar(batch)
@@ -225,7 +225,7 @@ ttk::style map TEntry -fieldbackground [list focus yellow]
 
 foreach window "$frame2a.add $frame2a.entry1 $frame2a.entry2" {
     bind $window <Return> {
-        ;# Guard against the user inadertantly hitting <Enter> or "Add" button without anything in the entry fields
+        ;# Guard against the user inadvertantly hitting <Enter> or "Add" button without anything in the entry fields
         if {[info exists GS_textVar(destQty)] eq 0} {return}
         Shipping_Code::addMaster $GS_textVar(destQty) $GS_textVar(batch)
         #Shipping_Code::insertInListbox $GS_textVar(destQty) $GS_textVar(batch)
@@ -291,6 +291,37 @@ bind [$frame2b.listbox bodytag] <Double-1> {
 
 bind all <<ComboboxSelected>> {
     Shipping_Code::readHistory [$frame1.entry1 current]
+}
+
+proc breakDown {} {
+    #****f* breakDown/Shipping_Gui
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 20011 - Casey Ackels
+    #
+    # FUNCTION
+    #	Displays the breakdown per destination
+    #
+    # SYNOPSIS
+    #	N/A
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	blueSquirrel::parentGUI
+    #
+    # NOTES
+    #	None
+    #
+    # SEE ALSO
+    #	TODO: List the other *GUI procs.
+    #
+    #***
+    
+    
 }
 
 
