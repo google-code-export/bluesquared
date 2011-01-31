@@ -404,11 +404,13 @@ proc displayListHelper {fullboxes partialboxes {reset 0}} {
     # Sort out the 'like' number groups; start at 1, because the 'unique' numbers are always 0.
     set valueLists2 [lrange $valueLists 1 end]
     #puts "valueLists2: $valueLists2"
+    #set GI_textVar(labelsPartial_noText) $valueLists2
 
     set x 0 
     foreach value $valueLists2 {
 	# This is for the groups of "like numbers"
         set GI_textVar(labelsPartial1) "[llength [lindex $valueLists2 $x]] Labels @ [lindex $valueLists2 $x end]"
+        
         
 	writeText [llength [lindex $valueLists2 $x]] [lindex $valueLists2 $x end]
 	
@@ -417,7 +419,10 @@ proc displayListHelper {fullboxes partialboxes {reset 0}} {
 
 
     # now we insert the 'unique' numbers, these should always just be one box each. Hence the hard-coding.
+    #puts "valuelists1: #$valueLists"
     set valueLists [split [join [lrange $valueLists 0 0]]]
+    #puts "valuelists2a: $valueLists"
+    set GI_textVar(labelsPartial_noText) $valueLists ;# get clean list with no other text
     foreach value $valueLists {
 	set GI_textVar(labelsPartial2) "1 Label @ $valueLists"
         

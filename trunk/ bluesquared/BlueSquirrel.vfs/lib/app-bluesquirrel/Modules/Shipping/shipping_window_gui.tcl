@@ -320,6 +320,31 @@ proc breakDown {} {
     #	TODO: List the other *GUI procs.
     #
     #***
+    global GI_textVar
+    
+    # make sure we don't allow two of the same windows open at the same time.
+    if {[winfo exists .breakdown]} {
+        destroy .breakdown
+    }
+    
+    set breakdown [toplevel .breakdown]
+    
+    set text [text .breakdown.txt]
+    pack $text
+    focus $text
+    
+    #Quantity: $GI_textVar(qty)\n-\n$GI_textVar(labels)\n$GI_textVar(labelsPartial1)\n$GI_textVar(labelsPartial2)
+    
+    # These variables have predefined text. Must find the source and fix it, for the Breakdown list to work correctly.
+    set x 0
+    $text insert [incr x].end "Total Quantity: $GI_textVar(qty)\n"
+    $text insert [incr x].end .end "Labels: $GI_textVar(labels)\n"
+    $text insert [incr x].end .end "Partial: $GI_textVar(labelsPartial1)\n"
+
+    foreach value $GI_textVar(labelsPartial_noText) {
+        $text insert [incr x].end "Partial: 1 Label @ $value\n"
+    }
+
     
     
 }

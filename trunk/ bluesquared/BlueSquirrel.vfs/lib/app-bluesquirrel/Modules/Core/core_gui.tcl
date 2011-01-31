@@ -79,11 +79,8 @@ proc blueSquirrel::parentGUI {} {
     ## Edit
     menu $mb.edit -tearoff 0 -relief raised -bd 2
     $mb add cascade -label "Edit" -menu $mb.edit
-    $mb add cascade -label "Breakdown" -menu $mb.breakdown
     
-    $mb.edit add command -label "Clear List" -command {
-                Shipping_Code::clearList
-                }
+    $mb.edit add command -label "Clear List" -command {Shipping_Code::clearList}
     $mb.edit add command -label "Breakdown" -command {Shipping_Gui::breakDown}
                 
     ## Mode
