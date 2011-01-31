@@ -262,12 +262,13 @@ proc createList {} {
 #            puts "L_rawEntries: [split [join [$frame2b.listbox getcells 0,1 end,1]]]"
 #	return
 #	}
-    #puts "L_rawEntries: $L_rawEntries"
+    puts "L_rawEntries: $L_rawEntries"
     
     # Make sure the variables are cleared out; we don't want any data to lag behind.
     set FullBoxes ""
     set PartialQty ""
-      
+    
+    # L_rawEntries holds each qty (i.e. 200 204 317)
     foreach entry $L_rawEntries {
 	set result [doMath $entry $GS_textVar(maxBoxQty)]
 	
@@ -364,8 +365,6 @@ proc displayListHelper {fullboxes partialboxes {reset 0}} {
         set GI_textVar(labelsPartial1) ""
         set GI_textVar(labelsPartial2) ""
 
-        #tooltip::tooltip $frame2b.listbox \
-        "Quantity: $GI_textVar(qty)\n-\n$GI_textVar(labels)\n$GI_textVar(labelsPartial1)\n$GI_textVar(labelsPartial2)"
     }
     
     controlFile destination fileopen
@@ -389,22 +388,14 @@ proc displayListHelper {fullboxes partialboxes {reset 0}} {
 	
         set GI_textVar(labels) "$fullboxes $labels @ $GS_textVar(maxBoxQty)"
 	    
-	#tooltip::tooltip $frame2b.listbox \
-        "Quantity: $GI_textVar(qty)\n-\n$GI_textVar(labels)\n$GI_textVar(labelsPartial1)\n$GI_textVar(labelsPartial2)"
-        #puts "GI_textVar(labels): $GI_textVar(labels)"
-	
 	writeText $fullboxes $GS_textVar(maxBoxQty)
-        #writeHistory $GS_textVar(maxBoxQty)
     }
     
     # Lets sort out the like groups, and the unique group/numbers.
     set valueLists [extractFromList $partialboxes]
-    #puts "valueLists: $valueLists"
 
     # Sort out the 'like' number groups; start at 1, because the 'unique' numbers are always 0.
     set valueLists2 [lrange $valueLists 1 end]
-    #puts "valueLists2: $valueLists2"
-    #set GI_textVar(labelsPartial_noText) $valueLists2
 
     set x 0 
     foreach value $valueLists2 {
@@ -419,9 +410,8 @@ proc displayListHelper {fullboxes partialboxes {reset 0}} {
 
 
     # now we insert the 'unique' numbers, these should always just be one box each. Hence the hard-coding.
-    #puts "valuelists1: #$valueLists"
     set valueLists [split [join [lrange $valueLists 0 0]]]
-    #puts "valuelists2a: $valueLists"
+
     set GI_textVar(labelsPartial_noText) $valueLists ;# get clean list with no other text
     foreach value $valueLists {
 	set GI_textVar(labelsPartial2) "1 Label @ $valueLists"
@@ -431,10 +421,7 @@ proc displayListHelper {fullboxes partialboxes {reset 0}} {
     
     puts "tooltip"
     puts "qty: $GI_textVar(qty)"
-    #tooltip::tooltip $frame2b.listbox \
-        "Quantity: $GI_textVar(qty)\n-\n$GI_textVar(labels)\n$GI_textVar(labelsPartial1)\n$GI_textVar(labelsPartial2)"
-    
-    
+
     controlFile destination fileclose
 } ;# End of displayListHelper proc    
     

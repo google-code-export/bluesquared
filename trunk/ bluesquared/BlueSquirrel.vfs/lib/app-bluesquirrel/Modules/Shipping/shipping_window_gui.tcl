@@ -335,11 +335,11 @@ proc breakDown {} {
     
     #Quantity: $GI_textVar(qty)\n-\n$GI_textVar(labels)\n$GI_textVar(labelsPartial1)\n$GI_textVar(labelsPartial2)
     
-    # These variables have predefined text. Must find the source and fix it, for the Breakdown list to work correctly.
+    # This is the overview.
     set x 0
     $text insert [incr x].end "Total Quantity: $GI_textVar(qty)\n"
-    $text insert [incr x].end .end "Labels: $GI_textVar(labels)\n"
-    $text insert [incr x].end .end "Partial: $GI_textVar(labelsPartial1)\n"
+    $text insert [incr x].end "Labels: $GI_textVar(labels)\n"
+    $text insert [incr x].end "Partial: $GI_textVar(labelsPartial1)\n"
 
     foreach value $GI_textVar(labelsPartial_noText) {
         $text insert [incr x].end "Partial: 1 Label @ $value\n"
