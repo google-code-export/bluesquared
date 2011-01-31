@@ -1,1 +1,1 @@
-tclkit852.exe sdx.kit wrap BlueSquirrel -runtime tclkit-852.exe
+tclkit852.exe sdx.kit wrap BlueSquirrel.exe -runtime tclkit-852.exe
