@@ -209,7 +209,7 @@ proc addListboxNums {{reset 0}} {
     #	N/A
     #
     #***
-    global frame2b GI_textVar
+    global frame2b GI_textVar GS_textVar
 
     ;# If we clear the entire list, we want to reset all counters.
     if {$reset ne 0} {
@@ -231,18 +231,15 @@ proc addListboxNums {{reset 0}} {
         }
     }
     
-#    set S_rawNum [string trim $S_rawNum \{]
-#    set S_rawNum [string trim $S_rawNum \}]
-#    
-#    #puts "S_rawNum_trimmed: $S_rawNum"
-#
-#    
-#    if {$S_rawNum != ""} {
-#	set GI_textVar(qty) [expr [join $S_rawNum + ]]
-#        puts "addListBoxNums - textVar(qty): $GI_textVar(qty)"
-#    } else {
-#	set GI_textVar(qty) 0
-#    }
+    foreach value $err {
+        set fullboxes [expr $value/$GS_textVar(maxBoxQty)]
+        set partialboxes [expr $value - [expr {$GS_textVar(maxBoxQty)*$fullboxes}]]
+        puts "Total: $value"
+        puts "addListBox - FullBoxes: [llength $fullboxes] Labels @ $GS_textVar(maxBoxQty)"
+        puts "addListBox - PartialBoxes: 1 Label @ $partialboxes"
+    }
+    
+
     
 } ;# addListboxNums
 
@@ -271,6 +268,7 @@ proc createList {} {
     # L_rawEntries holds each qty (i.e. 200 204 317)
     foreach entry $L_rawEntries {
 	set result [doMath $entry $GS_textVar(maxBoxQty)]
+        puts "Result: $result"
 	
 	# Make sure the variables are cleared out; we don't want any data to lag behind.
 	set FullBoxes_text ""
@@ -286,11 +284,13 @@ proc createList {} {
 	
 	#Shipping_Gui::displayList [expr [join $FullBoxes +]] $PartialQty
 	displayListHelper $FullBoxes $PartialQty
+        puts "DisplayListHelper_A: $FullBoxes $PartialQty"
     
     } elseif {[info exists PartialQty] == 1} {
 	set FullBoxes ""
 	#Shipping_Gui::displayList $FullBoxes $PartialQty
 	displayListHelper $FullBoxes $PartialQty
+        puts "DisplayListHelper_B: $FullBoxes $PartialQty"
     
     } else {
 	Error_Message::errorMsg createList2
