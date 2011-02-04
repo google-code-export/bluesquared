@@ -266,7 +266,10 @@ proc createList {} {
     # L_rawEntries holds each qty (i.e. 200 204 317)
     foreach entry $L_rawEntries {
 	set result [doMath $entry $GS_textVar(maxBoxQty)]
-        puts "Result: [lrange $result 0 0] Label @ $GS_textVar(maxBoxQty)"
+        
+        if {[lrange $result 0 0 ]!= 0} {
+            puts "Result: [lrange $result 0 0] Label @ $GS_textVar(maxBoxQty)"
+        }
         
         if {[lrange $result 1 end] != 0} {
             puts "Result: 1 Label @ [lrange $result 1 end]"
