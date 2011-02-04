@@ -231,16 +231,17 @@ proc addListboxNums {{reset 0}} {
         }
     }
     
-    foreach value $err {
-        set fullboxes [expr $value/$GS_textVar(maxBoxQty)]
-        set partialboxes [expr $value - [expr {$GS_textVar(maxBoxQty)*$fullboxes}]]
+    #foreach value $err {
+    #    set fullboxes [expr $value/$GS_textVar(maxBoxQty)]
+    #    set partialboxes [expr $value - [expr {$GS_textVar(maxBoxQty)*$fullboxes}]]
         #puts "Total: $value"
         #puts "addListBox - FullBoxes: [llength $fullboxes] Labels @ $GS_textVar(maxBoxQty)"
         #puts "addListBox - PartialBoxes: 1 Label @ $partialboxes"
-        .breakdown.txt insert end "Total: $value"
-        .breakdown.txt insert end "FullBoxes: [llength $fullboxes] Labels @ $GS_textVar(maxBoxQty)"
-        .breakdown.txt insert end "PartialBoxes: 1 Label @ $partialboxes"
-    }
+    #    .breakdown.txt insert end "Total_a: $value\n"
+    #    .breakdown.txt insert end "FullBoxes: [llength $fullboxes] Labels @ $GS_textVar(maxBoxQty)\n"
+    #    .breakdown.txt insert end "PartialBoxes: 1 Label @ $partialboxes\n"
+    #    .breakdown.txt insert end "------\n"
+    #}
     
 
     
@@ -254,14 +255,8 @@ proc createList {} {
     if {[info exists GS_textVar(maxBoxQty)] == 0} {Error_Message::errorMsg createList1; return}
     if {$GS_textVar(maxBoxQty) == ""} {Error_Message::errorMsg createList1; return}
     
-    #set L_rawEntries [split [join [ catch {[$frame2b.listbox getcells 0,1 end,1]} err]]]
     set L_rawEntries [split [join [$frame2b.listbox getcells 0,1 end,1]]]
-#    catch {set L_rawEntries [split [join [$frame2b.listbox getcells 0,1 end,1]]]} err ;# Tablelist
-#        if {[info exist err] eq 1} {
-#            puts "err: $err"
-#            puts "L_rawEntries: [split [join [$frame2b.listbox getcells 0,1 end,1]]]"
-#	return
-#	}
+
     puts "L_rawEntries: $L_rawEntries"
     
     # Make sure the variables are cleared out; we don't want any data to lag behind.
@@ -271,8 +266,12 @@ proc createList {} {
     # L_rawEntries holds each qty (i.e. 200 204 317)
     foreach entry $L_rawEntries {
 	set result [doMath $entry $GS_textVar(maxBoxQty)]
-        puts "Result: $result"
-	
+        puts "Result: [lrange $result 0 0] Label @ $GS_textVar(maxBoxQty)"
+        
+        if {[lrange $result 1 end] != 0} {
+            puts "Result: 1 Label @ [lrange $result 1 end]"
+        }
+        
 	# Make sure the variables are cleared out; we don't want any data to lag behind.
 	set FullBoxes_text ""
 	set PartialQty_text ""

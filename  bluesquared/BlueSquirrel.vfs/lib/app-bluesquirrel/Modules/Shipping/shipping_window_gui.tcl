@@ -55,7 +55,7 @@ proc shippingGUI {} {
     #	TODO: List the other *GUI procs.
     #
     #***
-    global GI_textVar GS_textVar frame1 frame2b genResults GS_windows GS_widget
+    global GI_textVar GS_textVar frame1 frame2b genResults GS_windows
     
     # Destroy frames
     # NOTE: GS_windows is set in core_gui.tcl
@@ -68,8 +68,7 @@ proc shippingGUI {} {
     wm title . "Box Labels"
     
     # Initiate breakdown window; see proc breakDown
-    toplevel .breakdown
-    set GS_widget(breakdown) [text .breakdown.txt]
+
     
 # Frame 1
     set frame1 [ttk::labelframe .container.frame1 -text "Label Information"]
@@ -310,7 +309,7 @@ bind all <F2> {console hide}
 
 } ;# End of shippingGUI
 
-proc breakDown {} {}
+proc breakDown {} {
     #****f* breakDown/Shipping_Gui
     # AUTHOR
     #	Casey Ackels
@@ -337,12 +336,15 @@ proc breakDown {} {}
     #	TODO: List the other *GUI procs.
     #
     #***
-    global GI_textVar GS_windows
+    global GI_textVar GS_widget
     
     # make sure we don't allow two of the same windows open at the same time.
     #if {[winfo exists .breakdown]} {
     #    destroy .breakdown
     #}
+    toplevel .breakdown
+    text .breakdown.txt
+    set GS_widget(breakdown) .breakdown.txt
     pack $GS_widget(breakdown)
     focus $GS_widget(breakdown)
 
@@ -355,7 +357,7 @@ proc breakDown {} {}
 
     foreach value $GI_textVar(labelsPartial_noText) {
         $GS_widget(breakdown) insert end "Partial: 1 Label @ $value\n"
-    }
+        }
     
     
 } ;# End of breakDown
