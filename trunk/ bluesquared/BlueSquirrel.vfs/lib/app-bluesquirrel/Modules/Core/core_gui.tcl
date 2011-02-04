@@ -59,12 +59,13 @@ proc blueSquirrel::parentGUI {} {
     #	N/A
     #
     #***
-    global GI_textVar GS_textVar frame1 frame2b genResults GS_windows
+    global GI_textVar GS_textVar frame1 frame2b genResults GS_windows GS_widget
     
     # List of frames within this proc
     set GS_windows ".frame1 .frame2 .frame3"
+    #array set GS_widget breakdown
     
-    wm geometry . 420x470
+    wm geometry . 420x430
         
     # Create the Menu's
     set mb [menu .mb]
@@ -113,7 +114,10 @@ proc blueSquirrel::parentGUI {} {
     # Start the Default GUI - ShippingGUI
         # All frames that make up the GUI are children to .container
     Shipping_Gui::shippingGUI
-
+    
+    #toplevel .breakdown
+    #text .breakdown.txt
+    #set GS_widget(breakdown) .breakdown.txt
 
     ## 
     ## Control Buttons
