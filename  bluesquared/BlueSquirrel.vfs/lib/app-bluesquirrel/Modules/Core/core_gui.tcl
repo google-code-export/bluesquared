@@ -80,8 +80,8 @@ proc blueSquirrel::parentGUI {} {
     menu $mb.edit -tearoff 0 -relief raised -bd 2
     $mb add cascade -label "Edit" -menu $mb.edit
     
-    $mb.edit add command -label "Clear List" -command {Shipping_Code::clearList}
-    $mb.edit add command -label "Breakdown" -command {Shipping_Gui::breakDown}
+    $mb.edit add command -label "Clear List" -command { Shipping_Code::clearList }
+    $mb.edit add command -label "Breakdown" -command { Shipping_Gui::breakDown }
                 
     ## Mode
     #menu $mb.mode -tearoff 0 -relief raised -bd 2
