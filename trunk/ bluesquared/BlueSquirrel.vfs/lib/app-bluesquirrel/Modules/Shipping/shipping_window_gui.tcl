@@ -55,7 +55,7 @@ proc shippingGUI {} {
     #	TODO: List the other *GUI procs.
     #
     #***
-    global GI_textVar GS_textVar frame1 frame2b genResults GS_windows
+    global GI_textVar GS_textVar frame1 frame2b genResults GS_windows GS_widget
     
     # Destroy frames
     # NOTE: GS_windows is set in core_gui.tcl
@@ -65,8 +65,12 @@ proc shippingGUI {} {
         }
     }
     
-    wm title . "BlueSquirrel (Box Labels)"
-
+    wm title . "Box Labels"
+    
+    # Initiate breakdown window; see proc breakDown
+    toplevel .breakdown
+    set GS_widget(breakdown) [text .breakdown.txt]
+    
 # Frame 1
     set frame1 [ttk::labelframe .container.frame1 -text "Label Information"]
     pack $frame1 -expand yes -fill both -padx 5p -pady 3p -ipady 2p
@@ -293,13 +297,26 @@ bind all <<ComboboxSelected>> {
     Shipping_Code::readHistory [$frame1.entry1 current]
 }
 
-proc breakDown {} {
+
+
+
+    
+
+
+
+bind all <Escape> {exit}
+bind all <F1> {console show}
+bind all <F2> {console hide}
+
+} ;# End of shippingGUI
+
+proc breakDown {} {}
     #****f* breakDown/Shipping_Gui
     # AUTHOR
     #	Casey Ackels
     #
     # COPYRIGHT
-    #	(c) 20011 - Casey Ackels
+    #	(c) 2011 - Casey Ackels
     #
     # FUNCTION
     #	Displays the breakdown per destination
@@ -320,40 +337,26 @@ proc breakDown {} {
     #	TODO: List the other *GUI procs.
     #
     #***
-    global GI_textVar
+    global GI_textVar GS_windows
     
     # make sure we don't allow two of the same windows open at the same time.
-    if {[winfo exists .breakdown]} {
-        destroy .breakdown
-    }
-    
-    set breakdown [toplevel .breakdown]
-    
-    set text [text .breakdown.txt]
-    pack $text
-    focus $text
+    #if {[winfo exists .breakdown]} {
+    #    destroy .breakdown
+    #}
+    pack $GS_widget(breakdown)
+    focus $GS_widget(breakdown)
+
     
     #Quantity: $GI_textVar(qty)\n-\n$GI_textVar(labels)\n$GI_textVar(labelsPartial1)\n$GI_textVar(labelsPartial2)
     
     # This is the overview.
-    set x 0
-    $text insert [incr x].end "Total Quantity: $GI_textVar(qty)\n"
-    $text insert [incr x].end "Labels: $GI_textVar(labels)\n"
-    $text insert [incr x].end "Partial: $GI_textVar(labelsPartial1)\n"
+    $GS_widget(breakdown) insert end "Labels: $GI_textVar(labels)\n"
+    $GS_widget(breakdown) insert end "Partial: $GI_textVar(labelsPartial1)\n"
 
     foreach value $GI_textVar(labelsPartial_noText) {
-        $text insert [incr x].end "Partial: 1 Label @ $value\n"
+        $GS_widget(breakdown) insert end "Partial: 1 Label @ $value\n"
     }
-
     
     
-}
-
-
-bind all <Escape> {exit}
-bind all <F1> {console show}
-bind all <F2> {console hide}
-
-} ;# End of shippingGUI
-
+} ;# End of breakDown
 } ;# End of Shipping_Gui namespace

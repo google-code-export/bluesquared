@@ -234,9 +234,12 @@ proc addListboxNums {{reset 0}} {
     foreach value $err {
         set fullboxes [expr $value/$GS_textVar(maxBoxQty)]
         set partialboxes [expr $value - [expr {$GS_textVar(maxBoxQty)*$fullboxes}]]
-        puts "Total: $value"
-        puts "addListBox - FullBoxes: [llength $fullboxes] Labels @ $GS_textVar(maxBoxQty)"
-        puts "addListBox - PartialBoxes: 1 Label @ $partialboxes"
+        #puts "Total: $value"
+        #puts "addListBox - FullBoxes: [llength $fullboxes] Labels @ $GS_textVar(maxBoxQty)"
+        #puts "addListBox - PartialBoxes: 1 Label @ $partialboxes"
+        .breakdown.txt insert end "Total: $value"
+        .breakdown.txt insert end "FullBoxes: [llength $fullboxes] Labels @ $GS_textVar(maxBoxQty)"
+        .breakdown.txt insert end "PartialBoxes: 1 Label @ $partialboxes"
     }
     
 
