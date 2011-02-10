@@ -274,7 +274,7 @@ proc createList {} {
         if {[lrange $result 1 end] != 0} {
             puts "Result: 1 Label @ [lrange $result 1 end]"
         }
-        
+
 	# Make sure the variables are cleared out; we don't want any data to lag behind.
 	set FullBoxes_text ""
 	set PartialQty_text ""
@@ -698,9 +698,9 @@ proc readHistory {args} {
     
     
     set text [lindex $lines $args]
-    #puts "text: $text"
-    set x 1
+    puts "text: $text"
     
+    set x 1
     foreach line [::csv::split $text] {
         #puts "retrieve: $line"
         if {$x <= 5} {
@@ -710,6 +710,12 @@ proc readHistory {args} {
             set GS_textVar(maxBoxQty) $line
             }
     }
+    # If text holds no data, clear all lines    
+      if {$text eq ""} {
+        for {set x 1} {$x<6} {incr x} {set GS_textVar(line$x) ""}
+        set GS_textVar(maxBoxQty) ""
+    }
+    
     ;# clear the listbox
     Shipping_Code::clearList
 } ;# readHistory

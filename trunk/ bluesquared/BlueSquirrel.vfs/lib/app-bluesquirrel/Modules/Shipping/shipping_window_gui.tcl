@@ -72,26 +72,26 @@ proc shippingGUI {} {
     
 # Frame 1
     set frame1 [ttk::labelframe .container.frame1 -text "Label Information"]
-    pack $frame1 -expand yes -fill both -padx 5p -pady 3p -ipady 2p
+    pack $frame1 -expand yes -fill both -padx 5p -pady 3p -ipady 2p ;#-ipadx 5p
     
     
     ttk::label $frame1.text1 -text "Line 1"
     ;# NOTE: We populate the *(history) variable just under [openHistory]
     ttk::combobox $frame1.entry1 -textvariable GS_textVar(line1) \
-                                -width 43 \
                                 -values $GS_textVar(history)
+                                ;#-width 43
     
     ttk::label $frame1.text2 -text "Line 2"
-    ttk::entry $frame1.entry2 -textvariable GS_textVar(line2) -width 43
-    
+    ttk::entry $frame1.entry2 -textvariable GS_textVar(line2) ;#-width 43
+  
     ttk::label $frame1.text3 -text "Line 3"
-    ttk::entry $frame1.entry3 -textvariable GS_textVar(line3) -width 43
+    ttk::entry $frame1.entry3 -textvariable GS_textVar(line3) ;#-width 43
     
     ttk::label $frame1.text4 -text "Line 4"
-    ttk::entry $frame1.entry4 -textvariable GS_textVar(line4) -width 43
+    ttk::entry $frame1.entry4 -textvariable GS_textVar(line4) ;#-width 43
     
     ttk::label $frame1.text5 -text "Line 5"
-    ttk::entry $frame1.entry5 -textvariable GS_textVar(line5) -width 43
+    ttk::entry $frame1.entry5 -textvariable GS_textVar(line5) ;#-width 43
     
     # With ttk widgets, we need to populate the variables or else we get an error. :(
     foreach num {1 2 3 4 5} {
@@ -100,20 +100,21 @@ proc shippingGUI {} {
     
 
     grid $frame1.text1 -column 0 -row 2 -sticky nes -padx 5p
-    grid $frame1.entry1 -column 1 -row 2 -sticky new -pady 3p
+    grid $frame1.entry1 -column 1 -row 2 -sticky news -pady 2p -padx 5p
     
     grid $frame1.text2 -column 0 -row 3 -sticky nes -padx 5p
-    grid $frame1.entry2 -column 1 -row 3 -sticky new -pady 2p
-    
+    grid $frame1.entry2 -column 1 -row 3 -sticky news -pady 2p -padx 5p
+
     grid $frame1.text3 -column 0 -row 4 -sticky nes -padx 5p
-    grid $frame1.entry3 -column 1 -row 4 -sticky new -pady 2p
+    grid $frame1.entry3 -column 1 -row 4 -sticky news -pady 2p -padx 5p
     
     grid $frame1.text4 -column 0 -row 5 -sticky nes -padx 5p
-    grid $frame1.entry4 -column 1 -row 5 -sticky new -pady 2p
+    grid $frame1.entry4 -column 1 -row 5 -sticky news -pady 2p -padx 5p
     
     grid $frame1.text5 -column 0 -row 6 -sticky nes -padx 5p
-    grid $frame1.entry5 -column 1 -row 6 -sticky new -pady 2p
+    grid $frame1.entry5 -column 1 -row 6 -sticky news -pady 2p -padx 5p
     
+    grid columnconfigure $frame1 1 -weight 1
     focus $frame1.entry1
     
 # Frame 2 (This is a container for two frames)
@@ -353,12 +354,13 @@ proc breakDown {} {
     
     # This is the overview.
     $GS_widget(breakdown) insert end "Labels: $GI_textVar(labels)\n"
-    $GS_widget(breakdown) insert end "Partial: $GI_textVar(labelsPartial1)\n"
+    #$GS_widget(breakdown) insert end "Partial: $GI_textVar(labelsPartial1)\n"
 
     foreach value $GI_textVar(labelsPartial_noText) {
         $GS_widget(breakdown) insert end "Partial: 1 Label @ $value\n"
         }
     
-    
+    bind $GS_widget(breakdown) <KeyPress> {break} ;# Prevent people from entering/removing anything
+    #bind $GS_widget(breakdown) <Button-1> {break} ;# Prevent people from entering/removing anything
 } ;# End of breakDown
 } ;# End of Shipping_Gui namespace
