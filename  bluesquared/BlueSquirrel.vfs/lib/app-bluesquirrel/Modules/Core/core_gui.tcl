@@ -154,7 +154,7 @@ proc blueSquirrel::about {} {
     
     ttk::frame .about.parent
     
-    ttk::label .about.parent.version -text "Version: 1.2 (Released September 2010)"
+    ttk::label .about.parent.version -text "Version: 1.2.11 (Released February 2011)"
     ttk::label .about.parent.label -text "About"
     text .about.parent.txt -height 10 -width 50 -wrap word
     ttk::label .about.parent.copy -text "\u00a9 2007-2011 Casey Ackels"
