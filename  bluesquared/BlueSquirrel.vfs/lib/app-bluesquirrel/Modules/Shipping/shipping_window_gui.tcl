@@ -298,12 +298,6 @@ bind all <<ComboboxSelected>> {
 }
 
 
-
-
-    
-
-
-
 bind all <Escape> {exit}
 bind all <F1> {console show}
 bind all <F2> {console hide}
