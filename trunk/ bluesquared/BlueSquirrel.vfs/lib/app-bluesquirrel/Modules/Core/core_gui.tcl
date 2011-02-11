@@ -149,27 +149,31 @@ proc blueSquirrel::about {} {
     
     toplevel .about
     wm transient .about .
-    wm geometry .about
+    #wm geometry .about 420x430
     wm title .about About
     
     ttk::frame .about.parent
     
     ttk::label .about.parent.version -text "Version: 1.2.11 (Released February 2011)"
-    ttk::label .about.parent.label -text "About"
-    text .about.parent.txt -height 10 -width 50 -wrap word
+    #ttk::label .about.parent.label -text "About" -font {Arial 12}
+    text .about.parent.txt -wrap word
     ttk::label .about.parent.copy -text "\u00a9 2007-2011 Casey Ackels"
     
-    .about.parent.txt insert 0.0 {
-I wrote this program so that we would not have to repeatedly do mundane math for each job that required box labels.
-}
+    .about.parent.txt insert end "I wrote this program so that we would not have to repeatedly do mundane math for each job that required box labels.\n"
+    .about.parent.txt insert end "\n\n"
+    .about.parent.txt insert end "Release 1.2.11\n1. Overview reinstated, go to Edit > Breakdown\n2. When selecting the blank line in the History it will now clear out all entry fields\n3.A few cosmetic updates"
+    
+    
     bind .about.parent.txt <KeyPress> {break} ;# Prevent people from entering/removing anything
     bind .about.parent.txt <Button-1> {break} ;# Prevent people from entering/removing anything
     
     grid .about.parent.version -column 0 -row 0
-    grid .about.parent.label -column 0 -row 1
-    grid .about.parent.txt -column 0 -row 2 -sticky ew
-    grid .about.parent.copy -column 0 -row 3
+    #grid .about.parent.label -column 0 -row 1
+    grid .about.parent.txt -column 0 -row 2 -sticky news -padx 5p -pady 5p
+    grid .about.parent.copy -column 0 -row 3 -padx 5p -pady 5p
     
-    grid .about.parent -column 0 -row 0 -sticky news 
+    grid rowconfigure .about.parent 2 -weight 1
+    pack .about.parent -expand yes -fill both
+    #grid .about.parent -column 0 -row 0 -sticky news 
 }
 
