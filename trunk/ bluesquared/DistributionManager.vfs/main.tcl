@@ -1,4 +1,4 @@
 package require starkit
 starkit::startup
 
-package require app-bluesquirrel
+package require app-disthelper

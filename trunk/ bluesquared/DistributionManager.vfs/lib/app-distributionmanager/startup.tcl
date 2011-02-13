@@ -5,9 +5,9 @@
 #
 # Subversion
 #
-# $Revision:  $
-# $LastChangedBy:  $
-# $LastChangedDate:  $
+# $Revision$
+# $LastChangedBy$
+# $LastChangedDate$
 #
 ########################################################################################
 
@@ -29,10 +29,10 @@
 
 # We use the prefix 'blueSquirrel_ because we are in the global namespace now, and we don't want to pollute it.
 
-package provide app-jgdistribution 1.0
+package provide app-disthSelper 1.0
 
-proc 'jgDist_sourceReqdFiles {} {
-    #****f* 'jgDist_sourceReqdFiles/global
+proc 'distHelper_sourceReqdFiles {} {
+    #****f* 'distHelper_sourceReqdFiles/global
     # AUTHOR
     #	Casey Ackels
     #
@@ -55,7 +55,7 @@ proc 'jgDist_sourceReqdFiles {} {
     #	N/A
     #
     # SEE ALSO
-    #	'jgDist_sourceOtherFiles
+    #	'distHelper_sourceOtherFiles
     #
     #***
 #console show
@@ -95,7 +95,7 @@ proc 'jgDist_sourceReqdFiles {} {
 }
 
 
-proc 'jgDist_sourceOtherFiles {} {
+proc 'distHelper_sourceOtherFiles {} {
     #****f* 'blueSquirrel_sourceOtherFiles/global
     # AUTHOR
     #	Casey Ackels
@@ -142,8 +142,8 @@ proc 'jgDist_sourceOtherFiles {} {
 }
 
 
-proc 'jgDist_loadOptions {} {
-    #****f* 'jgDist_loadOptions/global
+proc 'distHelper_loadOptions {} {
+    #****f* 'distHelper_loadOptions/global
     # AUTHOR
     #	Casey Ackels
     #
@@ -166,7 +166,7 @@ proc 'jgDist_loadOptions {} {
     #	N/A
     #
     # SEE ALSO
-    #	'jgDist_loadSettings
+    #	'distHelper_loadSettings
     #
     #***
     #option add *font {tahoma 10}
@@ -179,8 +179,8 @@ proc 'jgDist_loadOptions {} {
 }
 
 
-proc 'jgDist_loadSettings {} {
-    #****f* 'jgDist_loadSettings/global
+proc 'distHelper_loadSettings {} {
+    #****f* 'distHelper_loadSettings/global
     # AUTHOR
     #	Casey Ackels
     #
@@ -204,7 +204,7 @@ proc 'jgDist_loadSettings {} {
     #	N/A
     #
     # SEE ALSO
-    #	'jgDist_loadOptions
+    #	'distHelper_loadOptions
     #
     #***
 #    global programPath
@@ -224,17 +224,17 @@ proc 'jgDist_loadSettings {} {
 #    }
 }
 # Load required files / packages
-'jgDist_sourceReqdFiles
+'distHelper_sourceReqdFiles
 
 # Load the Option Database options
-'jgDist_loadOptions
+'distHelper_loadOptions
 
 # Load the config file
-#'jgDist_loadSettings
+#'distHelper_loadSettings
 
 # Start the GUI
 #blueSquirrel::shippingGUI
 blueSquirrel::parentGUI
 
 # Load the rest of the files
-'jgDist_sourceOtherFiles
+'distHelper_sourceOtherFiles
