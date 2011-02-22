@@ -331,26 +331,31 @@ proc breakDown {} {
     #	TODO: List the other *GUI procs.
     #
     #***
-    global GI_textVar GS_widget
+    global GS_textVar GS_widget
     
     # make sure we don't allow two of the same windows open at the same time.
     #if {[winfo exists .breakdown]} {
     #    destroy .breakdown
     #}
     toplevel .breakdown
+    wm title .breakdown Break Down
+    
+    
     text .breakdown.txt
     set GS_widget(breakdown) .breakdown.txt
     pack $GS_widget(breakdown)
     focus $GS_widget(breakdown)
 
-    
-    #Quantity: $GI_textVar(qty)\n-\n$GI_textVar(labels)\n$GI_textVar(labelsPartial1)\n$GI_textVar(labelsPartial2)
-    
     # This is the overview.
-    $GS_widget(breakdown) insert end "Labels: $GI_textVar(labels)\n"
-    #$GS_widget(breakdown) insert end "Partial: $GI_textVar(labelsPartial1)\n"
+    $GS_widget(breakdown) insert end "Full Boxes: [expr [join $GS_textVar(labelsFull) +]]\n"
 
-    foreach value $GI_textVar(labelsPartial_noText) {
+    # Like Numbers
+    foreach value $GS_textVar(labelsPartialLike) {
+        $GS_widget(breakdown) insert end "Partial: $value\n"
+        }
+    
+    # Unique Numbers    
+    foreach value $GS_textVar(labelsPartialUnique) {
         $GS_widget(breakdown) insert end "Partial: 1 Label @ $value\n"
         }
     
