@@ -67,7 +67,7 @@ proc 'blueSquirrel_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]]]
         
         lappend ::auto_path [file join [file dirname [info script]] Binaries]
-        lappend ::auto_path [file join [file dirname [info script]] Binaries sqlite3.3.8]
+        #lappend ::auto_path [file join [file dirname [info script]] Binaries sqlite3.3.8]
         
 	lappend ::auto_path [file join [file dirname [info script]] Libraries]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist4.8]
@@ -91,7 +91,7 @@ proc 'blueSquirrel_sourceReqdFiles {} {
 	
 	package require shipping
 	package require bluesquirrel_core
-        package require sqlite3
+        #package require sqlite3
 	
 	# Source the required files
 	#source [file join [file dirname [info script]] Modules Core core_gui.tcl]

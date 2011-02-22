@@ -300,6 +300,12 @@ proc createList {} {
     } else {
 	Error_Message::errorMsg createList2
     }
+    
+    set GS_textVar(labelsFull) $FullBoxes
+    set GS_textVar(labelsPartial) $PartialQty
+    
+    puts "LabelsFull: $GS_textVar(labelsFull)"
+    #puts "LabelsPartial: $GS_textVar(labelsPartial)"
 
 } ;# createList
 
@@ -398,33 +404,43 @@ proc displayListHelper {fullboxes partialboxes {reset 0}} {
     
     # Lets sort out the like groups, and the unique group/numbers.
     set valueLists [extractFromList $partialboxes]
+    puts "valueLists1_1: $valueLists"
 
     # Sort out the 'like' number groups; start at 1, because the 'unique' numbers are always 0.
     set valueLists2 [lrange $valueLists 1 end]
+    
 
-    set x 0 
+    set x 0
+    set GS_textVar(labelsPartialLike) "" ;# clear it out
     foreach value $valueLists2 {
 	# This is for the groups of "like numbers"
         set GI_textVar(labelsPartial1) "[llength [lindex $valueLists2 $x]] Labels @ [lindex $valueLists2 $x end]"
-        
+        #set GI_textVar(labelsPartial_noTextLike) [lindex $valueLists2 $x end]
+        #puts "valueLists2: $value"
+        lappend GS_textVar(labelsPartialLike) $GI_textVar(labelsPartial1)
+
         
 	writeText [llength [lindex $valueLists2 $x]] [lindex $valueLists2 $x end]
 	
 	incr x
     }
+    
+    if {[info exists GS_textVar(labelsPartialLike)] == 1} {
+    puts "Like Partials: $GS_textVar(labelsPartialLike)"
+    }
 
 
     # now we insert the 'unique' numbers, these should always just be one box each. Hence the hard-coding.
     set valueLists [split [join [lrange $valueLists 0 0]]]
+    puts "valueLists1_2: $valueLists"
 
-    set GI_textVar(labelsPartial_noText) $valueLists ;# get clean list with no other text
-    foreach value $valueLists {
+    set GS_textVar(labelsPartialUnique) $valueLists ;# get clean list with no other text
+     foreach value $valueLists {
 	set GI_textVar(labelsPartial2) "1 Label @ $valueLists"
         
 	writeText 1 $value
     }
-    
-    puts "tooltip"
+
     puts "qty: $GI_textVar(qty)"
 
     controlFile destination fileclose
