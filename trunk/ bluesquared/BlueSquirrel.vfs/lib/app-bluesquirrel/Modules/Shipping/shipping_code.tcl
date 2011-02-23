@@ -177,7 +177,9 @@ proc insertInListbox {args} {
     $frame2b.listbox see end
     
     ;# Add everything together for the running total
-    addListboxNums 
+    addListboxNums
+    
+
     
 } ;# insertInListbox
 
@@ -230,6 +232,7 @@ proc addListboxNums {{reset 0}} {
             set GI_textVar(qty) 0
         }
     }
+    
     
     #foreach value $err {
     #    set fullboxes [expr $value/$GS_textVar(maxBoxQty)]
@@ -306,6 +309,9 @@ proc createList {} {
     
     puts "LabelsFull: $GS_textVar(labelsFull)"
     #puts "LabelsPartial: $GS_textVar(labelsPartial)"
+    
+    # Keep the breakdown window updated even if it is open
+    if {[winfo exists .breakdown] == 1} {Shipping_Gui::breakDown}
 
 } ;# createList
 
