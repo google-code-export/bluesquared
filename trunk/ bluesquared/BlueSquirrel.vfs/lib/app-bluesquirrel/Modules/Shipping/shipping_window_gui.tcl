@@ -333,33 +333,46 @@ proc breakDown {} {
     #***
     global GS_textVar GS_widget
     
-    # make sure we don't allow two of the same windows open at the same time.
-    #if {[winfo exists .breakdown]} {
-    #    destroy .breakdown
-    #}
-    toplevel .breakdown
-    wm title .breakdown Break Down
+    if {![winfo exists .breakdown]} {
+        toplevel .breakdown
+        wm title .breakdown "Break Down"
     
+        text .breakdown.txt
+        set GS_widget(breakdown) .breakdown.txt
+        ttk::button .breakdown.refresh -text "Refresh" -command { Shipping_Gui::breakDown }
     
-    text .breakdown.txt
-    set GS_widget(breakdown) .breakdown.txt
-    pack $GS_widget(breakdown)
-    focus $GS_widget(breakdown)
+        pack $GS_widget(breakdown)
+        pack .breakdown.refresh
+        focus $GS_widget(breakdown)
+    
+        bind $GS_widget(breakdown) <KeyPress> {break} ;# Prevent people from entering/removing anything
+        #bind $GS_widget(breakdown) <Button-1> {break} ;# Prevent people from entering/removing anything
+    
+    } else {
+        # Refreshing
+        .breakdown.txt delete 0.0 end       
+    }
+    
 
     # This is the overview.
-    $GS_widget(breakdown) insert end "Full Boxes: [expr [join $GS_textVar(labelsFull) +]]\n"
+    if {[info exists GS_textVar(labelsFull)] == 1} {
+        $GS_widget(breakdown) insert end "Full Boxes: [expr [join $GS_textVar(labelsFull) +]]\n"
+    }
 
     # Like Numbers
-    foreach value $GS_textVar(labelsPartialLike) {
-        $GS_widget(breakdown) insert end "Partial: $value\n"
+    if {[info exists GS_textVar(labelsPartialLike)] == 1} {
+        foreach value $GS_textVar(labelsPartialLike) {
+            $GS_widget(breakdown) insert end "Partial: $value\n"
         }
+    }
     
-    # Unique Numbers    
-    foreach value $GS_textVar(labelsPartialUnique) {
-        $GS_widget(breakdown) insert end "Partial: 1 Label @ $value\n"
+    # Unique Numbers
+    if {[info exists GS_textVar(labelsPartialUnique)] == 1} {
+        foreach value $GS_textVar(labelsPartialUnique) {
+            $GS_widget(breakdown) insert end "Partial: 1 Label @ $value\n"
         }
+    }
     
-    bind $GS_widget(breakdown) <KeyPress> {break} ;# Prevent people from entering/removing anything
-    #bind $GS_widget(breakdown) <Button-1> {break} ;# Prevent people from entering/removing anything
+
 } ;# End of breakDown
 } ;# End of Shipping_Gui namespace
