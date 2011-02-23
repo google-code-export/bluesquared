@@ -284,13 +284,6 @@ bind [$frame2b.listbox bodytag] <Double-1> {
     catch {Shipping_Code::createList}  ;# Make sure our totals add up
 }
 
-##
-## MAYBE we should also do the math upon <ENTER>
-##
-#bind $frame2b.listbox <Enter> {
-#    tooltip::tooltip $frame2b.listbox \
-#        "Quantity: $GI_textVar(qty)\n-\n$GI_textVar(labels)\n$GI_textVar(labelsPartial1)\n$GI_textVar(labelsPartial2)"
-#}
 
 
 bind all <<ComboboxSelected>> {
@@ -355,8 +348,12 @@ proc breakDown {} {
     
 
     # This is the overview.
-    if {[info exists GS_textVar(labelsFull)] == 1} {
-        $GS_widget(breakdown) insert end "Full Boxes: [expr [join $GS_textVar(labelsFull) +]]\n"
+    if {([info exists GS_textVar(labelsFull)] == 1) && ($GS_textVar(labelsFull) != "")} {
+        if {[llength $GS_textVar(labelsFull)] <= 2} {
+            $GS_widget(breakdown) insert end "Full Boxes: [expr [join $GS_textVar(labelsFull) +]]\n"
+        } else {
+            $GS_widget(breakdown) insert end "Full Boxes: $GS_textVar(labelsFull)\n"
+        }
     }
 
     # Like Numbers
