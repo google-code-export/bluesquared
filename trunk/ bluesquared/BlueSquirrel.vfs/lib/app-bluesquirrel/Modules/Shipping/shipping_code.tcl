@@ -219,6 +219,7 @@ proc addListboxNums {{reset 0}} {
         set GI_textVar(labels) ""
         set GI_textVar(labelsPartial1) ""
         set GI_textVar(labelsPartial2) ""
+
     }
     
     # row,column
@@ -230,24 +231,14 @@ proc addListboxNums {{reset 0}} {
             set GI_textVar(qty) [expr [join $err +]]
         } else {
             set GI_textVar(qty) 0
+            # Keep the breakdown window updated even if it is open
+            set GS_textVar(labelsFull) ""
+            set GS_textVar(labelsPartialLike) ""
+            set GS_textVar(labelsPartialUnique) ""
+            
+            if {[winfo exists .breakdown] == 1} {puts "addlistbox::Refreshing Break Down"; Shipping_Gui::breakDown}
         }
     }
-    
-    
-    #foreach value $err {
-    #    set fullboxes [expr $value/$GS_textVar(maxBoxQty)]
-    #    set partialboxes [expr $value - [expr {$GS_textVar(maxBoxQty)*$fullboxes}]]
-        #puts "Total: $value"
-        #puts "addListBox - FullBoxes: [llength $fullboxes] Labels @ $GS_textVar(maxBoxQty)"
-        #puts "addListBox - PartialBoxes: 1 Label @ $partialboxes"
-    #    .breakdown.txt insert end "Total_a: $value\n"
-    #    .breakdown.txt insert end "FullBoxes: [llength $fullboxes] Labels @ $GS_textVar(maxBoxQty)\n"
-    #    .breakdown.txt insert end "PartialBoxes: 1 Label @ $partialboxes\n"
-    #    .breakdown.txt insert end "------\n"
-    #}
-    
-
-    
 } ;# addListboxNums
 
 
@@ -311,7 +302,7 @@ proc createList {} {
     #puts "LabelsPartial: $GS_textVar(labelsPartial)"
     
     # Keep the breakdown window updated even if it is open
-    if {[winfo exists .breakdown] == 1} {Shipping_Gui::breakDown}
+    if {[winfo exists .breakdown] == 1} {puts "refreshing Break Down"; Shipping_Gui::breakDown}
 
 } ;# createList
 
@@ -497,14 +488,14 @@ proc printLabels {} {
 	
 	} elseif {$GS_textVar(line2) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
-                        Error_Message::errorMsg seattleMet1; return
+                        Error_Message::errorMsg seattleMet2; return
 	    } else {
 		exec $programPath(Bartend) /AF=$programPath(LabelPath)\\3LINEDB.btw /P /CLOSE
 	    }
 	    
 	} elseif {$GS_textVar(line1) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
-                        Error_Message::errorMsg seattleMet1; return
+                        Error_Message::errorMsg seattleMet2; return
 	    } else {
 		exec $programPath(Bartend) /AF=$programPath(LabelPath)\\2LINEDB.btw /P /CLOSE
 	    }
@@ -563,10 +554,6 @@ proc truncateHistory {} {
             lappend GS_textVar(history) [lindex [::csv::split $line] 0]
         }
         controlFile history close
-        #puts "truncateHistory: re-open history"
-        #Shipping_Code::openHistory ;# Re-Populate the variable.
-        #puts "truncateHistory: History should be opened"
-        #openHistory
     }
     
     if {[winfo exists .container] eq 1} {
@@ -674,10 +661,6 @@ proc openHistory {} {
         foreach line $lines {
             lappend GS_textVar(history) [lindex [::csv::split $line] 0]
         }
-
-        #if {[winfo exists .container] eq 1} {
-        #    $frame1.entry1 configure -values $GS_textVar(history)
-        #}
     }
     #puts "openHistory: Ending"
 } ;#openHistory
@@ -777,10 +760,14 @@ proc addMaster {destQty batch} {
     
     ;# Reset the variables
     set GS_textVar(destQty) ""
-    set GS_textVar(batch) "" 
+    set GS_textVar(batch) ""
+    #set GS_textVar(labelsFull) ""
+    #set GS_textVar(labelsPartialLike) ""
+    #set GS_textVar(labelsPartialUnique) ""
     
     ;# Display the updated amount of entries that we have
     Shipping_Code::createList
+    #Shipping_Gui::breakdDown
     
     
 } ;# addMaster
