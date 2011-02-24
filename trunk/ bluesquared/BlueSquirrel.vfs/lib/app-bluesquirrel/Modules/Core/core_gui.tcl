@@ -150,7 +150,7 @@ proc blueSquirrel::about {} {
     
     ttk::frame .about.parent
     
-    ttk::label .about.parent.version -text "Version: 1.5 (Released February 2011)"
+    ttk::label .about.parent.version -text "Version: 1.5.1 (Released February 2011)"
     #ttk::label .about.parent.label -text "About" -font {Arial 12}
     text .about.parent.txt -wrap word
     ttk::button .about.parent.close -text "Close" -command {destroy .about}
@@ -158,7 +158,9 @@ proc blueSquirrel::about {} {
     
     .about.parent.txt insert end "I wrote this program so that we would not have to repeatedly do mundane math for each job that required box labels.\n"
     .about.parent.txt insert end "\n\n"
-    .about.parent.txt insert end "Release 1.5 (February 2011)\n\n1. Fixed Breakdown to work correctly.\n2. Changed the versioning scheme to include version number, following with the month it was released.\n3. Deactivated a module that wasn't in use, might increase speed."
+    .about.parent.txt insert end "Release 1.5.1 (February 2011)\n\n1. Break Down will now automatically refresh if the window is open and you add or remove an entry."
+    .about.parent.txt insert end "\n\n"
+    .about.parent.txt insert end "Release 1.5 (February 2011)\n\n1. Fixed Break Down to work correctly.\n2. Changed the versioning scheme to include version number, following with the month it was released.\n3. Deactivated a module that wasn't in use, might increase speed."
     .about.parent.txt insert end "\n\n"
     .about.parent.txt insert end "Release 1.2.11 (February 2011)\n\n1. Overview reinstated, go to Edit > Breakdown\n\n2. When selecting the blank line in the History it will now clear out all entry fields\n\n3. A few cosmetic updates"
     
