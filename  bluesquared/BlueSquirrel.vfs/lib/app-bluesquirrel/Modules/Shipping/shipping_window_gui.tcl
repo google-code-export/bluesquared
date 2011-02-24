@@ -66,10 +66,7 @@ proc shippingGUI {} {
     }
     
     wm title . "Box Labels"
-    
-    # Initiate breakdown window; see proc breakDown
 
-    
 # Frame 1
     set frame1 [ttk::labelframe .container.frame1 -text "Label Information"]
     pack $frame1 -expand yes -fill both -padx 5p -pady 3p -ipady 2p ;#-ipadx 5p
@@ -151,12 +148,6 @@ proc shippingGUI {} {
             if {[info exists GS_textVar(destQty)] eq 0} {return}
             
             Shipping_Code::addMaster $GS_textVar(destQty) $GS_textVar(batch)
-                                                    #Shipping_Code::insertInListbox $GS_textVar(destQty) $GS_textVar(batch)
-                                                    #set GS_textVar(destQty) ""; set GS_textVar(batch) "" ;# Reset the variables
-                                                    
-                                                    ;# Display the updated amount of entries that we have
-                                                    #Shipping_Code::createList
-                                                    #Shipping_Code::createList $o_frame1.listbox $d_frame1.text 
     }
     
     grid $frame2a.text -column 0 -row 0
@@ -211,7 +202,6 @@ proc shippingGUI {} {
     set frame3 [ttk::labelframe .container.frame3 -text "Did you know?" -width 4.5i -labelanchor nw]
     pack $frame3 -expand yes -fill both -padx 5p
 
-        #set GS_textVar(tips) "Press Ctrl+M to insert the current Month"
     ttk::label $frame3.tip -textvariable GS_textVar(tips)
 
     grid $frame3.tip -column 0 -row 0 -sticky nse -padx 5p
@@ -232,9 +222,7 @@ foreach window "$frame2a.add $frame2a.entry1 $frame2a.entry2" {
         ;# Guard against the user inadvertantly hitting <Enter> or "Add" button without anything in the entry fields
         if {[info exists GS_textVar(destQty)] eq 0} {return}
         Shipping_Code::addMaster $GS_textVar(destQty) $GS_textVar(batch)
-        #Shipping_Code::insertInListbox $GS_textVar(destQty) $GS_textVar(batch)
-        #set GS_textVar(destQty) ""; set GS_textVar(batch) "" ;# Reset the variables
-        #Shipping_Code::createList
+
     }
 }
 
@@ -279,9 +267,12 @@ bind [$frame2b.listbox bodytag] <Double-1> {
 
     $frame2b.listbox delete [$frame2b.listbox curselection]
     
-    ;# Make sure we keep all the textvars updated when we delete something
+    # Make sure we keep all the textvars updated when we delete something
     Shipping_Code::addListboxNums ;# Add everything together for the running total
-    catch {Shipping_Code::createList}  ;# Make sure our totals add up
+    # If we don't have the [catch] here, then we will get an error if we remove the last entry.
+    # cell index "0,1" out of range
+    catch {Shipping_Code::createList} err ;# Make sure our totals add up
+    #puts "binding-Double1: $err"
 }
 
 
@@ -306,7 +297,7 @@ proc breakDown {} {
     #	(c) 2011 - Casey Ackels
     #
     # FUNCTION
-    #	Displays the breakdown per destination
+    #	Displays the breakdown per boxes. (I.E. 5 Boxes at 50, 3 Boxes at 25)
     #
     # SYNOPSIS
     #	N/A
@@ -315,7 +306,7 @@ proc breakDown {} {
     #	N/A
     #
     # PARENTS
-    #	blueSquirrel::parentGUI
+    #	blueSquirrel::parentGUI, Shipping_Code::createList
     #
     # NOTES
     #	None
@@ -348,10 +339,14 @@ proc breakDown {} {
     
 
     # This is the overview.
+    # Make sure the variable exists and that it contains a value
     if {([info exists GS_textVar(labelsFull)] == 1) && ($GS_textVar(labelsFull) != "")} {
-        if {[llength $GS_textVar(labelsFull)] <= 2} {
+        # Make sure that it has 2 or more values
+        if {[llength $GS_textVar(labelsFull)] >= 2} {
+            puts "LabelsFull <=: $GS_textVar(labelsFull)"
             $GS_widget(breakdown) insert end "Full Boxes: [expr [join $GS_textVar(labelsFull) +]]\n"
         } else {
+            # If we have less than 2 values, just insert what the full boxes are.
             $GS_widget(breakdown) insert end "Full Boxes: $GS_textVar(labelsFull)\n"
         }
     }

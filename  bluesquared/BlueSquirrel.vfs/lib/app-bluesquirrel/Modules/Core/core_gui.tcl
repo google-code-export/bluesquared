@@ -89,8 +89,6 @@ proc blueSquirrel::parentGUI {} {
     #$mb add cascade -label "Mode" -menu $mb.mode
     
     #$mb.mode add command -label "Box Labels" -command {Shipping_Gui::shippingGUI}
-    #$mb.mode add command -label "Inventory" -command {Inventory_Gui::inventoryGUI}
-    #$mb.mode add command -label "Roll Stock" -command {Rollstock_Gui::rollstockGUI}
     
     ## Help
     menu $mb.help -tearoff 0 -relief raised -bd 2
@@ -110,14 +108,11 @@ proc blueSquirrel::parentGUI {} {
     # Create the container frame
     ttk::frame .container
     pack .container -expand yes -fill both
-
+    
     # Start the Default GUI - ShippingGUI
         # All frames that make up the GUI are children to .container
     Shipping_Gui::shippingGUI
     
-    #toplevel .breakdown
-    #text .breakdown.txt
-    #set GS_widget(breakdown) .breakdown.txt
 
     ## 
     ## Control Buttons
