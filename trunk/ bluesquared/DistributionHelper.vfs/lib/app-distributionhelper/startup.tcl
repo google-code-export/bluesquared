@@ -68,7 +68,7 @@ proc 'distHelper_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Binaries tkdnd2.2]
         
 	
-	lappend ::auto_path [file join [file dirname [info script]] Libraries
+	lappend ::auto_path [file join [file dirname [info script]] Libraries]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries autoscroll]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.2]
