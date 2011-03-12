@@ -29,7 +29,7 @@
 
 # We use the prefix 'blueSquirrel_ because we are in the global namespace now, and we don't want to pollute it.
 
-package provide app-disthSelper 1.0
+package provide app-disthelper 1.0
 
 proc 'distHelper_sourceReqdFiles {} {
     #****f* 'distHelper_sourceReqdFiles/global
