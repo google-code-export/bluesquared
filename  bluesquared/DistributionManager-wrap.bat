@@ -1,1 +1,1 @@
-tclkit852.exe sdx.kit wrap JGDistribution.exe -runtime tclkit-852.exe
+tclkit852.exe sdx.kit wrap DistributionHelper.exe -runtime tclkit-852.exe
