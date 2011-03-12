@@ -13,7 +13,7 @@
 
 ##
 ## - Overview
-# This file holds the launch code for List Display.
+# This file holds the launch code for Distribution Helper.
 
 # Definitions for prefixes of Variables
 # G = Global
@@ -76,7 +76,8 @@ proc 'distHelper_sourceReqdFiles {} {
 	
 	
 	lappend ::auto_path [file join [file dirname [info script]] Modules]
-	#lappend ::auto_path [file join [file dirname [info script]] Modules Core]
+	lappend ::auto_path [file join [file dirname [info script]] Modules Core]
+	lappend ::auto_path [file join [file dirname [info script]] Modules Importfiles]
 	
 	
 	# Start the Package Require
@@ -86,8 +87,9 @@ proc 'distHelper_sourceReqdFiles {} {
 	package require csv
 	
 	#package require shipping
-	#package require bluesquirrel_core
-        package require sqlite3
+	package require disthelper_core
+	package require disthelper_importFiles
+        #package require sqlite3
 	
 	# Source the required files
 	#source [file join [file dirname [info script]] Modules Core core_gui.tcl]
@@ -97,12 +99,12 @@ proc 'distHelper_sourceReqdFiles {} {
 
 
 proc 'distHelper_sourceOtherFiles {} {
-    #****f* 'blueSquirrel_sourceOtherFiles/global
+    #****f* 'distHelper_sourceOtherFiles/global
     # AUTHOR
     #	Casey Ackels
     #
     # COPYRIGHT
-    #	(c) 2008 - Casey Ackels
+    #	(c) 20011 - Casey Ackels
     #
     # FUNCTION
     #	Sources the rest of the files.
@@ -174,7 +176,9 @@ proc 'distHelper_loadOptions {} {
     option add *Listbox.font {tahoma 12}
     
     # Theme setting for Tile
-    ttk::style theme use $ttk::currentTheme
+    ttk::style theme use $ttk::currentTheme;# The ttk way, to change the background
+    ttk::style map TCombobox -fieldbackground [list focus yellow]
+    ttk::style map TEntry -fieldbackground [list focus yellow]
     #style configure TCombobox -fieldbackground yellow
     #style theme use clam
 }
@@ -235,7 +239,7 @@ proc 'distHelper_loadSettings {} {
 
 # Start the GUI
 #blueSquirrel::shippingGUI
-blueSquirrel::parentGUI
+distHelper::parentGUI
 
 # Load the rest of the files
 'distHelper_sourceOtherFiles
