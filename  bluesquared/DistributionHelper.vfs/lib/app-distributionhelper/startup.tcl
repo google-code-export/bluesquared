@@ -70,9 +70,9 @@ proc 'distHelper_sourceReqdFiles {} {
 	
 	lappend ::auto_path [file join [file dirname [info script]] Libraries]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries autoscroll]
-	lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
+	#lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.2]
-	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
+	#lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
 	
 	
 	lappend ::auto_path [file join [file dirname [info script]] Modules]
@@ -82,9 +82,9 @@ proc 'distHelper_sourceReqdFiles {} {
 	
 	# Start the Package Require
 	package require Tablelist_tile 5.2
-	package require tooltip
+	#package require tooltip
 	package require autoscroll
-	package require csv
+	#package require csv
 	
 	#package require shipping
 	package require disthelper_core
@@ -239,7 +239,7 @@ proc 'distHelper_loadSettings {} {
 
 # Start the GUI
 #blueSquirrel::shippingGUI
-distHelper::parentGUI
+disthelper::parentGUI
 
 # Load the rest of the files
 'distHelper_sourceOtherFiles

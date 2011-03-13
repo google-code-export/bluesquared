@@ -5,9 +5,9 @@
 #
 # Subversion
 #
-# $Revision: 43 $
-# $LastChangedBy: casey.ackels $
-# $LastChangedDate: 2011-03-12 13:44:31 -0800 (Sat, 12 Mar 2011) $
+# $Revision$
+# $LastChangedBy$
+# $LastChangedDate$
 #
 ########################################################################################
 
@@ -30,7 +30,7 @@
 package provide disthelper_importFiles 1.0
 
 
-namespace eval Disthelper_Gui {
+namespace eval Disthelper_GUI {
 
 proc disthelperGUI {} {
     #****f* disthelperGUI/Disthelper_Gui
@@ -68,35 +68,38 @@ proc disthelperGUI {} {
     pack $frame1 -expand yes -fill both -padx 5p -pady 3p -ipady 2p ;#-ipadx 5p
     
     tablelist::tablelist $frame1.listbox \
-                -showlabels yes \
-                -stretch all \
-                -height 5 \
+                -state normal \
+                -height 20 \
+                -width 20 \
                 -selectbackground yellow \
                 -selectforeground black \
                 -exportselection yes \
                 -showseparators yes \
-                -yscrollcommand [list $frame2b.scrolly set]
-    
-        $frame2b.listbox columnconfigure 0 -showlinenumbers 1 \
-                                            -labelalign center \
-                                            -align center
+                -yscrollcommand [list $frame1.scrolly set]
+
     
    
-    ttk::scrollbar $frame1.scrolly -orient v -command [list $frame2b.listbox yview]
+    ttk::scrollbar $frame1.scrolly -orient v -command [list $frame1.listbox yview]
     
-    grid $frame2.listbox -column 0 -row 0 -sticky news
-    grid columnconfigure $frame $frame.listbox -weight 1
+    grid $frame1.listbox -column 0 -row 0 -sticky news
     
     grid $frame1.scrolly -column 1 -row 0 -sticky nse
     
-    ::autoscroll::autoscroll $frame2b.scrolly ;# Enable the 'autoscrollbar'
-
-    
-
-    grid $frame1.text1 -column 0 -row 2 -sticky nes -padx 5p
-    grid $frame1.entry1 -column 1 -row 2 -sticky news -pady 2p -padx 5p
+    ::autoscroll::autoscroll $frame1.scrolly ;# Enable the 'autoscrollbar'
        
-    grid columnconfigure $frame1 1 -weight 1
+    
+    # test data
+    $frame1.listbox insert end "0 017"
+    $frame1.listbox insert end "General Motors"
+    $frame1.listbox insert end "Attn: Mr. Motors"
+    $frame1.listbox insert end "283 Stark Street"
+    $frame1.listbox insert end "#211"
+    $frame1.listbox insert end "Vancouver"
+    $frame1.listbox insert end "WA"
+    $frame1.listbox insert end "98661"
+    $frame1.listbox insert end "555-601-5444"
+    $frame1.listbox insert end "58999"
+    $frame1.listbox insert end "250"
     
 # Frame 2 (This is a container for two frames)
     #set frame2 [ttk::labelframe .container.frame2 -text "Shipment Information"]
@@ -112,24 +115,24 @@ proc disthelperGUI {} {
 
 
 
-bind [$frame2b.listbox bodytag] <Double-1> {
-    #puts "selection2: [$frame2b.listbox curselection]"
+#bind [$frame2b.listbox bodytag] <Double-1> {
+#    #puts "selection2: [$frame2b.listbox curselection]"
+#
+#    $frame2b.listbox delete [$frame2b.listbox curselection]
+#    
+#    # Make sure we keep all the textvars updated when we delete something
+#    Shipping_Code::addListboxNums ;# Add everything together for the running total
+#    # If we don't have the [catch] here, then we will get an error if we remove the last entry.
+#    # cell index "0,1" out of range
+#    catch {Shipping_Code::createList} err ;# Make sure our totals add up
+#    #puts "binding-Double1: $err"
+#}
 
-    $frame2b.listbox delete [$frame2b.listbox curselection]
-    
-    # Make sure we keep all the textvars updated when we delete something
-    Shipping_Code::addListboxNums ;# Add everything together for the running total
-    # If we don't have the [catch] here, then we will get an error if we remove the last entry.
-    # cell index "0,1" out of range
-    catch {Shipping_Code::createList} err ;# Make sure our totals add up
-    #puts "binding-Double1: $err"
-}
 
 
-
-bind all <<ComboboxSelected>> {
-    Shipping_Code::readHistory [$frame1.entry1 current]
-}
+#bind all <<ComboboxSelected>> {
+#    Shipping_Code::readHistory [$frame1.entry1 current]
+#}
 
 
 bind all <Escape> {exit}
