@@ -71,7 +71,7 @@ proc 'distHelper_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries autoscroll]
 	#lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
-	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.2]
+	#lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.2]
 	#lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
 	
 	
@@ -79,19 +79,28 @@ proc 'distHelper_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Modules Core]
 	lappend ::auto_path [file join [file dirname [info script]] Modules Importfiles]
 	
+	#
+	## Start the Package Require
+	#
 	
-	# Start the Package Require
-	package require Tablelist_tile 5.2
+	## System Packages
+	package require msgcat
+	
+	## 3rd Party modules
+	package require tkdnd
+	#package require Tablelist_tile 5.2
 	#package require tooltip
 	package require autoscroll
 	#package require csv
 	
+	## Distribution Helper modules
 	#package require shipping
 	package require disthelper_core
 	package require disthelper_importFiles
         #package require sqlite3
 	
 	# Source the required files
+        source [file join [file dirname [info script]] Libraries dragNdrop.tcl] 
 	#source [file join [file dirname [info script]] Modules Core core_gui.tcl]
 	#source [file join [file dirname [info script]] Modules Shipping shipping_window_gui.tcl]
 
@@ -173,7 +182,7 @@ proc 'distHelper_loadOptions {} {
     #
     #***
     #option add *font {tahoma 10}
-    option add *Listbox.font {tahoma 12}
+    option add *Listbox.font {tahoma 8}
     
     # Theme setting for Tile
     ttk::style theme use $ttk::currentTheme;# The ttk way, to change the background
@@ -228,6 +237,8 @@ proc 'distHelper_loadSettings {} {
 #	}
 #    }
 }
+
+namespace import msgcat::mc
 # Load required files / packages
 'distHelper_sourceReqdFiles
 

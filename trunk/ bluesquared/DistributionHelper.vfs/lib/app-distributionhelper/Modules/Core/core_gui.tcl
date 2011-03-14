@@ -13,7 +13,7 @@
 
 ##
 ## - Overview
-# This file holds the parent GUI for Distribution Helper
+# This file holds the parent GUI frame, buttons and menu for Distribution Helper
 
 # Definitions for prefixes of Variables
 # G = Global
@@ -60,8 +60,8 @@ proc disthelper::parentGUI {} {
     #
     #***
  
-    wm geometry . 420x430
-        
+    wm geometry . 600x480 ;# width X Height
+    
     # Create the Menu's
     set mb [menu .mb]
     . configure -menu $mb
@@ -114,7 +114,7 @@ proc disthelper::parentGUI {} {
     
     grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p  
     grid $btnBar.close -column 1 -row 3 -sticky nse
-    pack $btnBar -side bottom -anchor se -pady 4p -padx 5p
+    pack $btnBar -side bottom -anchor e -pady 10p -padx 5p
     
     # ToolTips
     #tooltip::tooltip $btnBar.close "Close (Esc)"
