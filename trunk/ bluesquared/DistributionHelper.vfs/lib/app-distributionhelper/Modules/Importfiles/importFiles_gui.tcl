@@ -282,24 +282,9 @@ proc disthelperGUI {} {
 ##
 ## - Bindings
 ##
+ttk::style configure TEntry -fieldbackground [list focus yellow]
 
-
-
-
-#bind [$frame2b.listbox bodytag] <Double-1> {
-#    #puts "selection2: [$frame2b.listbox curselection]"
-#
-#    $frame2b.listbox delete [$frame2b.listbox curselection]
-#    
-#    # Make sure we keep all the textvars updated when we delete something
-#    Shipping_Code::addListboxNums ;# Add everything together for the running total
-#    # If we don't have the [catch] here, then we will get an error if we remove the last entry.
-#    # cell index "0,1" out of range
-#    catch {Shipping_Code::createList} err ;# Make sure our totals add up
-#    #puts "binding-Double1: $err"
-#}
-
-
+#ttk::style map TEntry -fieldbackground [list focus yellow]
 
 #bind all <<ComboboxSelected>> {
 #    Shipping_Code::readHistory [$frame1.entry1 current]
@@ -313,7 +298,7 @@ proc disthelperGUI {} {
 bind all <Escape> {exit}
 bind all <F1> {console show}
 bind all <F2> {console hide}
-
+ttk::style map TEntry -fieldbackground [list focus yellow]
 } ;# End of disthelperGUI
 
 proc dropDest {window} {

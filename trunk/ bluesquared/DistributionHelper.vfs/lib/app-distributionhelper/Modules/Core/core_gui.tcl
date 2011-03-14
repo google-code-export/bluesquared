@@ -69,21 +69,22 @@ proc disthelper::parentGUI {} {
     ## File
     menu $mb.file -tearoff 0 -relief raised -bd 2
     
-    $mb add cascade -label "File" -menu $mb.file
-    $mb.file add command -label "Exit" -command {exit}
+    $mb add cascade -label [mc "File"] -menu $mb.file
+    $mb.file add command -label [mc "Import File"] -command {Disthelper_Code::getOpenFile}
+    $mb.file add command -label [mc "Exit"] -command {exit}
     
     ## Edit
     menu $mb.edit -tearoff 0 -relief raised -bd 2
-    $mb add cascade -label "Edit" -menu $mb.edit
+    $mb add cascade -label [mc "Edit"] -menu $mb.edit
     
-    $mb.edit add command -label "Clear List" -command { Shipping_Code::clearList }
-    $mb.edit add command -label "Breakdown" -command { Shipping_Gui::breakDown }
+    $mb.edit add command -label "Clear List" -command {}
+    $mb.edit add command -label "Breakdown" -command {}
     
     ## Help
     menu $mb.help -tearoff 0 -relief raised -bd 2
-    $mb add cascade -label "Help" -menu $mb.help
+    $mb add cascade -label [mc "Help"] -menu $mb.help
     
-    $mb.help add command -label "About" -command {blueSquirrel::about}
+    $mb.help add command -label [mc "About"] -command {}
     #$mb.help add command -label "v0.4" -command {}
     
 
