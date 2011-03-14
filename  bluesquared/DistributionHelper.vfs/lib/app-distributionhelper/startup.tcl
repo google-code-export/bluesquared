@@ -70,9 +70,9 @@ proc 'distHelper_sourceReqdFiles {} {
 	
 	lappend ::auto_path [file join [file dirname [info script]] Libraries]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries autoscroll]
-	#lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
 	#lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.2]
-	#lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
 	
 	
 	lappend ::auto_path [file join [file dirname [info script]] Modules]
@@ -89,18 +89,17 @@ proc 'distHelper_sourceReqdFiles {} {
 	## 3rd Party modules
 	package require tkdnd
 	#package require Tablelist_tile 5.2
-	#package require tooltip
+	package require tooltip
 	package require autoscroll
-	#package require csv
+	package require csv
 	
 	## Distribution Helper modules
 	#package require shipping
 	package require disthelper_core
 	package require disthelper_importFiles
-        #package require sqlite3
+
 	
 	# Source the required files
-        source [file join [file dirname [info script]] Libraries dragNdrop.tcl] 
 	#source [file join [file dirname [info script]] Modules Core core_gui.tcl]
 	#source [file join [file dirname [info script]] Modules Shipping shipping_window_gui.tcl]
 
@@ -185,9 +184,10 @@ proc 'distHelper_loadOptions {} {
     option add *Listbox.font {tahoma 8}
     
     # Theme setting for Tile
-    ttk::style theme use $ttk::currentTheme;# The ttk way, to change the background
-    ttk::style map TCombobox -fieldbackground [list focus yellow]
-    ttk::style map TEntry -fieldbackground [list focus yellow]
+    ttk::style theme use $ttk::currentTheme
+    ;# The ttk way, to change the background
+    #ttk::style map TEntry -fieldbackground [list focus yellow]
+    #ttk::style configure TEntry -fieldbackground [list focus yellow]
     #style configure TCombobox -fieldbackground yellow
     #style theme use clam
 }
