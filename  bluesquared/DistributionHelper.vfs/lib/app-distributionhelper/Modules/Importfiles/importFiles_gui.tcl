@@ -74,7 +74,7 @@ proc disthelperGUI {} {
     pack $frame1 -fill both -padx 5p -pady 5p -ipady 2p -anchor nw -side left;#-ipadx 5p
     
     listbox $frame1.listbox \
-                -width 20 \
+                -width 30 \
                 -selectbackground yellow \
                 -selectforeground black \
                 -exportselection yes \
@@ -96,9 +96,11 @@ proc disthelperGUI {} {
     grid rowconfigure $frame1 $frame1.listbox -weight 1
     
     grid $frame1.scrolly -column 1 -row 0 -sticky nse
+    grid $frame1.scrollx -column 0 -row 1 -sticky ews
     
     # Enable the 'autoscrollbar'
-    ::autoscroll::autoscroll $frame1.scrolly 
+    ::autoscroll::autoscroll $frame1.scrolly
+    ::autoscroll::autoscroll $frame1.scrollx
        
     
     # test data

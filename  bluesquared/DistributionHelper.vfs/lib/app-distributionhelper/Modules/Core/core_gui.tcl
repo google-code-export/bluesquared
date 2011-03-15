@@ -33,7 +33,7 @@ package provide disthelper_core 1.0
 namespace eval disthelper {}
 
 proc disthelper::parentGUI {} {
-    #****f* parentGUI/blueSquirrel
+    #****f* parentGUI/disthelper
     # AUTHOR
     #	Casey Ackels
     #
@@ -60,7 +60,7 @@ proc disthelper::parentGUI {} {
     #
     #***
  
-    wm geometry . 600x480 ;# width X Height
+    wm geometry . 640x480 ;# width X Height
     
     # Create the Menu's
     set mb [menu .mb]
@@ -110,7 +110,7 @@ proc disthelper::parentGUI {} {
     
     set btnBar [ttk::frame .btnBar]
     
-    ttk::button $btnBar.print -text "Generate File" -command ""
+    ttk::button $btnBar.print -text "Generate File" -command { Disthelper_Code::writeOutPut }
     ttk::button $btnBar.close -text "Cancel" -command {exit}
     
     grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p  
@@ -122,6 +122,6 @@ proc disthelper::parentGUI {} {
     
     # Bindings
     bind $btnBar.close <Return> {exit}
-    bind all <Control-p> "Shipping_Code::printLabels"
+    #bind all <Control-p> "Shipping_Code::printLabels"
 
 } ;# End of parentGUI
