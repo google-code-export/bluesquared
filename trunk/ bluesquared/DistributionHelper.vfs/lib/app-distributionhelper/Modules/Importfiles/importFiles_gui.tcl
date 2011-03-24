@@ -62,12 +62,12 @@ proc disthelperGUI {} {
     #	TODO: List the other *GUI procs.
     #
     #***
-
+    global GS_job GS_ship GS_address
 
     wm title . "Distribution Helper"
     focus -force .
     
-    global GS_job GS_ship GS_address
+
 
 # Frame 1 - Listbox only
     set frame1 [ttk::labelframe .container.frame1 -text "File Headers"]
@@ -131,12 +131,16 @@ proc disthelperGUI {} {
     
     ttk::label $frame2a.jobNumberField -text [mc "Job Number"]
     ttk::entry $frame2a.jobNumberEntry -textvariable GS_job(Number)
+        dropDest $frame2a.jobNumberEntry GS_job(Number)
+        #set GS_job(Number) ""
     
     ttk::label $frame2a.jobNameField -text [mc "Job Name"]
     ttk::entry $frame2a.jobNameEntry -textvariable GS_job(Name)
+         dropDest $frame2a.jobNameEntry GS_job(Name)
+        #set GS_job(Name) ""
     
-    dropDest $frame2a.jobNumberEntry
-    dropDest $frame2a.jobNameEntry
+    
+   
 
 #
 ## Grid Frame2a
@@ -159,39 +163,49 @@ proc disthelperGUI {} {
    
     ttk::label $frame2b.addressConsigneeField -text [mc "Consignee"]
     ttk::entry $frame2b.addressConsigneeEntry -textvariable GS_address(Consignee)
-    dropDest $frame2b.addressConsigneeEntry
+        dropDest $frame2b.addressConsigneeEntry GS_address(Consignee)
+        #bind $frame2b.addressConsigneeEntry <ButtonPress-3> {tk_popup .editPopup %X %Y}
+        #set GS_address(Consignee) ""
     
     ttk::label $frame2b.addressCompanyField -text [mc "Company"]
     ttk::entry $frame2b.addressCompanyEntry -textvariable GS_address(Company)
-    dropDest $frame2b.addressCompanyEntry
+        dropDest $frame2b.addressCompanyEntry GS_address(Company
+        #set GS_address(Company) ""
     
     ttk::label $frame2b.addressAddr3Field -text [mc "Address 3"]
     ttk::entry $frame2b.addressAddr3Entry -textvariable GS_address(addrThree)
-    dropDest $frame2b.addressAddr3Entry
+        dropDest $frame2b.addressAddr3Entry GS_address(addrThree)
+        #set GS_address(addrThree) ""
     
     ttk::label $frame2b.addressAddr2Field -text [mc "Address 2"]
     ttk::entry $frame2b.addressAddr2Entry -textvariable GS_address(addrTwo)
-    dropDest $frame2b.addressAddr2Entry
+        dropDest $frame2b.addressAddr2Entry GS_address(addrTwo
+        #set GS_address(addrTwo) ""
     
     ttk::label $frame2b.addressDelAddrField -text [mc "Delivery Address"]
     ttk::entry $frame2b.addressDelAddrEntry -textvariable GS_address(deliveryAddr)
-    dropDest $frame2b.addressDelAddrEntry
+        dropDest $frame2b.addressDelAddrEntry GS_address(deliveryAddr)
+        #set GS_address(deliveryAddr) ""
     
     ttk::label $frame2b.addressCityField -text [mc "City"]
     ttk::entry $frame2b.addressCityEntry -textvariable GS_address(City)
-    dropDest $frame2b.addressCityEntry
+        dropDest $frame2b.addressCityEntry GS_address(City)
+        #set GS_address(City) ""
     
     ttk::label $frame2b.addressStateField -text [mc "State"] 
     ttk::entry $frame2b.addressStateEntry -textvariable GS_address(State) -width 5
-    dropDest $frame2b.addressStateEntry
+        dropDest $frame2b.addressStateEntry GS_address(State)
+        #set GS_address(State) ""
     
     ttk::label $frame2b.addressZipField -text [mc "Zip"] 
     ttk::entry $frame2b.addressZipEntry -textvariable GS_address(Zip) -width 9
-    dropDest $frame2b.addressZipEntry
+        dropDest $frame2b.addressZipEntry GS_address(Zip)
+        #set GS_address(Zip) ""
     
     ttk::label $frame2b.addressPhoneField -text [mc "Phone"]
     ttk::entry $frame2b.addressPhoneEntry -textvariable GS_address(Phone)
-    dropDest $frame2b.addressPhoneEntry
+        dropDest $frame2b.addressPhoneEntry GS_address(Phone)
+        #set GS_address(Phone) ""
     
     
 #
@@ -235,27 +249,33 @@ proc disthelperGUI {} {
     
     ttk::label $frame2c.shipmentDateField -text [mc "Date"]
     ttk::entry $frame2c.shipmentDateEntry -textvariable GS_job(Date)
-    dropDest $frame2c.shipmentDateEntry
+        dropDest $frame2c.shipmentDateEntry GS_job(Date)
+        #set GS_job(Date) ""
     
     ttk::label $frame2c.shipmentVersionField -text [mc "Version"]
     ttk::entry $frame2c.shipmentVersionEntry -textvariable GS_job(Version)
-    dropDest $frame2c.shipmentVersionEntry
+        dropDest $frame2c.shipmentVersionEntry GS_job(Version)
+        #set GS_job(Version) ""
 
     ttk::label $frame2c.shipmentShipViaField -text [mc "Ship Via"]
     ttk::entry $frame2c.shipmentShipViaEntry -textvariable GS_ship(shipVia)
-    dropDest $frame2c.shipmentShipViaEntry
+        dropDest $frame2c.shipmentShipViaEntry GS_ship(shipVia)
+        #set GS_ship(shipVia) ""
     
     ttk::label $frame2c.shipmentQuantityField -text [mc "Quantity"]
     ttk::entry $frame2c.shipmentQuantityEntry -textvariable GS_job(Quantity)
-    dropDest $frame2c.shipmentQuantityEntry
+        dropDest $frame2c.shipmentQuantityEntry GS_job(Quantity)
+        #set GS_job(Quantity) ""
     
     ttk::label $frame2c.shipmentPieceWeightField -text [mc "Piece Weight"]
     ttk::entry $frame2c.shipmentPieceWeightEntry -textvariable GS_job(pieceWeight)
-    dropDest $frame2c.shipmentPieceWeightEntry
+        dropDest $frame2c.shipmentPieceWeightEntry GS_job(pieceWeight)
+        #set GS_job(pieceWeight) ""
     
     ttk::label $frame2c.shipmentFullBoxField -text [mc "Full Box Qty"]
     ttk::entry $frame2c.shipmentFullBoxEntry -textvariable GS_job(fullBoxQty)
-    dropDest $frame2c.shipmentFullBoxEntry
+        dropDest $frame2c.shipmentFullBoxEntry GS_job(fullBoxQty)
+        #set GS_job(fullBoxQty) ""
     
 #
 ## Grid Frame2b
@@ -284,7 +304,7 @@ proc disthelperGUI {} {
 ##
 ## - Bindings
 ##
-ttk::style configure TEntry -fieldbackground [list focus yellow]
+#ttk::style configure TEntry -fieldbackground [list focus yellow]
 
 #ttk::style map TEntry -fieldbackground [list focus yellow]
 
@@ -297,13 +317,15 @@ ttk::style configure TEntry -fieldbackground [list focus yellow]
 #    puts "Selection: [.container.frame1.listbox get [.container.frame1.listbox curselection]]"
 #}
 
+editPopup
+
 bind all <Escape> {exit}
 bind all <F1> {console show}
 bind all <F2> {console hide}
 ttk::style map TEntry -fieldbackground [list focus yellow]
 } ;# End of disthelperGUI
 
-proc dropDest {window} {
+proc dropDest {window txtVar} {
     #****f* dropDest/Disthelper_GUI
     # AUTHOR
     #	Casey Ackels
@@ -329,9 +351,15 @@ proc dropDest {window} {
     #	
     #
     #***
+    global gui_Entry
+    
     tkdnd::drop_target register $window DND_Text
     bind $window <<DragEnter>> {list copy} 
     bind $window <<Drop>> {%W insert end [.container.frame1.listbox get [.container.frame1.listbox curselection]]}
+    
+    
+    bind $window <ButtonPress-3> {tk_popup .editPopup %X %Y}
+    #set $txtVar ""
 
 }
 } ;# End of Disthelper_GUI namespace
