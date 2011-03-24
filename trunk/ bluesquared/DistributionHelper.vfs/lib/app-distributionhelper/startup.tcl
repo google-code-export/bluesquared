@@ -100,9 +100,7 @@ proc 'distHelper_sourceReqdFiles {} {
 
 	
 	# Source the required files
-	#source [file join [file dirname [info script]] Modules Core core_gui.tcl]
-	#source [file join [file dirname [info script]] Modules Shipping shipping_window_gui.tcl]
-
+        source [file join [file dirname [info script]] Libraries popups.tcl]
 }
 
 
