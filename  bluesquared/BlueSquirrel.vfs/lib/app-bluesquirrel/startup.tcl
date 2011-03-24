@@ -191,6 +191,7 @@ proc 'blueSquirrel_loadOptions {} {
     
     # Theme setting for Tile
     ttk::style theme use $ttk::currentTheme
+    #ttk::style theme use xpnative
     #style configure TCombobox -fieldbackground yellow
     #style theme use clam
 }
