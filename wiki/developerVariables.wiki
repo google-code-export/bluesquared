@@ -1,0 +1,24 @@
+#labels Docs-Developer,Phase-Implementation
+# Here is a list of program wide variables
+
+= Introduction =
+
+Program wide variables are typically read-only, and should only be changed in one place. The Options window.
+
+
+= Settings Arra y=
+
+settings(Home)
+  The path to where the application resides
+
+settings(outFilePath)
+  Path to where we save the formatted Import File
+
+settings(outFilePathCopy)
+  Path to where we save the backup/archive Import File
+
+settings(sourceFiles)
+  Path to where we read in the source import files. Which are the files we see before we format them.
+
+settings(BoxTareWeight)
+  Default for the tare weight of the boxes. Theoretically we will not have to change this.
