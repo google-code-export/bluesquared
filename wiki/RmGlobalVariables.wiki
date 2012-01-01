@@ -1,0 +1,18 @@
+#labels ReceiptMaker,Docs-Developer
+#Receipt Maker's global variables
+
+= Introduction =
+
+A list of Namespaces currently used
+
+
+= Details =
+Profile - This is the global variable that will hold all the useful information per profile
+
+  * profile(store) - Name of the profile/store name
+  * profile($profile(store),
+
+program - Global Variable that holds program specific information
+
+  * program(path) - Path where program is located
+  * program(Profiles) - Path where profiles are located
