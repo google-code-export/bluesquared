@@ -1,0 +1,10 @@
+#labels ReceiptMaker,Docs-Developer
+= Introduction =
+NameSpaces used in Receipt Maker
+
+
+= Details =
+
+GUI: nextgenrm_GUI
+Code: nextgenrm_Code
+Icons: nextgenrm_Icons
