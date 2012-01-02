@@ -1,0 +1,4 @@
+#labels ReceiptMaker
+* PCL (Print Control Language)
+* TCL (Theremal Contrl Language)
+* POS/ESC
