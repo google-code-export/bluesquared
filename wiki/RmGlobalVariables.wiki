@@ -49,3 +49,4 @@ Global array that holds program specific information
 *_General_*
   * program(profileList) - contains a list of available Profiles
   * program(purchasedList) - list of available Purchased Lists
+  * program(newName) - Holds the name of a new Purchased List or Profile
