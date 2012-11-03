@@ -10,7 +10,7 @@ A list of useful global variables currently used
 This is the global array that will hold all the useful information per profile
 
 *_General_*
-  * *_deprecated_* profile(store) - Name of the profile/store name
+  * profile(Store) - Name of the profile/store name
 
 *_Printing_*
   * profile($profile(Store),bodySize) - Body Font Size
