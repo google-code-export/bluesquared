@@ -38,6 +38,7 @@ Global array that holds program specific information
 *_Program Related_*
   * program(Name) - Name of the program
   * program(Version) - Version of the program
+  * program(fileGateway) - Values will either be -create or -rename. This is used for the New Profile/Purchased List. It is dependent on if the combobox and checkbutton are Normal state.
 
 
 *_Paths_*
