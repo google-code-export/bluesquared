@@ -1,5 +1,6 @@
-Efficiency Assist - 4.0
-OVERVIEW
+=Efficiency Assist - 4.0=
+
+*OVERVIEW*
 This release will contain all addresses in a database. You will open the file, assign values to the correct fields (all except pieceweight, fullbox),  and “import” it into the database.
 
 Once imported, will then be able to assign pieceweights, fullbox qty’s and other shipment specific information.
@@ -8,55 +9,54 @@ The person generating the batch, will type in the job number, which will bring u
 
 Once you have a the Batch Creator open, you can modify the day it ships (which will affect the scheduler), insert pieceweights and fullbox qty’s per version. 
 
-•	Must have the ability to search on old jobs (customer, description, number) to retrieve historical information. Mainly pieceweight, qty per box
+  * Must have the ability to search on old jobs (customer, description, number) to retrieve historical information. Mainly pieceweight, qty per box
 
-DATABASE
-Tables
-* Consignee Data
-# Cons_id (Primary Key)
-# ConsCompany
-# ConsAttention
-# ConsAddress1
-# ConsAddress2
-# ConsAddress3
-# ConsCity
-# ConsState
-# ConsZip
-# ConsCountry
-# ConsPhone
-# ConsEmail
-# JobNumber (ForeignKey)
+==DATABASE TABLES==
+  * *Consignee Data*
+    # Cons_id (Primary Key)
+    # ConsCompany
+    # ConsAttention
+    # ConsAddress1
+    # ConsAddress2
+    # ConsAddress3
+    # ConsCity
+    # ConsState
+    # ConsZip
+    # ConsCountry
+    # ConsPhone
+    # ConsEmail
+    # JobNumber (ForeignKey)
+----
+  * *Customer*
+    # Cust_id (Primary Key)
+    # CustName
+    # Cust3PAcctNumber
+    # Cust3PCarrier (FedEx/UPS)
+    # CustCode (From Process Shipper)
 
-* Customer
-# Cust_id (Primary Key)
-# CustName
-# Cust3PAcctNumber
-# Cust3PCarrier (FedEx/UPS)
-# CustCode (From Process Shipper)
+  * *Ship*
+    # Ship_id (Primary Key)
+    # ShipQuantity
+    # ShipDate
+    # ShipVia
+    # JobNumber (ForeignKey)
 
-* Ship
-# Ship_id (Primary Key)
-# ShipQuantity
-# ShipDate
-# ShipVia
-# JobNumber (ForeignKey)
+  * *Job*
+    # Job_id
+    # JobName
+    # JobNumber (Primary Key)
+    # JobDescription
 
-* Job
-# Job_id
-# JobName
-# JobNumber (Primary Key)
-# JobDescription
+  * *Version*
+    # Vers_id (Primary Key)
+    # VersName
+    # VersPieceWeight
+    # VersFullBox
+    # JobNumber (Foreign Key)
 
-* Version
-# Vers_id (Primary Key)
-# VersName
-# VersPieceWeight
-# VersFullBox
-# JobNumber (Foreign Key)
-
-SCHEDULER
+*SCHEDULER*
 This will list all known imports for a given date range; you should be able to edit the ship date, if it changes directly from here.
 
-BATCH CREATOR
+*BATCH CREATOR*
 Main window that the batch import maker will use.
 You will enter the job number and it will bring up statistics on that particular job, along with the ability to enter FullBox/Pieceweight etc, by version. And finally able to hit “generate” to create a batch import file.
