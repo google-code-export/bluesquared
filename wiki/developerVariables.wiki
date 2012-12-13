@@ -6,7 +6,7 @@
 Program wide variables are typically read-only, and should only be changed in one place. The Options window.
 
 
-= Settings Arra y=
+=Settings Array=
 
 settings(Home)
   The path to where the application resides
