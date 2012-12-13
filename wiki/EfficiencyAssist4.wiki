@@ -1,6 +1,8 @@
 #labels Phase-Design,Phase-Requirements,EfficiencyAssist
 =Efficiency Assist - 4.0=
 
+See issue 86 for the associated issues with this release.
+
 *OVERVIEW*
 This release will contain all addresses in a database. You will open the file, assign values to the correct fields (all except pieceweight, fullbox),  and “import” it into the database.
 
