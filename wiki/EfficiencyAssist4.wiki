@@ -14,6 +14,13 @@ Once you have a the Batch Creator open, you can modify the day it ships (which w
 
   * Must have the ability to search on old jobs (customer, description, number) to retrieve historical information. Mainly pieceweight, qty per box
 
+  * Create Box Labels
+This will roll the current Box Label program into EA to make one uniform package. The benefits to this are:
+  # No more hand entering shipment qty's on large jobs
+  # Only required to enter FullBox qty's on jobs in EA.
+  # All other jobs that require labels, and are NOT in EA, will function normally. Meaning, how the labels are created now will not change.
+  # The ability to print out reports (ups vs freight, and shipment level). This will require slightly more data input.
+
 ==DATABASE TABLES==
   * *Consignee Data*
     # Cons_id (Primary Key)
@@ -36,7 +43,7 @@ Once you have a the Batch Creator open, you can modify the day it ships (which w
     # Cust3PAcctNumber
     # Cust3PCarrier (FedEx/UPS)
     # CustCode (From Process Shipper)
-
+----
   * *Ship*
     # Ship_id (Primary Key)
     # ShipQuantity
@@ -49,14 +56,14 @@ Once you have a the Batch Creator open, you can modify the day it ships (which w
     # JobName
     # JobNumber (Primary Key)
     # JobDescription
-
+----
   * *Version*
     # Vers_id (Primary Key)
     # VersName
     # VersPieceWeight
     # VersFullBox
     # JobNumber (Foreign Key)
-
+----
 *SCHEDULER*
 This will list all known imports for a given date range; you should be able to edit the ship date, if it changes directly from here.
 
