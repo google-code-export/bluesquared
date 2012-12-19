@@ -70,3 +70,8 @@ This will list all known imports for a given date range; you should be able to e
 *BATCH CREATOR*
 Main window that the batch import maker will use.
 You will enter the job number and it will bring up statistics on that particular job, along with the ability to enter FullBox/Pieceweight etc, by version. And finally able to hit “generate” to create a batch import file.
+
+*LABEL MAKER*
+Allow the user to enter the correct information for the label, and individual shipment quantities.
+
+They should be able to 
