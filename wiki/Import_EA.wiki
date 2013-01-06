@@ -1,2 +1,2 @@
-#summary EA 4 - Import Mode
+#summary EA 4 - Mode:Import
 #labels Phase-Requirements,Phase-Design,EfficiencyAssist,Phase-Implementation
