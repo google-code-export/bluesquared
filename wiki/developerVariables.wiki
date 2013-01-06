@@ -1,5 +1,5 @@
-#labels Docs-Developer,Phase-Implementation
-# Here is a list of program wide variables
+#summary Code:Variables
+#labels Docs-Developer,Phase-Implementation,Phase-Design,EfficiencyAssist
 
 = Introduction =
 
