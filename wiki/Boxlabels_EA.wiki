@@ -1,4 +1,4 @@
-#summary EA 4 - Box Labels Mode
+#summary EA 4 - Mode:Labels
 #labels Phase-Requirements,Phase-Design,Phase-Implementation,EfficiencyAssist
 
 = Introduction =
