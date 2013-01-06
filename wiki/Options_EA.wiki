@@ -1,4 +1,4 @@
-#summary EA_4 Options
+#summary EA 4 Options
 #labels Phase-Requirements,Phase-Design,Phase-Implementation,EfficiencyAssist
 
 = Introduction =
