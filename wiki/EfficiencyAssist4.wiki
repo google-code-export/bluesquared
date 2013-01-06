@@ -1,4 +1,5 @@
 #labels Phase-Design,Phase-Requirements,EfficiencyAssist,Phase-Implementation
+#EfficiencyAssist v4.0 is rewritten from the ground up
 =Efficiency Assist - 4.0=
 
 See issue 86 for the associated issues with this release.
