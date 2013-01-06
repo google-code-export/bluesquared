@@ -21,48 +21,7 @@ This will roll the current Box Label program into EA to make one uniform package
   # All other jobs that require labels, and are NOT in EA, will function normally. Meaning, how the labels are created now will not change.
   # The ability to print out reports (ups vs freight, and shipment level). This will require slightly more data input.
 
-==DATABASE TABLES==
-  * *Consignee Data*
-    # Cons_id (Primary Key)
-    # ConsCompany
-    # ConsAttention
-    # ConsAddress1
-    # ConsAddress2
-    # ConsAddress3
-    # ConsCity
-    # ConsState
-    # ConsZip
-    # ConsCountry
-    # ConsPhone
-    # ConsEmail
-    # JobNumber (ForeignKey)
-----
-  * *Customer*
-    # Cust_id (Primary Key)
-    # CustName
-    # Cust3PAcctNumber
-    # Cust3PCarrier (FedEx/UPS)
-    # CustCode (From Process Shipper)
-----
-  * *Ship*
-    # Ship_id (Primary Key)
-    # ShipQuantity
-    # ShipDate
-    # ShipVia
-    # JobNumber (ForeignKey)
 
-  * *Job*
-    # Job_id
-    # JobName
-    # JobNumber (Primary Key)
-    # JobDescription
-----
-  * *Version*
-    # Vers_id (Primary Key)
-    # VersName
-    # VersPieceWeight
-    # VersFullBox
-    # JobNumber (Foreign Key)
 ----
 *IMPORT*
 Import correctly formatted files into EA. So that the user can perform sanitizing rules on it; to make it ready to product a batch file for the shipping system or label creating software.
