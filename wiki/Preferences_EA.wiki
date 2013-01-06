@@ -1,4 +1,4 @@
-#summary One-sentence summary of this page.
+#summary EA 4 - Preferences
 #labels Phase-Requirements,Phase-Design,Phase-Implementation,EfficiencyAssist
 
 = Introduction =
