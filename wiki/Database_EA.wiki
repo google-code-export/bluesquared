@@ -1,4 +1,4 @@
-#summary EA 4 - Database
+#summary EA 4 - Core:Database
 #labels Phase-Design,EfficiencyAssist,Phase-Requirements,Phase-Implementation
 
 ==DATABASE TABLES==
