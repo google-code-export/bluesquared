@@ -1,4 +1,4 @@
-#summary EA 4 - Preferences
+#summary EA 4 - Window:Preferences
 #labels Phase-Requirements,Phase-Design,Phase-Implementation,EfficiencyAssist
 
 = Introduction =
