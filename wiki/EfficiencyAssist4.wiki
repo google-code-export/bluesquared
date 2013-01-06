@@ -23,19 +23,19 @@ This will roll the current Box Label program into EA to make one uniform package
 
 
 ----
-*IMPORT*
+*[Import_EA IMPORT]*
 Import correctly formatted files into EA. So that the user can perform sanitizing rules on it; to make it ready to product a batch file for the shipping system or label creating software.
 
 *[Database_EA DATABASE]*
 Will hold all job specific information, along with customer and shipment data.
 
-*EDIT DB*
+*[EditDB_EA EDIT DB]*
 Edit the DB
 
-*SCHEDULER*
+*[Scheduler_EA SCHEDULER]*
 This will list all known imports for a given date range; you should be able to edit the ship date, if it changes directly from here.
 
-*BATCH CREATOR*
+*[BatchCreator_EA BATCH CREATOR]*
 Main window that the batch import maker will use.
 You will enter the job number and it will bring up statistics on that particular job, along with the ability to enter FullBox/Pieceweight etc, by version. And finally able to hit “generate” to create a batch import file.
 
