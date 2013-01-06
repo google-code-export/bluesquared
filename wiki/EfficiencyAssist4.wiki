@@ -1,4 +1,4 @@
-#summary EfficiencyAssist v4.0 is rewritten from the ground up
+#summary EA 4 - Starting page for EA4
 #labels Phase-Design,Phase-Requirements,EfficiencyAssist,Phase-Implementation
 =Efficiency Assist - 4.0=
 
