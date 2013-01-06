@@ -1,2 +1,2 @@
-#summary EA 4 - Batch Creator Mode
+#summary EA 4 - Mode:Batch Creator
 #labels Phase-Requirements,Phase-Design,Phase-Implementation,EfficiencyAssist
