@@ -1,4 +1,4 @@
-#labels Phase-Design,Phase-Requirements,EfficiencyAssist
+#labels Phase-Design,Phase-Requirements,EfficiencyAssist,Phase-Implementation
 =Efficiency Assist - 4.0=
 
 See issue 86 for the associated issues with this release.
@@ -39,11 +39,11 @@ This will list all known imports for a given date range; you should be able to e
 Main window that the batch import maker will use.
 You will enter the job number and it will bring up statistics on that particular job, along with the ability to enter FullBox/Pieceweight etc, by version. And finally able to hit “generate” to create a batch import file.
 
-*BOX LABELS*
+*[Boxlabels_EA BOX LABELS]*
 Allow the user to enter the correct information for the label, and individual shipment quantities.
 
-*OPTIONS*
+*[Options_EA OPTIONS]*
 Set the file paths to various folders or programs.
 
-*PREFERENCES*
+*[Preferences_EA PREFERENCES]*
 Set global wide options. This will affect everyone who opens the software.
