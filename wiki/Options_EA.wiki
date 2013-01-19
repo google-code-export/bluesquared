@@ -1,14 +1,14 @@
 #summary EA 4 - Window:Options
 #labels Phase-Requirements,Phase-Design,Phase-Implementation,EfficiencyAssist
 
-= Introduction =
+= These are user specific options =
 
-Add your content here.
+== Variables ==
+*mySettings(saveFilePath)*
+So we can auto-save instead of having to ask the user where to save.
 
+*mySettings(saveFilePathCopy)*
+For a backup copy / archival reasons
 
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+*mySettings(userSourceFiles)*
+This is the location where the user will place "to import files", so we will want to open at this location when looking for those files.
