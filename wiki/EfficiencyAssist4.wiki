@@ -25,7 +25,7 @@ This will roll the current Box Label program into EA to make one uniform package
 
 ----
 *[Import_EA IMPORT]*
-Import correctly formatted files into EA. So that the user can perform sanitizing rules on it; to make it ready to product a batch file for the shipping system or label creating software.
+Import correctly formatted files into EA. So that the user can perform sanitizing rules on it; to make it ready to produce a batch file for the shipping system or label creating software.
 
 *[Database_EA DATABASE]*
 Will hold all job specific information, along with customer and shipment data.
