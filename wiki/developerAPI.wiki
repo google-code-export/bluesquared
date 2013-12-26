@@ -41,5 +41,7 @@ foreach value [package names] {
 }}}
 
 =Variables for Setup API=
+{{{
 setup($packageName,setupComplete)
 setup($packageName,setupReqd)
+}}}
