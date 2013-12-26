@@ -24,7 +24,7 @@ setup($packageName,setupReqd) <yes/no>
 That way we can create a `proc` to look at those variables, to determine if we need to process it further. Such as looking to see if the setup on it has been complete or not.
 
 Once setup has been *completed* lets issue another variable
-NOTE: When saving, cycle through all listed 'required' variables, and if they are all set, then set the 'setupComplete' variable to yes. Issue 90.
+NOTE: When saving, cycle through all listed 'required' variables, and if they are all set, then set the 'setupComplete' variable to yes. Issue #90
 {{{
 set setup($packageName,setupComplete) <yes/no>
 }}}
