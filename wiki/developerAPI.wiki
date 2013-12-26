@@ -7,3 +7,12 @@ API for modules communicating with Core.
 
 = Setup =
 Commands that allow Core to know if the active module needs to be Setup before it can be used.
+
+Using the *package* command, we can figure out what packages are loaded
+{{{
+foreach value [package names] {
+    if {[string match eAssist_* $value] == 1} {
+        puts $value
+        }
+}
+}}}
