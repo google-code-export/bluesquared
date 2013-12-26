@@ -8,9 +8,13 @@ API for modules communicating with Core.
 = Setup =
 Commands that allow Core to know if the active module needs to be Setup before it can be used.
 
-Each package adds variables to the `setup()` array, within the `namespace eval` proc.
+Each package adds variables to the `setup()` array, within the `namespace eval` proc, such as:
 {{{
-set setup($packageName,identifier) <value>
+namespace eval eAssistSetup {
+    global setup
+   set setup($packageName,identifier) <value>
+}
+
 }}}
 
 To determine if we require a setup before using, each package should use this sytanx
