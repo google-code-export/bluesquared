@@ -1,5 +1,5 @@
+#summary Launching Page for Developer API
 #labels Phase-Design,EfficiencyAssist
-#Launching Page for Developer API
 = API =
 
 API for modules communicating with Core.
