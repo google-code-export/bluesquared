@@ -4,7 +4,25 @@
 
 See issue 86 for the associated issues with this release.
 
-*OVERVIEW*
+=OVERVIEW=
+
+This release encompasses two existing programs into modules, and creating more as needed.
+
+=Setup=
+The setup module allows us to configure each module within one area. Everything configured here is used globally.
+
+=Labels=
+This module is essentially a front-end to BarTender by passing basic commands to it via the command line options.
+
+=Distribution=
+Allows you to import a file (headers required), by mapping the source headers to the program headers. Once imported, you can do several things with it, such as: Quickly identify which fields exceed preset character length limitations, assign "Distribution Types", shipment method, assign samples per version.
+
+It also offers to modes, the first is the most common. Which lists shipments by destination. The second, lists all destinations once per version, and only shows one version at a time.
+
+=BatchMaker=
+Was named UPS Imports; this will import files as needed. Allow you specify piece weight, full box, ship date. This will export a formatted file to import into the shipping system. 
+
+----
 This release will contain all addresses in a database. You will open the file, assign values to the correct fields (all except pieceweight, fullbox),  and “import” it into the program.
 
 Once imported, will then be able to assign pieceweights, fullbox qty’s and other shipment specific information.
