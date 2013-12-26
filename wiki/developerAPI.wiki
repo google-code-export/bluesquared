@@ -8,7 +8,25 @@ API for modules communicating with Core.
 = Setup =
 Commands that allow Core to know if the active module needs to be Setup before it can be used.
 
-Using the *package* command, we can figure out what packages are loaded
+Each package adds variables to the `setup()` array, within the `namespace eval` proc.
+{{{
+set setup($packageName,identifier) <value>
+}}}
+
+To determine if we require a setup before using, each package should use this sytanx
+{{{
+setup($packageName,setupReqd) <yes/no>
+}}}
+
+That way we can create a `proc` to look at those variables, to determine if we need to process it further. Such as looking to see if the setup on it has been complete or not.
+
+Once setup has been *completed* lets issue another variable
+{{{
+set setup($packageName,setupComplete) <yes/no>
+}}}
+
+Using the *`package`* command, we can figure out what packages are loaded. Then lets filter on the *`eAssist_`* keyword that we use to prefix all of the project-centric packages.
+
 {{{
 foreach value [package names] {
     if {[string match eAssist_* $value] == 1} {
