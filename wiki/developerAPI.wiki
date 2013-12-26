@@ -1,4 +1,4 @@
-#summary Launching Page for Developer API
+#summary EA 4 - API
 #labels Phase-Design,EfficiencyAssist
 = API =
 
