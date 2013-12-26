@@ -12,7 +12,7 @@ Each package adds variables to the `setup()` array, within the `namespace eval` 
 {{{
 namespace eval eAssistSetup {
     global setup
-   set setup($packageName,identifier) <value>
+   set setup($packageName,<identifier>) <value>
 }
 }}}
 
@@ -39,3 +39,7 @@ foreach value [package names] {
         }
 }
 }}}
+
+=Variables for Setup API=
+setup($packageName,setupComplete)
+setup($packageName,setupReqd)
