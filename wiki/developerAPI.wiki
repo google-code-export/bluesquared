@@ -1,0 +1,8 @@
+#Launching Page for Developer API
+= API =
+
+API for modules communicating with Core.
+
+
+= Setup =
+Commands that allow Core to know if the active module needs to be Setup before it can be used.
