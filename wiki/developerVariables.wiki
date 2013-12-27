@@ -6,7 +6,23 @@
 Program wide variables are typically read-only, and should only be changed in one place. The Options window.
 
 
-=Settings Array=
+== Arrays ==
+
+===Program===
+Program specific values<br>
+*`program(currentModule)`*
+  Allows the program to open up at the last window. (eg Addresses)
+
+*`program(Version)`*
+  Major version number (eg 4)
+
+*`program(PatchLevel)`*
+  Minor numbers (eg 0.1)
+
+*`program(beta)`*
+  Value should be Beta or Alpha (eg Alpha)
+
+===Settings===
 
 *`settings(Home)`*
   The path to where the application resides
