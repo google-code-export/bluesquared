@@ -4,8 +4,8 @@
 
 API for modules communicating with Core.
 <br>
-#  [developerAPI#Setup_API]
-#  [developerAPI#Update_API]
+  #[developerAPI#Setup_API]
+  #[developerAPI#Update_API]
 
 
 ==Setup_API==
