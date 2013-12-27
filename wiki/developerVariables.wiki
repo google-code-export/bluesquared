@@ -8,17 +8,17 @@ Program wide variables are typically read-only, and should only be changed in on
 
 =Settings Array=
 
-settings(Home)
+*`settings(Home)`*
   The path to where the application resides
 
-settings(outFilePath)
+*`settings(outFilePath)`*
   Path to where we save the formatted Import File
 
-settings(outFilePathCopy)
+*`settings(outFilePathCopy)`*
   Path to where we save the backup/archive Import File
 
-settings(sourceFiles)
+*`settings(sourceFiles)`*
   Path to where we read in the source import files. Which are the files we see before we format them.
 
-settings(BoxTareWeight)
+*`settings(BoxTareWeight)`*
   Default for the tare weight of the boxes. Theoretically we will not have to change this.
