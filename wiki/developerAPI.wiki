@@ -3,9 +3,11 @@
 = API =
 
 API for modules communicating with Core.
+<br>
+#  [developerAPI#Setup_API]
 
 
-= Setup =
+= Setup_API =
 Commands that allow Core to know if the active module needs to be Setup before it can be used.
 
 Each package adds variables to the `setup()` array, within the `namespace eval` proc, such as:
@@ -40,8 +42,8 @@ foreach value [package names] {
 }
 }}}
 
-=Variables for Setup API=
+=Variables for Setup_API=
 {{{
-setup($packageName,setupComplete)
-setup($packageName,setupReqd)
+setup($packageName,setupReqd) <yes/no>
+setup($packageName,setupComplete)<yes/no>
 }}}
