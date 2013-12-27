@@ -5,9 +5,10 @@
 API for modules communicating with Core.
 <br>
 #  [developerAPI#Setup_API]
+#  [developerAPI#Update_API]
 
 
-= Setup_API =
+==Setup_API==
 Commands that allow Core to know if the active module needs to be Setup before it can be used.
 
 Each package adds variables to the `setup()` array, within the `namespace eval` proc, such as:
@@ -27,7 +28,7 @@ That way we can create a `proc` to look at those variables, to determine if we n
 
 Once setup has been *completed* lets issue another variable
 <br>
-NOTE: When saving, cycle through all listed 'required' variables, and if they are all set, then set the 'setupComplete' variable to yes. Issue #90
+NOTE: When saving, cycle through all listed 'required' variables, and if they are all set, then set the 'setupComplete' variable to yes. See issue 90
 {{{
 set setup($packageName,setupComplete) <yes/no>
 }}}
@@ -42,8 +43,13 @@ foreach value [package names] {
 }
 }}}
 
-=Variables for Setup_API=
+===Variables for Setup_API===
 {{{
 setup($packageName,setupReqd) <yes/no>
 setup($packageName,setupComplete)<yes/no>
 }}}
+
+
+==Update_API==
+
+Check for updates; update program when new updates are available.
