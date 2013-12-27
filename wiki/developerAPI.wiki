@@ -52,4 +52,19 @@ setup($packageName,setupComplete)<yes/no>
 
 ==Update_API==
 
-Check for updates; update program when new updates are available.
+Check for updates; update program when new versions are available.<br>
+Possible features:
+  # Setup: Disable/Enable Auto-Update
+  # Setup: Always check automatically for newer versions, notification always appears here.
+  # Setup: Download (Button)
+
+==Filter_API==
+
+Filtering the data, could mean removing any periods or commas in a cell. We should allow the user to create their own. Requirements would be:
+  # Select columns for the filter to act on
+  # Allow the user to select what to filter out
+  * Commas
+  * Hyphens
+  * Forward/Back Slashes
+  * High ASCII
+  * User editable
