@@ -72,6 +72,7 @@ Filtering the data, could mean removing any periods or commas in a cell. We shou
 
 ==Loadscripts_API==
 
+Issue 99
 Allow the possibility to load scripts/packages from within EA, instead of hard-coding it.
 
 This should be in Setup, because we won't want the user to mess with this; for the most part.
