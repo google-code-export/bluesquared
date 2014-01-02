@@ -1,5 +1,5 @@
 #summary EA 4 - API
-#labels Phase-Design,EfficiencyAssist
+#labels Phase-Design,EfficiencyAssist,Code,GUI
 = API =
 
 API for modules communicating with Core.
@@ -7,6 +7,7 @@ API for modules communicating with Core.
   # [developerAPI#Setup_API]
   # [developerAPI#Update_API]
   # [developerAPI#Loadscripts_API]
+  # [developerAPI#MailManager_API]
 
 
 ==Setup_API==
@@ -78,3 +79,10 @@ See Issue 99
 This should be in Setup, because we won't want the user to mess with this; for the most part.
 
 If we require the scripts to be in the common Package format, zipped up. We should be able to just Plug N Play. With the ability to see EVERY package in Setup, and load only those that we want.
+
+==MailManager_API==
+
+See Issue 100
+<br>Export our massaged file to MailManager, have it run TaskMaster to CASS and send out for NCOA, once it returns, export it to a file. 
+
+EA should be watching, to alert the user when it has returned and that they can continue processing.
