@@ -1,4 +1,5 @@
-#summary EA-4
+#summary EA4 - Lists all major setup criteria
+#labels EfficiencyAssist,Phase-Design,Phase-Requirements,Phase-Implementation
 
 =Carriers=
 This refers to freight carriers and couriers. However, UPS/FedEx/USPS are excluded from this area.
