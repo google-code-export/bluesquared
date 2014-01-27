@@ -10,3 +10,5 @@ We need:
 ||  || Per Pallet ||
 ||  || Per Stop ||
 || States || ||
+|| Costs || Per Destination ||
+|| || Per Package ||
