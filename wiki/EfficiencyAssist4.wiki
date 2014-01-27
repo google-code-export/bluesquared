@@ -8,7 +8,7 @@ See issue 86 for the associated issues with this release.
 
 This release encompasses two existing programs into modules, and creating more as needed.
 
-=Setup=
+=[[Setup]]=
 The setup module allows us to configure each module within one area. Everything configured here is used globally.
 
 =Labels=
