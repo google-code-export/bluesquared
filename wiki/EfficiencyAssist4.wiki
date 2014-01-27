@@ -20,7 +20,17 @@ Allows you to import a file (headers required), by mapping the source headers to
 It also offers to modes, the first is the most common. Which lists shipments by destination. The second, lists all destinations once per version, and only shows one version at a time.
 
 =BatchMaker=
-Was named UPS Imports; this will import files as needed. Allow you specify piece weight, full box, ship date. This will export a formatted file to import into the shipping system. 
+Was named UPS Imports; this will import files as needed. Allow you to specify piece weight, full box, ship date. This will export a formatted file to import into the shipping system. 
+
+=Carriers=
+This refers to freight carriers and couriers. However, UPS/FedEx/USPS are excluded from this area.
+We need:
+  # Name
+  # Rates
+  # Per Package (and type of package)
+  # Per Pallet
+  # Per Stop (Soniq)
+  # List of preferred states to use this carrier
 
 ----
 This release will contain all addresses in a database. You will open the file, assign values to the correct fields (all except pieceweight, fullbox),  and “import” it into the program.
