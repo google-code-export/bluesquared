@@ -3,10 +3,10 @@
 
 =Carriers=
 This refers to freight carriers and couriers. However, UPS/FedEx/USPS are excluded from this area.
+
 We need:
-  # Name
-  # Rates
-  # Per Package (and type of package)
-  # Per Pallet
-  # Per Stop (Soniq)
-  # List of preferred states to use this carrier
+|| Name || ||
+|| Rates || Per Package ||
+||  || Per Pallet ||
+||  || Per Stop ||
+|| States || ||
