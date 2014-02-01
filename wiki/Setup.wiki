@@ -8,8 +8,8 @@ We need:
 || Carrier Name || ||
 || Customer || ALL || Use Monarch Customer code ||
 || || <Customer List> || Add customer code here upon saving, it is added to the list? ||
-|| Job || ALL ||
-|| || <Job List> ||
+|| Title || ALL ||
+|| || <Title List> ||
 || Preferred States || ALL ||
 || || <State List> ||
 || Country || ALL ||
