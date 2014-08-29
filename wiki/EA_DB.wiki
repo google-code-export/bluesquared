@@ -1,0 +1,6 @@
+#labels Docs-Developer,EfficiencyAssist,Code
+Query statement for retrieving secondary header names
+
+{{{
+SELECT SubHeaderName from SubHeaders left outer join Headers on SubHeaders.HeaderID = Headers.Header_ID where HeaderName='Company'
+}}}
