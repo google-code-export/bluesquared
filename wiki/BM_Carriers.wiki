@@ -1,4 +1,4 @@
-#labels Docs-Developer,EfficiencyAssist
+#labels Docs-Developer,EfficiencyAssist,Docs-Specs,Phase-Requirements
 #Carriers and the setup to detect the cheapest method. Should also aid in expected delivery date.
 
 = Introduction =
