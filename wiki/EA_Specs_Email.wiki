@@ -1,0 +1,9 @@
+#labels Phase-Requirements,Docs-Specs,Docs-Developer,EfficiencyAssist
+Setup of Email will be in its own designated section, called _EmailSetup_
+
+This window will contain multiple tabs, the first one being:
+*Email Setup*; configure the server, port, TLS if using etc.
+
+
+*Batch Maker/Box Labels*; configure who we are sending the email to and from.
+This should be controlled by a dropdown, which indicates what event generates the email. There should also be an area where you can add your own Header/Footer, Subject line information.
