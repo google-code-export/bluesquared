@@ -1,4 +1,4 @@
-#labels Phase-Requirements,Docs-Specs,Docs-Developer,EfficiencyAssist
+#labels Phase-Requirements,Docs-Specs,Docs-Developer,EfficiencyAssist,Incomplete
 Setup of Email will be in its own designated section, called _EmailSetup_
 
 This window will contain multiple tabs, the first one being:
