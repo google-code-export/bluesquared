@@ -2,6 +2,7 @@
 =Retrieving Data from joined tables=
 
 *Retrieve Subheaders*
+
 Query statement for retrieving secondary header names
 
 {{{
