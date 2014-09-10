@@ -1,5 +1,6 @@
 #labels Docs-Developer,EfficiencyAssist,Code,Incomplete
 =Retrieving Data from joined tables=
+
 *Retrieve Subheaders*
 Query statement for retrieving secondary header names
 
@@ -13,6 +14,7 @@ where HeaderName='Company'
 
 
 *Modules and Events Associated with them*
+
 Retrieve the EventNotifications associated with the _Box Labels_ module.
 
 {{{
