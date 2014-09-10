@@ -13,6 +13,8 @@ where HeaderName='Company'
 
 
 *Modules and Events Associated with them*
+Retrieve the EventNotifications associated with the _Box Labels_ module.
+
 {{{
 SELECT EventName
   FROM EventNotifications
