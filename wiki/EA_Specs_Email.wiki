@@ -1,9 +1,40 @@
 #labels Phase-Requirements,Docs-Specs,Docs-Developer,EfficiencyAssist,Incomplete
 Setup of Email will be in its own designated section, called _EmailSetup_
 
-This window will contain multiple tabs, the first one being:
-*Email Setup*; configure the server, port, TLS if using etc.
+This window will contain multiple tabs:
+*Email Setup*
+  * configure the server, port, TLS if using etc.
 
 
-*Batch Maker/Box Labels*; configure who we are sending the email to and from.
-This should be controlled by a dropdown, which indicates what event generates the email. There should also be an area where you can add your own Header/Footer, Subject line information.
+*Email Notification*
+The events are populated based on what version has been selected.
+  * Select Module, and disable/enable email notifications for the entire module
+  * Select Email Event, and disable/enable email notifications for the event.
+  * Email tips for available shortcuts will change depending on what Module/Event has been selected.
+  * Configure who we are sending the email to and from.
+  * Create the subject and body of email.
+
+
+==Mappings==
+
+Tied to each even is the ability to map generated data; for instance, how many box labels were created; could be inserted into the body of the email by using a keycode.
+
+Using `%b` to insert the break down. We could construct the body of the email like:
+{{{
+This is a system generated message, please see the details below:
+
+%b
+}}}
+
+Upon receiving it we would see:
+
+{{{
+This is a system generated message, please see the details below:
+
+Portland Monthly
+August
+Version 2
+
+45 @ 50
+3 @ 15
+}}}
