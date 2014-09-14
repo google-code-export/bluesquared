@@ -38,3 +38,26 @@ Version 2
 45 @ 50
 3 @ 15
 }}}
+
+===Macro Creation===
+
+The macro should be created by using [http://www.tcl.tk/man/tcl8.6/TclCmd/string.htm#M34 String Map]
+
+*Example*
+
+*Note* We must use double-quotes since we need variable substitution to happen, otherwise we would use curly braces.
+
+{{{
+set myTxt {
+Portland Monthly
+August
+Version 2
+
+45 @ 50
+3 @ 15}
+
+set myString {This is a system generated message, please see the details below:
+
+%b}
+
+string map "%b [list $myTxt]" $myString
