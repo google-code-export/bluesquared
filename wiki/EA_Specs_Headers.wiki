@@ -5,9 +5,9 @@
 Parameters can be set on each header.
 
 == Parameters ==
-  #ImportHeader
-  #ExportHeader
-  #InternalHeader
-  #Widget (entry or dropdown)
-  #Max Length
-  #Default Width (if not set defaults to width of header name)
+  # ImportHeader
+  # ExportHeader
+  # InternalHeader
+  # Widget (entry or dropdown)
+  # Max Length
+  # Default Width (if not set defaults to width of header name)
