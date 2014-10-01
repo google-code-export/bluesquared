@@ -110,39 +110,39 @@ proc eAssist_db::initContainers {} {
 
 
 
-proc eAssist_db::dbInsert {args} {
-    #****f* dbInsert/eAssist_db
-    # CREATION DATE
-    #   09/26/2014 (Friday Sep 26)
-    #
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2014 Casey Ackels
-    #   
-    #
-    # SYNOPSIS
-    #   eAssist_db::dbInsert -columnNames ?value1 ... valueN? -table value -data value
-    #
-    # FUNCTION
-    #	Inserts or Updates data in specified columns and table
-    #   
-    #   
-    # CHILDREN
-    #	N/A
-    #   
-    # PARENTS
-    #   
-    #   
-    # NOTES
-    #   
-    #   
-    # SEE ALSO
-    #   
-    #   
-    #***
-    global log
+#proc eAssist_db::dbInsert {args} {
+#    #****f* dbInsert/eAssist_db
+#    # CREATION DATE
+#    #   09/26/2014 (Friday Sep 26)
+#    #
+#    # AUTHOR
+#    #	Casey Ackels
+#    #
+#    # COPYRIGHT
+#    #	(c) 2014 Casey Ackels
+#    #   
+#    #
+#    # SYNOPSIS
+#    #   eAssist_db::dbInsert -columnNames ?value1 ... valueN? -table value -data value
+#    #
+#    # FUNCTION
+#    #	Inserts or Updates data in specified columns and table
+#    #   
+#    #   
+#    # CHILDREN
+#    #	N/A
+#    #   
+#    # PARENTS
+#    #   
+#    #   
+#    # NOTES
+#    #   
+#    #   
+#    # SEE ALSO
+#    #   
+#    #   
+#    #***
+#    global log
 proc eAssist_db::dbInsert {args} {
     if {$args == ""} {return -code 1 [mc "wrong # args: Must be -columnNames ?value1 .. valueN? -table value -data value\nNOTE: Each data value must be enclosed with single quotes"]}
     
@@ -164,13 +164,20 @@ proc eAssist_db::dbInsert {args} {
     # See if this is a new entry or if we should update an entry ...
     set dbCheck [eAssist_db::dbWhereQuery -columnNames [lrange $colNames 0 0] -table $tbl -where [lrange $colNames 0 0]=[lrange $data 0 0]]
     
-    if {[llength $colNames] == 1} {
-        # Only inserting into one column
-        db eval "INSERT or ABORT INTO $tbl $colNames VALUES ($data)"
+    if {$dbCheck eq ""} {
+        # Data doesn't exist, lets insert...
+        if {[llength $colNames] == 1} {
+            # Only inserting into one column
+            db eval "INSERT or ABORT INTO $tbl $colNames VALUES ($data)"
+        } else {
+            set colNames [join $colNames ,]
+            set data [join $data ,]
+            db eval "INSERT or ABORT INTO $tbl ($colNames) VALUES ($data)"
+        }
     } else {
-        set colNames [join $colNames ,]
-        set data [join $data ,]
-        db eval "INSERT or ABORT INTO $tbl ($colNames) VALUES ($data)"
+        # Data exists, lets update...
+        #UPDATE COMPANY SET ADDRESS = 'Texas', SALARY = 20000.00;
+        db eval "UPDATE $tbl SET "
     }
     
     #db eval {INSERT or ABORT INTO EventNotifications (ModID, EventName, EventSubstitutions EnableEventNotification)
@@ -644,10 +651,11 @@ proc eAssist_db::dbWhereQuery {args} {
     global log
     
     foreach {key value} $args {
+        ${log}::debug KEY: $key VALUE: $value
         switch -- $key {
-            -columnNames {set colNames $value; puts "ColumnNames: $colNames"}
-            -table {set tbl $value; if {[llength $value] != 1} {return -code 1 [mc "wrong # args: Should be -table value]}}
-            -where {set where $value; if {[llength $value] != 1} {return -code 1 [mc "wrong # args: Should be -table value]}}
+            -columnNames {set colNames $value}
+            -table {set tbl $value; if {[llength $value] != 1} {return -code 1 [mc "wrong # args: Should be -table value"]}}
+            -where {set where [join $value]; if {[llength $value] == 0} {return -code 1 [mc "wrong # args: Should be -where value"]}}
             default {return -code 1 [mc "Unknown $key $value"]}
         }
     }
@@ -667,7 +675,7 @@ proc eAssist_db::dbWhereQuery {args} {
         set returnQuery [db eval "SELECT $colNames FROM $tbl WHERE $where"]
     } else {
         foreach val $colNames {
-            set pos [lsearch $colNames $val]; puts "Pos: $pos"
+            set pos [lsearch $colNames $val] ;#puts "Pos: $pos"
             set myCommand {[subst $[lrange $colNames %b %b]]}
             lappend myNewCommand [string map "%b $pos" $myCommand]
         }
@@ -675,7 +683,14 @@ proc eAssist_db::dbWhereQuery {args} {
                 lappend returnQuery "[join [subst $myNewCommand]]"
             }
     }
-    return $returnQuery
+    
+    if {![info exists returnQuery]} {
+        ${log}::debug returnQuery not set, Could not find $where in $tbl
+        return 0
+        } else {
+             return $returnQuery            
+        }
+
 
 } ;# eAssist_db::dbWhereQuery
 
