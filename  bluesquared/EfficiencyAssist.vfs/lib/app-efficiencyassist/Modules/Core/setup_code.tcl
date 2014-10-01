@@ -110,6 +110,7 @@ proc eAssistSetup::selectionChanged {tbl} {
         International   {eAssistSetup::international_GUI ; set GS(gui,lastFrame) international_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         AddressHeaders  {eAssistSetup::addressHeaders_GUI ; set GS(gui,lastFrame) addressHeaders_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         Carrier         {eAssistSetup::carrierMethod_GUI; set GS(gui,lastFrame) carrierMethod_GUI; ${log}::debug Current Frame: $G_currentSetupFrame}
+        Countries       {eAssistSetup::countries_GUI; set GS(gui,lastFrame) countries_GUI; ${log}::debug Current Frame: $G_currentSetupFrame}
         Packaging       {eAssistSetup::packagingTypes_GUI; set GS(gui,lastFrame) packagingTypes_GUI; ${log}::debug Current Frame: $G_currentSetupFrame}
         DistTypes       {eAssistSetup::distributionTypes_GUI ; set GS(gui,lastFrame) distributionTypes_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         CSR             {eAssistSetup::customerService_GUI ; set GS(gui,lastFrame) customerService_GUI ; ${log}::debug current Frame: $G_currentSetupFrame}

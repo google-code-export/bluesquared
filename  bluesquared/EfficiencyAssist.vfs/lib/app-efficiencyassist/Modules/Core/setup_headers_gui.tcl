@@ -146,21 +146,13 @@ proc eAssistSetup::addressHeaders_GUI {} {
                 #
 				if {$hdrInfo eq ""} {continue}
                 $w(hdr_frame1a).listbox insert end "{} $hdrInfo $headerParams($hdrInfo)"
-               
-                #${log}::debug HEADER: [list $hdrInfo [lindex $headerParams($hdrInfo) 0] [lindex $headerParams($hdrInfo) 1]]
-                #${log}::debug _array name: $hdrInfo
-                #${log}::debug field 2: [lindex $headerParams($hdrInfo) 0]
-                #${log}::debug field 3: [lindex $headerParams($hdrInfo) 1]
-                #${log}::debug field 4: [lindex $headerParams($hdrInfo) 2]
-                #${log}::debug field 5: [lindex $headerParams($hdrInfo) 3]
-                #${log}::debug field 6: [lindex $headerParams($hdrInfo) 4]
             }
     }
         
-    bind [$w(hdr_frame1a).listbox bodytag] <Double-1> {
-        # Delete the entry
-        #$w(hdr_frame1a).listbox delete [$w(hdr_frame1a).listbox curselection]
-    }
+    #bind [$w(hdr_frame1a).listbox bodytag] <Double-1> {
+    #    # Delete the entry
+    #    #$w(hdr_frame1a).listbox delete [$w(hdr_frame1a).listbox curselection]
+    #}
     
     # Create the row counter and the first line
     set internal(addrHdr,currentRow) 0
