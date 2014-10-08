@@ -362,15 +362,21 @@ proc eAssistSetup::dbInsertProv {args} {
     if {$pAbbr eq {}} {${log}::debug Not inserting into db, no abbreviation yet; return}
     if {$pName eq {}} {${log}::debug Not inserting into db, no province name yet; return}
 
+    # This should return the db ID for the current country
     set countryID [db eval "SELECT Country_ID FROM Countries WHERE CountryCode='$program(db,currentCountryCode)'"]
+    #${log}::debug countryID: $countryID
 
+    # Match Country and Province Abbreviation
     set dbCheck [eAssist_db::dbWhereQuery -columnNames "ProvAbbr ProvName" -table Provinces -where "CountryID='$countryID' AND ProvAbbr='$pAbbr'"]
     set myWhere "CountryID='$countryID' AND ProvAbbr='$pAbbr'"
+    set myProv "ProvName = '$pName'"
     
     if {$dbCheck == 0} {
-        # Didn't find the CountryCode in the DB, lets see if we can find the CountryName. The user may have modified the country name.
-        set dbCheck [eAssist_db::dbWhereQuery -columnNames "ProvAbbr ProvName" -table Provinces -where "CountryID='$countryID' AND ProvAbbr='$pName'"]
-        set myWhere "CountryID='$countryID' AND ProvAbbr='$pName'"
+        ${log}::debug Didn't match province abbreviation, trying province name
+        # Didn't find the Province Abbreviation in the DB, lets see if we can find the Province Name. The user may have modified the abbreviation.
+        set dbCheck [eAssist_db::dbWhereQuery -columnNames "ProvAbbr ProvName" -table Provinces -where "CountryID='$countryID' AND ProvName='$pName'"]
+        set myWhere "CountryID='$countryID' AND ProvName='$pName'"
+        set myProv "ProvAbbr = '$pAbbr'"
         #${log}::debug Found the CountryName: $dbCheck
     }
     
@@ -386,12 +392,15 @@ proc eAssistSetup::dbInsertProv {args} {
     } else {
         # UPDATE
         ${log}::debug UPDATEing into db ... $args
+        ${log}::debug Elements - myProv: $myProv
+        ${log}::debug Elements - LowEnd: $pCodeLo
+        ${log}::debug Elements - HighEnd: $pCodeHi
+        ${log}::debug Elements - CountryID: $countryID
         #db eval "UPDATE Countries SET CountryCode = '$cCode', CountryName = '$cName' $myWhere"
-        db eval "UPDATE Provinces SET ProvAbbr = '$pAbbr',
-                                        ProvName = '$pName',
+        db eval "UPDATE Provinces SET $myProv,
                                         PostalCodeLowEnd = '$pCodeLo',
                                         PostalCodeHighEnd = '$pCodeHi'
-                                WHERE CountryID = $countryID"
+                                WHERE $myWhere"
     }
 
     
