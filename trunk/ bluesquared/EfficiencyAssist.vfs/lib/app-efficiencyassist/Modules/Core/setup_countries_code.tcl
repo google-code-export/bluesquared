@@ -295,27 +295,29 @@ proc eAssistSetup::provinceEditEnd {tbl row col text} {
                             #break
                         } else {
                             set newTxt [string toupper $text]
+                            set table Provinces
                         }
         }
         ProvName { foreach val $text {
                         lappend newTxt [string totitle $val]
                     }
+                    set table Provinces
                 }
-        PostalCodeLowEnd    {set newTxt $text }
-        PostalCodeHighEnd   {set newTxt $text}
+        PostalCodeLowEnd    {set newTxt $text; set table PostalCode }
+        PostalCodeHighEnd   {set newTxt $text; set table PostalCode }
         default     {}
     }
     
     $tbl cellconfigure $row,$col -text $newTxt
 
-    ${log}::debug dbInsertProv [lrange [$tbl get $row] 1 end]
-    eAssistSetup::dbInsertProv [lrange [$tbl get $row] 1 end]
+    ${log}::debug dbInsertProv $table [lrange [$tbl get $row] 1 end]
+    eAssistSetup::dbInsertProv $table [lrange [$tbl get $row] 1 end]
     return $newTxt
 
 } ;# eAssistSetup::provinceEditEnd
 
 
-proc eAssistSetup::dbInsertProv {args} {
+proc eAssistSetup::dbInsertProv {tbl args} {
     #****f* dbInsertProv/eAssistSetup
     # CREATION DATE
     #   09/30/2014 (Tuesday Sep 30)
@@ -351,6 +353,7 @@ proc eAssistSetup::dbInsertProv {args} {
 
     set args [join $args]
     
+    ${log}::debug Table: $tbl
     ${log}::debug Prov Args: $args
     ${log}::debug ProvName: [lrange $args 1 1]
 
@@ -387,6 +390,8 @@ proc eAssistSetup::dbInsertProv {args} {
         # INSERT
         #db eval "INSERT or ABORT INTO Countries (CountryCode, CountryName) VALUES ('$cCode', '$cName')"
         ${log}::debug Inserting into db ... $args
+        #db eval "INSERT or ABORT INTO Provinces (ProvAbbr, ProvName, PostalCodeLowEnd, PostalCodeHighEnd, CountryID)
+        #    VALUES ('$pAbbr', '$pName', '$pCodeLo', '$pCodeHi', '$countryID')"
         db eval "INSERT or ABORT INTO Provinces (ProvAbbr, ProvName, PostalCodeLowEnd, PostalCodeHighEnd, CountryID)
             VALUES ('$pAbbr', '$pName', '$pCodeLo', '$pCodeHi', '$countryID')"
     } else {
