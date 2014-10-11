@@ -55,72 +55,44 @@ proc eAssistSetup::countries_GUI {} {
     #   
     #   
     #***
-    global log G_setupFrame w
-    variable GUI
-    # init vars
-    set f1 ""
-    set f2 ""
-
+    global log G_setupFrame
 
     eAssist_Global::resetSetupFrames ;# Reset all frames so we start clean
+    set countryValues ""
     
     #-------- Container Frame
     set frame1 [ttk::label $G_setupFrame.frame1]
     pack $frame1 -expand yes -fill both -pady 5p -padx 5p
     
-    ##
-    ## Notebook
-    ##
-    
-    set w(countries) [ttk::notebook $frame1.countriesNBK]
-    pack $w(countries) -expand yes -fill both
-    
-    ttk::notebook::enableTraversal $w(countries)
-    
     #
-    # Setup the notebook
-    #
-    $w(countries) add [ttk::frame $w(countries).country] -text [mc "Countries/Regions"]
-    $w(countries) add [ttk::frame $w(countries).region] -text [mc "Postal Codes"]
-    
-    $w(countries) select $w(countries).country
-
-    
-    ##
-    ## Tab 1
-    ##
-    
-
-    ##
-    ## Create the frames
-    ##
-    set f1 [ttk::frame $w(countries).country.f1]
-    pack $f1 -padx 5p -pady 5p -fill both
-    
-    set f2 [ttk::labelframe $w(countries).country.f2 -text [mc "Countries"] -padding 10]
-    pack $f2 -pady 5p -fill both
-    
-    set f3 [ttk::frame $w(countries).country.f3]
-    pack $f3 -padx 5p -pady 5p -fill both
-    
-    set tbl2 [ttk::labelframe $w(countries).country.tbl2 -text [mc "Province/Regions"] -padding 10]
-    pack $tbl2 -padx 5p -pady 5p -fill both
-
-    #
-    # --- Frame 1
+    # --- Frame 1 - Countries
     #   
-    ttk::button $f1.btn1 -text [mc "Add"] -command "eAssistSetup::modifyCountry $f2.listbox -add"
-    ttk::button $f1.btn2 -text [mc "Delete"] -command "eAssistSetup::modifyCountry $f2.listbox -del"
+    set f1 [ttk::labelframe $frame1.f1 -text [mc "Countries"] -padding 10]
+    pack $f1 -expand yes -fill both
+
+        ## Child frame for the buttons
+        set f1_b [ttk::frame $f1.btns]
+        grid $f1_b -sticky nsw ;#-column 0 -row 0 -sticky nse
+        
+        ttk::label $f1_b.txt1 -text [mc "2-Digit Code"]
+        ttk::entry $f1_b.entry1
+        ttk::label $f1_b.txt2 -text [mc "Name"]
+        ttk::entry $f1_b.entry2
+        
+        ttk::button $f1_b.btn1 -text [mc "Add"] -command "eAssistSetup::modifyCountry $f1.listbox $f1_b"
+        ttk::button $f1_b.btn2 -text [mc "Delete"] -command "eAssistSetup::delCountryProv $f1.listbox"
+        
+        grid $f1_b.txt1 -column 0 -row 0 -padx 2p -pady 2p -sticky nse
+        grid $f1_b.entry1 -column 1 -row 0 -padx 2p -pady 2p
+        grid $f1_b.txt2 -column 0 -row 1 -padx 2p -pady 2p -sticky nse
+        grid $f1_b.entry2 -column 1 -row 1 -padx 2p -pady 2p
+        
+        grid $f1_b.btn1 -column 2 -row 0 -padx 0p -pady 0p -sticky nsw
+        grid $f1_b.btn2 -column 2 -row 1 -padx 0p -pady 0p -sticky nsw
     
-    grid $f1.btn1 -column 0 -row 0 -padx 2p -pady 5p -sticky nsw
-    grid $f1.btn2 -column 1 -row 0 -padx 2p -pady 5p -sticky nsw
-    
-    #
-    # --- Frame 2 Countries
-    #
-    tablelist::tablelist $f2.listbox -columns {
+    tablelist::tablelist $f1.listbox -columns {
                                                 0   "..." center
-                                                0  "ISO Country Code"
+                                                0  "2-Digit Code"
                                                 50  "Name"} \
                                         -showlabels yes \
                                         -height 10 \
@@ -130,49 +102,49 @@ proc eAssistSetup::countries_GUI {} {
                                         -exportselection yes \
                                         -showseparators yes \
                                         -fullseparators yes \
-                                        -selectmode single \
+                                        -selectmode extended \
                                         -editselectedonly 1 \
-                                        -selecttype cell \
-                                        -yscrollcommand [list $f2.scrolly set] \
-                                        -xscrollcommand [list $f2.scrollx set] \
+                                        -selecttype row \
+                                        -yscrollcommand [list $f1.scrolly set] \
+                                        -xscrollcommand [list $f1.scrollx set] \
                                         -editstartcommand {eAssistSetup::placeholder} \
                                         -editendcommand {eAssistSetup::countryEditEnd}
         
     
         # The internal names are the same spelling/capitalization as the db columns in table Countries
-        $f2.listbox columnconfigure 0 -name "count" \
+        $f1.listbox columnconfigure 0 -name "count" \
                                             -showlinenumbers 1 \
                                             -labelalign center
     
-        $f2.listbox columnconfigure 1 -name "CountryCode" \
+        $f1.listbox columnconfigure 1 -name "CountryCode" \
                                             -editable yes \
                                             -editwindow ttk::entry \
                                             -labelalign center
         
-        $f2.listbox columnconfigure 2 -name "CountryName" \
+        $f1.listbox columnconfigure 2 -name "CountryName" \
                                             -editable yes \
                                             -editwindow ttk::entry \
                                             -labelalign center
 
-    ttk::scrollbar $f2.scrolly -orient v -command [list $f2.listbox yview]
-    ttk::scrollbar $f2.scrollx -orient h -command [list $f2.listbox xview]
+    ttk::scrollbar $f1.scrolly -orient v -command [list $f1.listbox yview]
+    ttk::scrollbar $f1.scrollx -orient h -command [list $f1.listbox xview]
 
     
-    grid $f2.listbox -column 0 -row 1 -sticky news
+    grid $f1.listbox -column 0 -row 1 -sticky news
     
-    grid columnconfigure $f2 $f2.listbox -weight 1
-    grid rowconfigure $f2 $f2.listbox -weight 1
+    grid columnconfigure $f1 $f1.listbox -weight 1
+    #grid rowconfigure $f1 $f1.listbox -weight 1
     
-    grid $f2.scrolly -column 1 -row 0 -sticky nse
-    grid $f2.scrollx -column 0 -row 1 -sticky ews
+    grid $f1.scrolly -column 1 -row 0 -sticky nse
+    grid $f1.scrollx -column 0 -row 1 -sticky ews
     
-    ::autoscroll::autoscroll $f2.scrolly ;# Enable the 'autoscrollbar'
-    ::autoscroll::autoscroll $f2.scrollx
+    ::autoscroll::autoscroll $f1.scrolly ;# Enable the 'autoscrollbar'
+    ::autoscroll::autoscroll $f1.scrollx
     
     set countries [eAssist_db::dbSelectQuery -columnNames "CountryCode CountryName" -table Countries]
     if {$countries != ""} {
         foreach country $countries {
-            $f2.listbox insert end [list {} [lrange $country 0 0] [lrange $country 1 end]]
+            $f1.listbox insert end [list {} [lrange $country 0 0] [lrange $country 1 end]]
             ${log}::debug Country code: [lrange $country 0 0] Name: [lrange $country 1 end]
         }
     }
@@ -180,24 +152,58 @@ proc eAssistSetup::countries_GUI {} {
 
     
     #
-    # --- Frame 3
-    #   
-    ttk::button $f3.btn1 -text [mc "Add"] -command "eAssistSetup::modifyCountry $tbl2.tbl2 -add"
-    ttk::button $f3.btn2 -text [mc "Delete"] -command "eAssistSetup::modifyCountry $tbl2.tbl2 -del"
+    # --- Frame 2
+    #
+    set f2 [ttk::labelframe $frame1.f2 -text [mc "Province/Regions"] -padding 10]
+    pack $f2 -expand yes -fill both
     
-    grid $f3.btn1 -column 0 -row 0 -padx 2p -pady 5p -sticky nsw
-    grid $f3.btn2 -column 1 -row 0 -padx 2p -pady 5p -sticky nsw
+        ## Child frame for the buttons
+        set f2_b [ttk::frame $f2.btns]
+        grid $f2_b -sticky nsw -pady 2p ;#-column 0 -row 0 -sticky nse
+        
+        ttk::label $f2_b.txt0 -text [mc "Country"]
+        ttk::combobox $f2_b.cbx1 -state readonly \
+                                    -postcommand [list eAssistSetup::getCountries $f2_b]
+        
+        ttk::label $f2_b.txt1 -text [mc "Abbreviation"]
+        ttk::entry $f2_b.entry1
+        
+        ttk::label $f2_b.txt2 -text [mc "Name"]
+        ttk::entry $f2_b.entry2
+        
+        ttk::label $f2_b.txt3 -text [mc "PostCode Low End"]
+        ttk::entry $f2_b.entry3
+        
+        ttk::label $f2_b.txt4 -text [mc "PostCode High End"]
+        ttk::entry $f2_b.entry4
+       
+        ttk::button $f2_b.btn1 -text [mc "Add"] -command "eAssistSetup::modifyCountry $f2.tbl2 $f2_b"
+        ttk::button $f2_b.btn2 -text [mc "Delete"] -command "eAssistSetup::delCountryProv $f2.tbl2"
+        #ttk::button $f2_b.btn3 -text [mc "Save"] -command "eAssistSetup::dbInsertProv $f2.tbl2"
+        
+        grid $f2_b.txt0 -column 0 -row 0 -sticky nse -pady 1p -padx 2p
+        grid $f2_b.cbx1 -column 1 -row 0 -sticky ew
+        grid $f2_b.txt1 -column 0 -row 1 -sticky nse -pady 1p -padx 2p
+        grid $f2_b.entry1 -column 1 -row 1 -sticky ew
+        grid $f2_b.txt2 -column 0 -row 2 -sticky nse -pady 1p -padx 2p
+        grid $f2_b.entry2 -column 1 -row 2 -sticky ew
+        
+        grid $f2_b.txt3 -column 2 -row 0 -sticky nse -pady 1p -padx 2p
+        grid $f2_b.entry3 -column 3 -row 0 -sticky ew
+        grid $f2_b.txt4 -column 2 -row 1 -sticky nse -pady 1p -padx 2p
+        grid $f2_b.entry4 -column 3 -row 1 -sticky ew
+        
+        grid $f2_b.btn1 -column 4 -row 0 -padx 2p -pady 1p -sticky nsw
+        grid $f2_b.btn2 -column 4 -row 1 -padx 2p -pady 1p -sticky nsw
     
-    
-    ##
-    ## Frame 4 - Province/Regions
-    ##
-    tablelist::tablelist $tbl2.tbl2 -columns {
+
+
+    tablelist::tablelist $f2.tbl2 -columns {
                                                 0   "..." center
                                                 0 "Abbreviation"
                                                 50 "Name"
-                                                25 "PostCode Hi-End"
-                                                25 "PostCode Lo-End"} \
+                                                25 "PostCode Low End"
+                                                25 "PostCode High End"} \
                                         -showlabels yes \
                                         -height 10 \
                                         -selectbackground yellow \
@@ -206,56 +212,60 @@ proc eAssistSetup::countries_GUI {} {
                                         -exportselection yes \
                                         -showseparators yes \
                                         -fullseparators yes \
-                                        -selectmode single \
+                                        -selectmode extended \
                                         -editselectedonly 1 \
-                                        -selecttype cell \
-                                        -yscrollcommand [list $tbl2.scrolly set] \
-                                        -xscrollcommand [list $tbl2.scrollx set] \
+                                        -selecttype row \
+                                        -yscrollcommand [list $f2.scrolly set] \
+                                        -xscrollcommand [list $f2.scrollx set] \
                                         -editstartcommand {eAssistSetup::placeholder} \
                                         -editendcommand {eAssistSetup::provinceEditEnd}
     
         # The internal names are the same spelling/capitalization as the db columns in table Countries
-        $tbl2.tbl2 columnconfigure 0 -name "count" \
+        $f2.tbl2 columnconfigure 0 -name "count" \
                                             -showlinenumbers 1 \
                                             -labelalign center
         
-        $tbl2.tbl2 columnconfigure 1 -name "ProvAbbr" \
+        $f2.tbl2 columnconfigure 1 -name "ProvAbbr" \
                                             -editable yes \
                                             -editwindow ttk::entry \
                                             -labelalign center
         
-        $tbl2.tbl2 columnconfigure 2 -name "ProvName" \
+        $f2.tbl2 columnconfigure 2 -name "ProvName" \
                                             -editable yes \
                                             -editwindow ttk::entry \
                                             -labelalign center
         
-        $tbl2.tbl2 columnconfigure 3 -name "PostalCodeLowEnd" \
+        $f2.tbl2 columnconfigure 3 -name "PostalCodeLowEnd" \
                                             -editable yes \
                                             -editwindow ttk::entry \
                                             -labelalign center
         
-        $tbl2.tbl2 columnconfigure 4 -name "PostalCodeHighEnd" \
+        $f2.tbl2 columnconfigure 4 -name "PostalCodeHighEnd" \
                                             -editable yes \
                                             -editwindow ttk::entry \
                                             -labelalign center
 
         
-    ttk::scrollbar $tbl2.scrolly -orient v -command [list $tbl2.listbox yview]
-    ttk::scrollbar $tbl2.scrollx -orient h -command [list $tbl2.listbox xview]
+    ttk::scrollbar $f2.scrolly -orient v -command [list $f2.listbox yview]
+    ttk::scrollbar $f2.scrollx -orient h -command [list $f2.listbox xview]
     
-    grid $tbl2.tbl2 -column 0 -row 1 -sticky news
+    grid $f2.tbl2 -column 0 -row 1 -sticky news
     
-    grid columnconfigure $tbl2 $tbl2.tbl2 -weight 1
-    grid rowconfigure $tbl2 $tbl2.tbl2 -weight 1
+    grid columnconfigure $f2 $f2.tbl2 -weight 1
+    #grid rowconfigure $f2 $f2.tbl2 -weight 1
     
-    grid $tbl2.scrolly -column 1 -row 0 -sticky nse
-    grid $tbl2.scrollx -column 0 -row 1 -sticky ews
+    grid $f2.scrolly -column 1 -row 0 -sticky nse
+    grid $f2.scrollx -column 0 -row 1 -sticky ews
     
-    ::autoscroll::autoscroll $tbl2.scrolly ;# Enable the 'autoscrollbar'
-    ::autoscroll::autoscroll $tbl2.scrollx
+    ::autoscroll::autoscroll $f2.scrolly ;# Enable the 'autoscrollbar'
+    ::autoscroll::autoscroll $f2.scrollx
     
-    # Populate the table
-    bind $f2.listbox <<TablelistSelect>> "eAssistSetup::dbGetProvinces $tbl2.tbl2 $f2.listbox"
+    bind $f2_b.cbx1 <<ComboboxSelected>> "eAssistSetup::dbGetProvinces $f2.tbl2 %W"
+    #eAssistSetup::dbGetProvinces $f2.tbl2 %W
+    
+    
+    # Populate the table the province table
+    #bind $f1.listbox <<TablelistSelect>> "eAssistSetup::dbGetProvinces $f2.tbl2 $f1.listbox"
     
     #bind $tbl2.listbox <<TablelistSelect>> {${log}::debug Table Selection: %W}
 } ;# eAssistSetup::countries_GUI
