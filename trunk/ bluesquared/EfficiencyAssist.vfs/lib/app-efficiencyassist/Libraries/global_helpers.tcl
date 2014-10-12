@@ -452,10 +452,10 @@ proc eAssist_Global::getGeom {module args} {
 } ;# eAssist_Global::getGeom
 
 
-proc eAssist_Global::removeBraces {args} {
-    #****f* removeBraces/eAssist_Global
+proc eAssist_Global::validate {validation char val args} {
+    #****f* validate/eAssist_Global
     # CREATION DATE
-    #   09/16/2014 (Tuesday Sep 16)
+    #   10/11/2014 (Saturday Oct 11)
     #
     # AUTHOR
     #	Casey Ackels
@@ -465,10 +465,10 @@ proc eAssist_Global::removeBraces {args} {
     #   
     #
     # SYNOPSIS
-    #   eAssist_Global::removeBraces args 
+    #   eAssist_Global::validate %W %d %S args 
     #
     # FUNCTION
-    #	Remove unwanted braces from list element
+    #	Returns validated data
     #   
     #   
     # CHILDREN
@@ -485,13 +485,23 @@ proc eAssist_Global::removeBraces {args} {
     #   
     #***
     global log
+    set returnValue 1 ;# This will allow us to pass through the original data if it doesn't match anything in the switch.
 
-    #set args [string trim $args \{]
-	#set args [string trim $args \}]
+    foreach {key value} $args {
+	switch -- $args {
+	    -length	{${log}::debug $key $value - $val
+			    if {[string length $val] <= $value} {set returnValue 1}
+			}
+	    -alpha	{${log}::debug $key $value - $val
+			    if {[string is alpha $char] == 1 || [string is space $char] == 1} {set returnValue 1}
+			}
+	    default	{${log}::debug $args}
+	}
+    }
 
-    
-} ;# eAssist_Global::removeBraces
-
+    ${log}::debug $validation $char $val
+    return $returnValue
+} ;# eAssist_Global::validate
 
 
 proc eAssist_Global::launchFilters {} {

@@ -75,23 +75,23 @@ proc eAssistSetup::countries_GUI {} {
         grid $f1_b -sticky nsw ;#-column 0 -row 0 -sticky nse
         
         ttk::label $f1_b.txt1 -text [mc "2-Digit Code"]
-        ttk::entry $f1_b.entry1
+        ttk::entry $f1_b.entry1 -validate all -validatecommand {eAssist_Global::validate %S %d %P -length 3 -alpha yes}
         ttk::label $f1_b.txt2 -text [mc "Name"]
         ttk::entry $f1_b.entry2
         
         ttk::button $f1_b.btn1 -text [mc "Add"] -command "eAssistSetup::modifyCountry $f1.listbox $f1_b"
         ttk::button $f1_b.btn2 -text [mc "Delete"] -command "eAssistSetup::delCountryProv $f1.listbox"
         
-        grid $f1_b.txt1 -column 0 -row 0 -padx 2p -pady 2p -sticky nse
+        grid $f1_b.txt1 -column 0 -row 0 -padx 2p -pady 2p -sticky nwe
         grid $f1_b.entry1 -column 1 -row 0 -padx 2p -pady 2p
-        grid $f1_b.txt2 -column 0 -row 1 -padx 2p -pady 2p -sticky nse
+        grid $f1_b.txt2 -column 0 -row 1 -padx 2p -pady 2p -sticky nwe
         grid $f1_b.entry2 -column 1 -row 1 -padx 2p -pady 2p
         
-        grid $f1_b.btn1 -column 2 -row 0 -padx 0p -pady 0p -sticky nsw
-        grid $f1_b.btn2 -column 2 -row 1 -padx 0p -pady 0p -sticky nsw
+        grid $f1_b.btn1 -column 2 -row 0 -padx 0p -pady 0p -sticky nwe
+        grid $f1_b.btn2 -column 2 -row 1 -padx 0p -pady 0p -sticky nwe
     
     tablelist::tablelist $f1.listbox -columns {
-                                                0   "..." center
+                                                0   "..."
                                                 0  "2-Digit Code"
                                                 50  "Name"} \
                                         -showlabels yes \
@@ -117,13 +117,9 @@ proc eAssistSetup::countries_GUI {} {
                                             -labelalign center
     
         $f1.listbox columnconfigure 1 -name "CountryCode" \
-                                            -editable yes \
-                                            -editwindow ttk::entry \
                                             -labelalign center
         
         $f1.listbox columnconfigure 2 -name "CountryName" \
-                                            -editable yes \
-                                            -editwindow ttk::entry \
                                             -labelalign center
 
     ttk::scrollbar $f1.scrolly -orient v -command [list $f1.listbox yview]
@@ -157,7 +153,7 @@ proc eAssistSetup::countries_GUI {} {
     set f2 [ttk::labelframe $frame1.f2 -text [mc "Province/Regions"] -padding 10]
     pack $f2 -expand yes -fill both
     
-        ## Child frame for the buttons
+        ## Child frame for the entry widgets and buttons
         set f2_b [ttk::frame $f2.btns]
         grid $f2_b -sticky nsw -pady 2p ;#-column 0 -row 0 -sticky nse
         
@@ -165,11 +161,11 @@ proc eAssistSetup::countries_GUI {} {
         ttk::combobox $f2_b.cbx1 -state readonly \
                                     -postcommand [list eAssistSetup::getCountries $f2_b]
         
-        ttk::label $f2_b.txt1 -text [mc "Abbreviation"]
-        ttk::entry $f2_b.entry1
+        ttk::label $f2_b.txt1 -text [mc "Abbreviation"]  
+        ttk::entry $f2_b.entry1 -validate all -validatecommand {AutoComplete::AutoComplete %W %d %v %P [lsort -dict [eAssist_db::dbSelectQuery -columnNames ProvAbbr -table Provinces]] upper}
         
         ttk::label $f2_b.txt2 -text [mc "Name"]
-        ttk::entry $f2_b.entry2
+        ttk::entry $f2_b.entry2 -validate all -validatecommand {AutoComplete::AutoComplete %W %d %v %P [lsort -dict [eAssist_db::dbSelectQuery -columnNames ProvName -table Provinces]] title}
         
         ttk::label $f2_b.txt3 -text [mc "PostCode Low End"]
         ttk::entry $f2_b.entry3
@@ -177,9 +173,9 @@ proc eAssistSetup::countries_GUI {} {
         ttk::label $f2_b.txt4 -text [mc "PostCode High End"]
         ttk::entry $f2_b.entry4
        
+        # See the bindings when updating these commands
         ttk::button $f2_b.btn1 -text [mc "Add"] -command "eAssistSetup::modifyCountry $f2.tbl2 $f2_b"
         ttk::button $f2_b.btn2 -text [mc "Delete"] -command "eAssistSetup::delCountryProv $f2.tbl2"
-        #ttk::button $f2_b.btn3 -text [mc "Save"] -command "eAssistSetup::dbInsertProv $f2.tbl2"
         
         grid $f2_b.txt0 -column 0 -row 0 -sticky nse -pady 1p -padx 2p
         grid $f2_b.cbx1 -column 1 -row 0 -sticky ew
@@ -199,7 +195,7 @@ proc eAssistSetup::countries_GUI {} {
 
 
     tablelist::tablelist $f2.tbl2 -columns {
-                                                0   "..." center
+                                                0   "..."
                                                 0 "Abbreviation"
                                                 50 "Name"
                                                 25 "PostCode Low End"
@@ -226,23 +222,15 @@ proc eAssistSetup::countries_GUI {} {
                                             -labelalign center
         
         $f2.tbl2 columnconfigure 1 -name "ProvAbbr" \
-                                            -editable yes \
-                                            -editwindow ttk::entry \
                                             -labelalign center
         
         $f2.tbl2 columnconfigure 2 -name "ProvName" \
-                                            -editable yes \
-                                            -editwindow ttk::entry \
                                             -labelalign center
         
         $f2.tbl2 columnconfigure 3 -name "PostalCodeLowEnd" \
-                                            -editable yes \
-                                            -editwindow ttk::entry \
                                             -labelalign center
         
         $f2.tbl2 columnconfigure 4 -name "PostalCodeHighEnd" \
-                                            -editable yes \
-                                            -editwindow ttk::entry \
                                             -labelalign center
 
         
@@ -261,11 +249,9 @@ proc eAssistSetup::countries_GUI {} {
     ::autoscroll::autoscroll $f2.scrollx
     
     bind $f2_b.cbx1 <<ComboboxSelected>> "eAssistSetup::dbGetProvinces $f2.tbl2 %W"
-    #eAssistSetup::dbGetProvinces $f2.tbl2 %W
+    bind $f2_b.btn1 <Return> "eAssistSetup::modifyCountry $f2.tbl2 $f2_b"
     
-    
-    # Populate the table the province table
-    #bind $f1.listbox <<TablelistSelect>> "eAssistSetup::dbGetProvinces $f2.tbl2 $f1.listbox"
-    
-    #bind $tbl2.listbox <<TablelistSelect>> {${log}::debug Table Selection: %W}
+    # Populate the entries with the selected row so we can edit/modify the data.
+    bind [$f2.tbl2 bodytag] <Double-ButtonRelease-1> "eAssistSetup::editTblEntry $f2.tbl2 $f2_b"
+
 } ;# eAssistSetup::countries_GUI

@@ -118,6 +118,62 @@ proc eAssistSetup::delCountryProv {tbl} {
     
 } ;# eAssistSetup::delCountryProv
 
+proc eAssistSetup::editTblEntry {tbl wid} {
+    #****f* editTblEntry/eAssistSetup
+    # CREATION DATE
+    #   10/11/2014 (Saturday Oct 11)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssistSetup::editTblEntry tbl wid 
+    #
+    # FUNCTION
+    #	Gets the selected values, and populates the entry widgets that exist in the passed frame
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    set data [$tbl get [$tbl curselection]]
+    
+    set children [winfo children $wid]
+    if {[winfo exists widgets]} {unset widgets}
+    
+    foreach item $children {
+        if {[string match -nocase *entry* $item] == 1} {
+            lappend widgets $item
+        }
+    }
+    
+    set x 1 ;# Using 1 because we don't want to insert the numeric into the entry widgets.
+    foreach wid $widgets {
+        ${log}::debug $wid insert end [lrange $data $x $x]
+        $wid delete 0 end
+        $wid insert end [join [lrange $data $x $x]]
+        incr x
+    }
+
+    
+} ;# eAssistSetup::editTblEntry
+
 
 proc eAssistSetup::getCountries {win} {
     #****f* getCountries/eAssistSetup

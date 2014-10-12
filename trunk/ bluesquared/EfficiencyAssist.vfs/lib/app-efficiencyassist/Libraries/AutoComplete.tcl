@@ -18,7 +18,59 @@
 
 namespace eval AutoComplete {}
 
-proc AutoComplete::AutoComplete {win action validation value valuelist} {
+proc AutoComplete::ToTitle {win action validation value valuelist} {
+    #****f* ToTitle/AutoComplete
+    # CREATION DATE
+    #   10/11/2014 (Saturday Oct 11)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   AutoComplete::ToTitle win action validation value valuelist 
+    #
+    # FUNCTION
+    #	Returns the data in a ToTitle fashion; this is a wrapper around AutoComplete::AutoComplete
+    #   
+    #   
+    # CHILDREN
+    #	AutoComplete::AutoComplete
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+    #set value ""
+    #set newVal ""
+    #if {[info exists newVal]} {unset newVal}
+
+    if {[llength $value] == 1} {
+        set value [string totitle $value]
+    } else {
+        foreach val $value {
+            lappend newVal [string totitle $val]
+        }
+        #set value $newVal
+    }
+    
+    ${log}::debug ToTitle: $value
+    #return [lsort -dict [eAssist_db::dbSelectQuery -columnNames ProvName -table Provinces]]
+    AutoComplete::AutoComplete $win $action $validation $value $valuelist
+} ;# AutoComplete::ToTitle
+
+
+proc AutoComplete::AutoComplete {win action validation value valuelist {capitalize 1}} {
     #****f* AutoComplete/AutoComplete
     # CREATION DATE
     #   09/23/2014 (Tuesday Sep 23)
@@ -28,7 +80,7 @@ proc AutoComplete::AutoComplete {win action validation value valuelist} {
     #   
     #
     # SYNOPSIS
-    #   AutoComplete::AutoComplete %W %d %v %P ?list to search on?
+    #   AutoComplete::AutoComplete %W %d %v %P <list to search on> ?upper|title?
     #
     # FUNCTION
     #	use autocomplete in the validate command of an entry box as follows
@@ -49,12 +101,34 @@ proc AutoComplete::AutoComplete {win action validation value valuelist} {
     #   
     #   
     #***
+    global log
+    
+    if {[info exists newVal]} {unset newVal}
+    switch -- [string tolower $capitalize] {
+        upper   {${log}::debug To Upper
+                    set newVal [string toupper $value]
+                    ${log}::debug To Upper: $value
+                }
+        title   {${log}::debug To Title
+                    foreach val $value {
+                        lappend newVal [string totitle $val]
+                    }
+                
+                ${log}::debug To Title: $value
+                }
+        default {${log}::debug default}
+    }
+
     
     if {$action == 1 & $value != {} & [set pop [lsearch -nocase -inline $valuelist $value*]] != {}} {
          $win delete 0 end;  $win insert end $pop
          $win selection range [string length $value] end
          $win icursor [string length $value]
-    } else {
+    } elseif {$action == -1} {
+        # insert the correct capitalized version if we don't have a match
+        if {![info exists newVal]} {return 1}
+        $win delete 0 end; $win insert end $newVal
+   } else {
         $win selection clear
    }
    
