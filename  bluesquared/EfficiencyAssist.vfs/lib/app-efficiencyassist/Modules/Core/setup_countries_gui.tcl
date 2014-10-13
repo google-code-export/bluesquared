@@ -75,7 +75,7 @@ proc eAssistSetup::countries_GUI {} {
         grid $f1_b -sticky nsw ;#-column 0 -row 0 -sticky nse
         
         ttk::label $f1_b.txt1 -text [mc "2-Digit Code"]
-        ttk::entry $f1_b.entry1 -validate all -validatecommand {eAssist_Global::validate %S %d %P -length 3 -alpha yes}
+        ttk::entry $f1_b.entry1 -validate all -validatecommand {eAssist_Global::validate %S %d %P -length 2 -alpha yes -punc no}
         ttk::label $f1_b.txt2 -text [mc "Name"]
         ttk::entry $f1_b.entry2
         

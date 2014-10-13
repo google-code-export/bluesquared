@@ -18,56 +18,56 @@
 
 namespace eval AutoComplete {}
 
-proc AutoComplete::ToTitle {win action validation value valuelist} {
-    #****f* ToTitle/AutoComplete
-    # CREATION DATE
-    #   10/11/2014 (Saturday Oct 11)
-    #
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2014 Casey Ackels
-    #   
-    #
-    # SYNOPSIS
-    #   AutoComplete::ToTitle win action validation value valuelist 
-    #
-    # FUNCTION
-    #	Returns the data in a ToTitle fashion; this is a wrapper around AutoComplete::AutoComplete
-    #   
-    #   
-    # CHILDREN
-    #	AutoComplete::AutoComplete
-    #   
-    # PARENTS
-    #   
-    #   
-    # NOTES
-    #   
-    #   
-    # SEE ALSO
-    #   
-    #   
-    #***
-    global log
-    #set value ""
-    #set newVal ""
-    #if {[info exists newVal]} {unset newVal}
-
-    if {[llength $value] == 1} {
-        set value [string totitle $value]
-    } else {
-        foreach val $value {
-            lappend newVal [string totitle $val]
-        }
-        #set value $newVal
-    }
-    
-    ${log}::debug ToTitle: $value
-    #return [lsort -dict [eAssist_db::dbSelectQuery -columnNames ProvName -table Provinces]]
-    AutoComplete::AutoComplete $win $action $validation $value $valuelist
-} ;# AutoComplete::ToTitle
+#proc AutoComplete::ToTitle {win action validation value valuelist} {
+#    #****f* ToTitle/AutoComplete
+#    # CREATION DATE
+#    #   10/11/2014 (Saturday Oct 11)
+#    #
+#    # AUTHOR
+#    #	Casey Ackels
+#    #
+#    # COPYRIGHT
+#    #	(c) 2014 Casey Ackels
+#    #   
+#    #
+#    # SYNOPSIS
+#    #   AutoComplete::ToTitle win action validation value valuelist 
+#    #
+#    # FUNCTION
+#    #	Returns the data in a ToTitle fashion; this is a wrapper around AutoComplete::AutoComplete
+#    #   
+#    #   
+#    # CHILDREN
+#    #	AutoComplete::AutoComplete
+#    #   
+#    # PARENTS
+#    #   
+#    #   
+#    # NOTES
+#    #   
+#    #   
+#    # SEE ALSO
+#    #   
+#    #   
+#    #***
+#    global log
+#    #set value ""
+#    #set newVal ""
+#    #if {[info exists newVal]} {unset newVal}
+#
+#    if {[llength $value] == 1} {
+#        set value [string totitle $value]
+#    } else {
+#        foreach val $value {
+#            lappend newVal [string totitle $val]
+#        }
+#        #set value $newVal
+#    }
+#    
+#    ${log}::debug ToTitle: $value
+#    #return [lsort -dict [eAssist_db::dbSelectQuery -columnNames ProvName -table Provinces]]
+#    AutoComplete::AutoComplete $win $action $validation $value $valuelist
+#} ;# AutoComplete::ToTitle
 
 
 proc AutoComplete::AutoComplete {win action validation value valuelist {capitalize 1}} {
