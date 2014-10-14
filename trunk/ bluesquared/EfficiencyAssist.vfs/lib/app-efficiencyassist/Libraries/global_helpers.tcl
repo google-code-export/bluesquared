@@ -452,7 +452,7 @@ proc eAssist_Global::getGeom {module args} {
 } ;# eAssist_Global::getGeom
 
 
-proc eAssist_Global::validate {validation char val args} {
+proc eAssist_Global::validate {val validation char args} {
     #****f* validate/eAssist_Global
     # CREATION DATE
     #   10/11/2014 (Saturday Oct 11)
@@ -485,25 +485,38 @@ proc eAssist_Global::validate {validation char val args} {
     #   
     #***
     global log
-    set returnValue 1 ;# Everything fails by default
+	if {$d == 1} {
+		# we only care about prevalidation
+		#${log}::debug validation: $d
+		#${log}::debug val: $P
+		#${log}::debug char: $S
+		#set validation $d
+		#set val $P
+		#set char $S
 
+		set returnValue 1
+	} else { return 1}
+	
     foreach {key value} $args {
-	switch -- $key {
-	    -length	{ ${log}::debug Length: [string length $val]
-			    if {$value < [string length $val]} {set returnValue 0}
-			}
-	    -alpha	{ ${log}::debug Alnum: [string is alnum $char]
-			    if {$value eq "no"} {set returnValue 0} elseif {$value eq "yes" & [string is alnum $char] == 1} {set returnValue 1}
-			}
-    	    -space	{ ${log}::debug Space: [string is space $char]
-			    if {$value eq "no"} {set returnValue 0} elseif {$value eq "yes" & [string is space $char] == 1} {set returnValue 1}
-			}
-	    -punc	{ ${log}::debug Space: [string is punc $char]
-			    if {$value eq "no"} {set returnValue 0; ${log}::debug PUNC IS NO! value_$value} elseif {$value eq "yes" & [string is punc $char] == 1} {set returnValue 1}
-			}
-	    default	{${log}::debug -DEFAULT-}
-	}
+		switch -- $key {
+			-length	{ ${log}::debug Length: [string length $val] - $val
+					if {$value < [string length $val]} {set returnValue 0; ${log}::debug only $value chars not ([string length $val]), breaking; break}
+				}
+			-alpha	{ ${log}::debug Alnum: [string is alnum $char] - $char
+					if {$value eq "no" & [string is alnum $char] == 1} {set returnValue 0; ${log}::debug NaN, found one - breaking; break}
+					
+				}
+			-space	{ ${log}::debug Space: [string is space $char] - $char
+					if {$value eq "no" & [string is space $char] == 1} {set returnValue 0; ${log}::debug No Spaces, found one - breaking; break}
+					
+				}
+			-punc	{ ${log}::debug Punc: [string is punc $char] - $char
+					if {$value eq "no" & [string is punc $char] == 1} {set returnValue 0; ${log}::debug No Punctuation, found one - breaking; break}
+				}
+			default	{${log}::debug -DEFAULT-}
+		}
     }
+	
 return $returnValue
     
 } ;# eAssist_Global::validate

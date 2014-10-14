@@ -34,7 +34,7 @@ intlSetup(enterUOM)
 intlSetup(enterPayer) 
 headerParent(whiteList) Company Notes DistributionType ContainerType PackageType ShippingClass InternalNotes DestinationIdentifier count
 headerParent(headerList) Company Attention Address1 Address2 Address3 City State Zip Country Phone Version Quantity Notes ShipDate DistributionType CarrierMethod 3rdPartyBilling ArriveDate ContainerType PackageType PackageQty ShippingClass Email InternalNotes DestinationIdentifier
-headerParent(outPutHeader) ShipToCompany ShipToAttention ShipToAddressLine1 ShipToAddressLine2 ShipToAddressLine3 ShipToCity ShipToState ShipToPostalCode ShipToCountry ShipToPhone Version ShipQuantity UserNotes ShipToDate DistributionType CarrierMethod 3rdPartyBilling ArriveDate ContainerType PackageType PackageQty ShippingClass Email InternalNotes
+headerParent(outPutHeader) ShipToCompany ShipToAttention ShipToAddressLine1 ShipToAddressLine2 ShipToAddressLine3 ShipToCity ShipToState ShipToPostalCode ShipToCountry ShipToPhone Version ShipQuantity UserNotes ShipToDate DistributionType CarrierMethod 3rdPartyBilling ArriveDate ContainerType PackageType PackageQty ShippingClass Email InternalNotes {}
 headerAddress(ShippingClass) shippingclass
 headerAddress(Address2) addr2 add2 addressline2 {address line 2} shiptoaddressline2
 headerAddress(State) state st st. province state/province shiptostate
