@@ -452,59 +452,61 @@ proc eAssist_Global::getGeom {module args} {
 } ;# eAssist_Global::getGeom
 
 
-#proc eAssist_Global::validate {validation char val args} {
-#    #****f* validate/eAssist_Global
-#    # CREATION DATE
-#    #   10/11/2014 (Saturday Oct 11)
-#    #
-#    # AUTHOR
-#    #	Casey Ackels
-#    #
-#    # COPYRIGHT
-#    #	(c) 2014 Casey Ackels
-#    #   
-#    #
-#    # SYNOPSIS
-#    #   eAssist_Global::validate %W %d %S args 
-#    #
-#    # FUNCTION
-#    #	Returns validated data
-#    #   
-#    #   
-#    # CHILDREN
-#    #	N/A
-#    #   
-#    # PARENTS
-#    #   
-#    #   
-#    # NOTES
-#    #   
-#    #   
-#    # SEE ALSO
-#    #   
-#    #   
-#    #***
-#    global log
-#    set returnValue 1 ;# This will allow us to pass through the original data if it doesn't match anything in the switch.
-#
-#    foreach {key value} $args {
-#	switch -- $args {
-#	    -length	{${log}::debug $key $value - $val
-#			    if {[string length $val] <= $value} {set returnValue 1}
-#			}
-#	    -alpha	{${log}::debug $key $value - $val
-#			    if {[string is alpha $char] == 1 || [string is space $char] == 1} {set returnValue 1}
-#			}
-#		-punc	{${log::debug $key $value - $val
-#				if {$key eq "no" && [string is punc $char] == 1} {set returnValue 0}
-#			}
-#	    default	{${log}::debug $args}
-#	}
-#    }
-#
-#    ${log}::debug $validation $char $val
-#    return $returnValue
-#} ;# eAssist_Global::validate
+proc eAssist_Global::validate {validation char val args} {
+    #****f* validate/eAssist_Global
+    # CREATION DATE
+    #   10/11/2014 (Saturday Oct 11)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssist_Global::validate %W %d %S args 
+    #
+    # FUNCTION
+    #	Returns validated data
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+    set returnValue 1 ;# Everything fails by default
+
+    foreach {key value} $args {
+	switch -- $key {
+	    -length	{ ${log}::debug Length: [string length $val]
+			    if {$value < [string length $val]} {set returnValue 0}
+			}
+	    -alpha	{ ${log}::debug Alnum: [string is alnum $char]
+			    if {$value eq "no"} {set returnValue 0} elseif {$value eq "yes" & [string is alnum $char] == 1} {set returnValue 1}
+			}
+    	    -space	{ ${log}::debug Space: [string is space $char]
+			    if {$value eq "no"} {set returnValue 0} elseif {$value eq "yes" & [string is space $char] == 1} {set returnValue 1}
+			}
+	    -punc	{ ${log}::debug Space: [string is punc $char]
+			    if {$value eq "no"} {set returnValue 0; ${log}::debug PUNC IS NO! value_$value} elseif {$value eq "yes" & [string is punc $char] == 1} {set returnValue 1}
+			}
+	    default	{${log}::debug -DEFAULT-}
+	}
+    }
+return $returnValue
+    
+} ;# eAssist_Global::validate
 
 
 proc eAssist_Global::launchFilters {} {
