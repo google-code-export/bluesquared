@@ -24,7 +24,7 @@
 
 proc eAssistSetup::placeholder {tbl row col text} {return $text}
 
-proc eAssistSetup::modifyCountry {tbl wid} {
+proc eAssistSetup::modifyCountry {tbl dbTable wid} {
     #****f* modifyCountry/eAssistSetup
     # CREATION DATE
     #   09/29/2014 (Monday Sep 29)
@@ -42,6 +42,7 @@ proc eAssistSetup::modifyCountry {tbl wid} {
     # FUNCTION
     #	tbl = path to the tablelist widget
     #   wid = path to the entry widgets
+    #   dbTable = Table that we want to reference in the database
     #   
     #   
     # CHILDREN
@@ -64,21 +65,25 @@ proc eAssistSetup::modifyCountry {tbl wid} {
     set children [winfo children $wid]
     if {[winfo exists valuesToInsert]} {unset valuesToInsert}
     
+    # Retrieves data from each entry widget, and puts them into a list.
+    # Clear out all entry widgets
     foreach item $children {
         if {[string match -nocase *entry* $item] == 1} {
             lappend valuesToInsert [$item get]
-            
-            #... Clear the widgets out
             $item delete 0 end
-            #puts $item
         }
     }
     
     ${log}::debug inserting values: $valuesToInsert
+    # insert into the table widget
+    $tbl insert end "{} $valuesToInsert"
     
+    # insert into the DB
+    eAssist_db::dbInsert -columnNames "CountryCode CountryName" -table $dbTable -data $valuesToInsert
 } ;# eAssistSetup::modifyCountry
 
-proc eAssistSetup::delCountryProv {tbl} {
+
+proc eAssistSetup::delCountryProv {tbl dbTable} {
     #****f* delCountryProv/eAssistSetup
     # CREATION DATE
     #   10/10/2014 (Friday Oct 10)
@@ -91,14 +96,14 @@ proc eAssistSetup::delCountryProv {tbl} {
     #   
     #
     # SYNOPSIS
-    #   eAssistSetup::addCountryProv tbl 
+    #   eAssistSetup::delCountryProvtbl 
     #
     # FUNCTION
     #	Deletes the selected row from the widget, and database
     #   
     #   
     # CHILDREN
-    #	N/A
+    #	eAssist_db::delete
     #   
     # PARENTS
     #   
@@ -112,11 +117,14 @@ proc eAssistSetup::delCountryProv {tbl} {
     #***
     global log
 
-    $tbl delete [$tbl curselection]
+    #$tbl delete [$tbl curselection]
+    ${log}::debug curselection: [$tbl curselection]
 
-    ### ADD CODE TO REMOVE FROM DB
+    # Delete from DB
+    #eAssist_db::delete $dbTable "" [eAssist_db::getRowID $dbTable $args]
     
 } ;# eAssistSetup::delCountryProv
+
 
 proc eAssistSetup::editTblEntry {tbl wid} {
     #****f* editTblEntry/eAssistSetup
