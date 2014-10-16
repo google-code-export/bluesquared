@@ -79,7 +79,7 @@ proc eAssistSetup::countries_GUI {} {
         ttk::label $f1_b.txt2 -text [mc "Name"]
         ttk::entry $f1_b.entry2
         
-        ttk::button $f1_b.btn1 -text [mc "Add"] -command "eAssistSetup::modifyCountry $f1.listbox $f1_b"
+        ttk::button $f1_b.btn1 -text [mc "Add"] -command "eAssistSetup::modifyCountry $f1.listbox Countries $f1_b"
         ttk::button $f1_b.btn2 -text [mc "Delete"] -command "eAssistSetup::delCountryProv $f1.listbox"
         
         grid $f1_b.txt1 -column 0 -row 0 -padx 2p -pady 2p -sticky nwe

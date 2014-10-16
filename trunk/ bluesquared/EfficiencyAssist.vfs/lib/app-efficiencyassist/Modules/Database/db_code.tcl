@@ -110,40 +110,40 @@ proc eAssist_db::initContainers {} {
 
 
 
-#proc eAssist_db::dbInsert {args} {
-#    #****f* dbInsert/eAssist_db
-#    # CREATION DATE
-#    #   09/26/2014 (Friday Sep 26)
-#    #
-#    # AUTHOR
-#    #	Casey Ackels
-#    #
-#    # COPYRIGHT
-#    #	(c) 2014 Casey Ackels
-#    #   
-#    #
-#    # SYNOPSIS
-#    #   eAssist_db::dbInsert -columnNames ?value1 ... valueN? -table value -data value
-#    #
-#    # FUNCTION
-#    #	Inserts or Updates data in specified columns and table
-#    #   
-#    #   
-#    # CHILDREN
-#    #	N/A
-#    #   
-#    # PARENTS
-#    #   
-#    #   
-#    # NOTES
-#    #   
-#    #   
-#    # SEE ALSO
-#    #   
-#    #   
-#    #***
-#    global log
 proc eAssist_db::dbInsert {args} {
+    #****f* dbInsert/eAssist_db
+    # CREATION DATE
+    #   09/26/2014 (Friday Sep 26)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssist_db::dbInsert -columnNames ?value1 ... valueN? -table value -data value
+    #
+    # FUNCTION
+    #	Inserts or Updates data in specified columns and table
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
     if {$args == ""} {return -code 1 [mc "wrong # args: Must be -columnNames ?value1 .. valueN? -table value -data value\nNOTE: Each data value must be enclosed with single quotes"]}
     
     foreach {key value} $args {
@@ -162,7 +162,14 @@ proc eAssist_db::dbInsert {args} {
     }
     
     # See if this is a new entry or if we should update an entry ...
-    set dbCheck [eAssist_db::dbWhereQuery -columnNames [lrange $colNames 0 0] -table $tbl -where [lrange $colNames 0 0]=[lrange $data 0 0]]
+    set dbCheck [eAssist_db::dbWhereQuery -columnNames [lrange $colNames 0 0] -table $tbl -where [lrange $colNames 0 0]='[lrange $data 0 0]']
+    ${log}::debug After dbCheck: $dbCheck
+    
+    if {[info exists cleansedData]} {unset cleansedData}
+    foreach item $data {
+        lappend cleansedData '$item'
+    }
+    set data $cleansedData
     
     if {$dbCheck eq ""} {
         # Data doesn't exist, lets insert...
@@ -170,6 +177,8 @@ proc eAssist_db::dbInsert {args} {
             # Only inserting into one column
             db eval "INSERT or ABORT INTO $tbl $colNames VALUES ($data)"
         } else {
+            ${log}::debug colNames: [join $colNames ,]
+            ${log}::debug data: [join $data ,]
             set colNames [join $colNames ,]
             set data [join $data ,]
             db eval "INSERT or ABORT INTO $tbl ($colNames) VALUES ($data)"
@@ -177,7 +186,7 @@ proc eAssist_db::dbInsert {args} {
     } else {
         # Data exists, lets update...
         #UPDATE COMPANY SET ADDRESS = 'Texas', SALARY = 20000.00;
-        db eval "UPDATE $tbl SET "
+        #db eval "UPDATE $tbl SET "
     }
     
     #db eval {INSERT or ABORT INTO EventNotifications (ModID, EventName, EventSubstitutions EnableEventNotification)
@@ -216,7 +225,14 @@ proc eAssist_db::delete {table col args} {
     global log
     ${log}::debug --START-- [info level 1]
     
-    db eval "DELETE from $table WHERE $col='$args'"
+    if {$col != ""} {
+        ${log}::debug "DELETE from $table WHERE $col='$args'"
+        db eval "DELETE from $table WHERE $col='$args'"
+    } else {
+        ${log}::debug "DELETE from $table WHERE rowid='$args'"
+        #${log}::debug [db eval "DELETE from $table WHERE rowid='$args'"]
+        db eval "DELETE from $table WHERE rowid='$args'"
+    }
 
     ${log}::debug --END-- [info level 1]
 } ;# eAssist_db::delete
@@ -672,6 +688,9 @@ proc eAssist_db::dbWhereQuery {args} {
         
         
     if {[llength $colNames] == 1} {
+        ${log}::debug colNames: $colNames
+        ${log}::debug tbl: $tbl
+        ${log}::debug where: $where
         set returnQuery [db eval "SELECT $colNames FROM $tbl WHERE $where"]
     } else {
         foreach val $colNames {
@@ -694,3 +713,46 @@ proc eAssist_db::dbWhereQuery {args} {
 
 } ;# eAssist_db::dbWhereQuery
 
+
+proc eAssist_db::getRowID {tbl args} {
+    #****f* getRowID/eAssist_db
+    # CREATION DATE
+    #   10/15/2014 (Wednesday Oct 15)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssist_db::getRowID tbl args 
+    #
+    # FUNCTION
+    #	Retrieves the rowID of the passed arguments
+    #   args must be in <colName>=<value> AND <colName>=<value> [WHERE] format
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+    #${log}::debug $tbl
+    #${log}::debug $args
+    set args [join $args]
+
+    db eval "SELECT rowid FROM $tbl WHERE $args"
+
+    
+} ;# eAssist_db::getRowID

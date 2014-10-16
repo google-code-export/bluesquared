@@ -485,7 +485,7 @@ proc eAssist_Global::validate {val validation char args} {
     #   
     #***
     global log
-	if {$d == 1} {
+	if {$validation == 1} {
 		# we only care about prevalidation
 		#${log}::debug validation: $d
 		#${log}::debug val: $P
