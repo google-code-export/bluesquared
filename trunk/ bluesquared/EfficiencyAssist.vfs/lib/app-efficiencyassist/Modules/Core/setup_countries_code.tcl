@@ -24,6 +24,62 @@
 
 proc eAssistSetup::placeholder {tbl row col text} {return $text}
 
+proc eAssistSetup::loadCtryProv {tbl wid dbTable args} {
+    #****f* loadCtryProv/eAssistSetup
+    # CREATION DATE
+    #   10/16/2014 (Thursday Oct 16)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssistSetup::loadCtryProv tbl wid dbTable args
+    #   tbl = table widget
+    #   wid = entry widgets
+    #   dbTable = Table in db
+    #   args can be:
+    #       -region country|province
+    #       -columns <column names>
+    #       
+    #
+    # FUNCTION
+    #	Refreshes the table widget with data from the DB
+    #   
+    #   
+    # CHILDREN
+    #	eAssistSetup::modifyCountry
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    eAssistSetup::modifyCountry $tbl $dbTable $wid
+    
+    
+    set countries [eAssist_db::dbSelectQuery -columnNames "CountryCode CountryName" -table $dbTable]
+    
+    if {$countries != ""} {
+        foreach country $countries {
+            $f1.listbox insert end [list {} [lrange $country 0 0] [lrange $country 1 end]]
+            #${log}::debug Country code: [lrange $country 0 0] Name: [lrange $country 1 end]
+        }
+    }
+
+    
+} ;# eAssistSetup::loadCtryProv
+
 proc eAssistSetup::modifyCountry {tbl dbTable wid} {
     #****f* modifyCountry/eAssistSetup
     # CREATION DATE
