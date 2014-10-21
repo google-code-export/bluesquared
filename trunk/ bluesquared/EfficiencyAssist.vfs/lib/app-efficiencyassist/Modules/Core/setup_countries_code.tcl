@@ -63,22 +63,26 @@ proc eAssistSetup::loadCtryProv {method tbl wid dbTable cols args} {
     #   
     #   
     #***
-    global log
+    global log program
+    if {[info exists region]} {unset region}
     
-    #${log}::debug %W_Args: $args
-    #set widValue [$args get]
-    #${log}::debug $widValue
-
     # Insert the data into the db first; then refresh
     switch -- $method {
         -add    {eAssistSetup::modifyCountry $tbl $dbTable $wid $cols}
         -delete {eAssistSetup::delCountryProv $tbl $dbTable}
-        -query  { #this just allows us to pass through to the rest of the proc}
+        -query  {set region [eAssist_db::dbSelectQuery -columnNames $cols -table $dbTable]}
         default {}
     }
 
 
-    set region [eAssist_db::dbSelectQuery -columnNames $cols -table $dbTable]
+    #set region [eAssist_db::dbSelectQuery -columnNames $cols -table $dbTable]
+    #set children [winfo children $wid]
+    #${log}::debug Children: $children
+    foreach item [winfo children $wid] {
+        if {[string match *cbx* $item]} {
+            set widCountry $item
+        }
+    }
     
     #switch -nocase $dbTable {
     #    countries {set data "[lrange %val 0 1] [lrange %val 2 end]"}
@@ -86,16 +90,21 @@ proc eAssistSetup::loadCtryProv {method tbl wid dbTable cols args} {
     #    default {${log}::critical Table isn't set up in [info level]: $dbTable; return}
     #}
     
-    $tbl delete 0 end
-    
-    foreach value $region {
-        # the quoting works for the tablelist widget; unknown for listboxes
-        #$tbl insert end "{} [subst [string map "%val $data" $value]]"
-        $tbl insert end "{} $value"
-        #${log}::debug $tbl insert end "{} [subst [string map "%val $data" $value]]"
+    if {[info exists region]} {
+        $tbl delete 0 end
         
+        foreach value $region {
+            # the quoting works for the tablelist widget; unknown for listboxes
+            #$tbl insert end "{} [subst [string map "%val $data" $value]]"
+            $tbl insert end "{} $value"
+            #${log}::debug insert end "{} $value"
+            
+        }
+    } else {
+        eAssistSetup::dbGetProvinces $tbl $widCountry
+        ${log}::debug Retrieved Provinces ....
     }
-    
+
 } ;# eAssistSetup::loadCtryProv
 
 proc eAssistSetup::modifyCountry {tbl dbTable wid cols} {
@@ -143,7 +152,9 @@ proc eAssistSetup::modifyCountry {tbl dbTable wid cols} {
     # Retrieves data from each entry widget, and puts them into a list.
     # Clear out all entry widgets
     foreach item $children {
+        
         if {[string match -nocase *entry* $item] == 1} {
+            ${log}::debug CHILDREN - $item _ [$item get]
             lappend valuesToInsert [$item get]
             $item delete 0 end
         }
@@ -162,6 +173,7 @@ proc eAssistSetup::modifyCountry {tbl dbTable wid cols} {
     #$tbl insert end "{} $valuesToInsert"
     
     # insert into the DB
+    ${log}::debug valuesToInsert - $valuesToInsert
     eAssist_db::dbInsert -columnNames $cols -table $dbTable -data $valuesToInsert
 } ;# eAssistSetup::modifyCountry
 
@@ -264,6 +276,7 @@ proc eAssistSetup::editTblEntry {tbl wid dbTable idx} {
     if {[winfo exists widgets]} {unset widgets}
     
     foreach item $children {
+        #${log}::debug CHILDREN - $item
         if {[string match -nocase *entry* $item] == 1} {
             lappend widgets $item
         }
@@ -543,8 +556,8 @@ proc eAssistSetup::dbGetProvinces {win country} {
                 INNER JOIN Countries
                     ON Countries.Country_ID = Provinces.CountryID
                     WHERE Countries.Country_ID = '$program(db,currentCountryID)'" {
-                        $win insert end [list {} $Prov_ID $ProvAbbr $ProvName $PostalCodeHighEnd $PostalCodeLowEnd]
-                        ${log}::debug PROVINCES: [list {} $Prov_ID $ProvAbbr $ProvName $PostalCodeHighEnd $PostalCodeLowEnd]
+                        $win insert end [list {} $Prov_ID $ProvAbbr $ProvName $PostalCodeLowEnd $PostalCodeHighEnd]
+                        ${log}::debug PROVINCES: [list {} $Prov_ID $ProvAbbr $ProvName $PostalCodeLowEnd $PostalCodeHighEnd]
                     }
 
     
