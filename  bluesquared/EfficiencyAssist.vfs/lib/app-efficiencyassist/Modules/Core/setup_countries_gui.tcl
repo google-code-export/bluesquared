@@ -143,7 +143,7 @@ proc eAssistSetup::countries_GUI {} {
     ::autoscroll::autoscroll $f1.scrolly ;# Enable the 'autoscrollbar'
     ::autoscroll::autoscroll $f1.scrollx
     
-    eAssistSetup::loadCtryProv -show $f1.listbox $f1_b Countries {Country_ID CountryCode CountryName}
+    eAssistSetup::loadCtryProv -query $f1.listbox $f1_b Countries {Country_ID CountryCode CountryName}
     
     # Populate the entries with the selected row so we can edit/modify the data.
     bind [$f1.listbox bodytag] <Double-ButtonRelease-1> "eAssistSetup::editTblEntry $f1.listbox $f1_b Countries Country_ID"
@@ -248,7 +248,7 @@ proc eAssistSetup::countries_GUI {} {
     grid columnconfigure $f2 $f2.tbl2 -weight 1
     #grid rowconfigure $f2 $f2.tbl2 -weight 1
     
-    grid $f2.scrolly -column 1 -row 0 -sticky nse
+    grid $f2.scrolly -column 1 -row 1 -sticky nse
     grid $f2.scrollx -column 0 -row 1 -sticky ews
     
     ::autoscroll::autoscroll $f2.scrolly ;# Enable the 'autoscrollbar'

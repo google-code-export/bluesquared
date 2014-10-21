@@ -175,25 +175,26 @@ proc eAssist_db::dbInsert {args} {
 	${log}::notice [info level 1] Mismatched columns and data to insert into db. Dropping [lrange $colNames 0 0]
 	set colNames [lrange $colNames 1 end]
     }
-    
+       
     # If rowID exists, issue an update statement.
-    if {[info exists tmp(db,rowID)] & $tmp(db,rowID) != ""} {
-	${log}::debug ROWID Exists: $tmp(db,rowID)
-	${log}::debug COLS: $colNames
-	${log}::debug DATA: $data
-	set y [llength $colNames]
-	for {set x 0} {$x < $y} {incr x} {
-	    ${log}::debug Col/Val [lrange $colNames $x $x]=[lrange $data $x $x]
-	    lappend updateStatement [join [lrange $colNames $x $x]]=[join [lrange $data $x $x]]
-	}
-	${log}::debug updateStatement: [join $updateStatement ,]
-	set updateStatement [join $updateStatement ,]
-	${log}::debug db eval "UPDATE $tbl SET $updateStatement WHERE rowid=$tmp(db,rowID)"
-	db eval "UPDATE $tbl SET $updateStatement WHERE rowid=$tmp(db,rowID)"
-	    
-	
-	return
-	unset tmp(db,rowID)
+    if {[info exists tmp(db,rowID)] == 1} {
+        if {$tmp(db,rowID) != ""} {
+            ${log}::debug ROWID Exists: $tmp(db,rowID)
+            ${log}::debug Update_COLS: $colNames
+            ${log}::debug Update_DATA: $data
+            set y [llength $colNames]
+                for {set x 0} {$x < $y} {incr x} {
+                    ${log}::debug Col/Val [lrange $colNames $x $x]=[lrange $data $x $x]
+                    lappend updateStatement [join [lrange $colNames $x $x]]=[join [lrange $data $x $x]]
+                }
+            ${log}::debug updateStatement: [join $updateStatement ,]
+            set updateStatement [join $updateStatement ,]
+            ${log}::debug db eval "UPDATE $tbl SET $updateStatement WHERE rowid=$tmp(db,rowID)"
+            db eval "UPDATE $tbl SET $updateStatement WHERE rowid=$tmp(db,rowID)"
+                
+            set tmp(db,rowID) ""
+            return
+        }
     }
     
     if {$dbCheck eq ""} {
@@ -202,8 +203,8 @@ proc eAssist_db::dbInsert {args} {
             # Only inserting into one column
             db eval "INSERT or ABORT INTO $tbl $colNames VALUES ($data)"
         } else {
-            #${log}::debug colNames: [join $colNames ,]
-            #${log}::debug data: [join $data ,]
+            ${log}::debug Insert_COLS: [join $colNames ,]
+            ${log}::debug Insert_Data: [join $data ,]
             set colNames [join $colNames ,]
             set data [join $data ,]
             db eval "INSERT or ABORT INTO $tbl ($colNames) VALUES ($data)"
