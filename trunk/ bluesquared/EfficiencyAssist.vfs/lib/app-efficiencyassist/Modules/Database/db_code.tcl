@@ -136,13 +136,13 @@ proc eAssist_db::dbInsert {args} {
     #   
     #   
     # NOTES
-    #   
+    #   Always make sure your index column is first. If we come up with a mismatch (4 values for 5 columns), we drop the first column, assuming it is the index and not wanted.
     #   
     # SEE ALSO
     #   
     #   
     #***
-    global log
+    global log tmp
 
     if {$args == ""} {return -code 1 [mc "wrong # args: Must be -columnNames ?value1 .. valueN? -table value -data value\nNOTE: Each data value must be enclosed with single quotes"]}
     
@@ -171,14 +171,39 @@ proc eAssist_db::dbInsert {args} {
     }
     set data $cleansedData
     
+    if {[llength $colNames] != [llength $cleansedData]} {
+	${log}::notice [info level 1] Mismatched columns and data to insert into db. Dropping [lrange $colNames 0 0]
+	set colNames [lrange $colNames 1 end]
+    }
+    
+    # If rowID exists, issue an update statement.
+    if {[info exists tmp(db,rowID)] & $tmp(db,rowID) != ""} {
+	${log}::debug ROWID Exists: $tmp(db,rowID)
+	${log}::debug COLS: $colNames
+	${log}::debug DATA: $data
+	set y [llength $colNames]
+	for {set x 0} {$x < $y} {incr x} {
+	    ${log}::debug Col/Val [lrange $colNames $x $x]=[lrange $data $x $x]
+	    lappend updateStatement [join [lrange $colNames $x $x]]=[join [lrange $data $x $x]]
+	}
+	${log}::debug updateStatement: [join $updateStatement ,]
+	set updateStatement [join $updateStatement ,]
+	${log}::debug db eval "UPDATE $tbl SET $updateStatement WHERE rowid=$tmp(db,rowID)"
+	db eval "UPDATE $tbl SET $updateStatement WHERE rowid=$tmp(db,rowID)"
+	    
+	
+	return
+	unset tmp(db,rowID)
+    }
+    
     if {$dbCheck eq ""} {
         # Data doesn't exist, lets insert...
         if {[llength $colNames] == 1} {
             # Only inserting into one column
             db eval "INSERT or ABORT INTO $tbl $colNames VALUES ($data)"
         } else {
-            ${log}::debug colNames: [join $colNames ,]
-            ${log}::debug data: [join $data ,]
+            #${log}::debug colNames: [join $colNames ,]
+            #${log}::debug data: [join $data ,]
             set colNames [join $colNames ,]
             set data [join $data ,]
             db eval "INSERT or ABORT INTO $tbl ($colNames) VALUES ($data)"
@@ -229,9 +254,9 @@ proc eAssist_db::delete {table col args} {
         ${log}::debug "DELETE from $table WHERE $col='$args'"
         db eval "DELETE from $table WHERE $col='$args'"
     } else {
-        ${log}::debug "DELETE from $table WHERE rowid='$args'"
+        ${log}::debug "DELETE from $table WHERE rowid=$args"
         #${log}::debug [db eval "DELETE from $table WHERE rowid='$args'"]
-        db eval "DELETE from $table WHERE rowid='$args'"
+        db eval "DELETE from $table WHERE rowid=$args"
     }
 
     ${log}::debug --END-- [info level 1]
@@ -619,10 +644,14 @@ proc eAssist_db::dbSelectQuery {args} {
         foreach val $colNames {
             set pos [lsearch $colNames $val]; puts "Pos: $pos"
             set myCommand {[subst $[lrange $colNames %b %b]]}
-            lappend myNewCommand [string map "%b $pos" $myCommand]
+	    #${log}::debug myCommand: $myCommand
+            lappend myNewCommand [list [string map "%b $pos" $myCommand]]
+	    #${log}::debug myNewCommand: $myNewCommand
         }
             db eval "SELECT [join $colNames ,] FROM $tbl" {
                 lappend returnQuery "[join [subst $myNewCommand]]"
+		#lappend returnQuery "[subst $myNewCommand]"
+		#${log}::debug returnQuery: $returnQuery
             }
     }
     return $returnQuery
@@ -731,7 +760,7 @@ proc eAssist_db::getRowID {tbl args} {
     #
     # FUNCTION
     #	Retrieves the rowID of the passed arguments
-    #   args must be in <colName>=<value> AND <colName>=<value> [WHERE] format
+    #   args must be in [WHERE] format: <colName>=<value> AND <colName>=<value> 
     #   
     #   
     # CHILDREN

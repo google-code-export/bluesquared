@@ -24,7 +24,7 @@
 
 proc eAssistSetup::placeholder {tbl row col text} {return $text}
 
-proc eAssistSetup::loadCtryProv {tbl wid dbTable args} {
+proc eAssistSetup::loadCtryProv {method tbl wid dbTable cols args} {
     #****f* loadCtryProv/eAssistSetup
     # CREATION DATE
     #   10/16/2014 (Thursday Oct 16)
@@ -37,17 +37,17 @@ proc eAssistSetup::loadCtryProv {tbl wid dbTable args} {
     #   
     #
     # SYNOPSIS
-    #   eAssistSetup::loadCtryProv tbl wid dbTable args
+    #   eAssistSetup::loadCtryProv method tbl wid dbTable cols args
+    #   method = -add | -delete
     #   tbl = table widget
     #   wid = entry widgets
     #   dbTable = Table in db
-    #   args can be:
-    #       -region country|province
-    #       -columns <column names>
-    #       
+    #   cols = Column Names
+    #   
     #
     # FUNCTION
     #	Refreshes the table widget with data from the DB
+    #	e.g. We just added a country code and name, this proc will refresh the widget with the data that we just inserted into the db.
     #   
     #   
     # CHILDREN
@@ -64,23 +64,41 @@ proc eAssistSetup::loadCtryProv {tbl wid dbTable args} {
     #   
     #***
     global log
+    
+    #${log}::debug %W_Args: $args
+    #set widValue [$args get]
+    #${log}::debug $widValue
 
-    eAssistSetup::modifyCountry $tbl $dbTable $wid
-    
-    
-    set countries [eAssist_db::dbSelectQuery -columnNames "CountryCode CountryName" -table $dbTable]
-    
-    if {$countries != ""} {
-        foreach country $countries {
-            $f1.listbox insert end [list {} [lrange $country 0 0] [lrange $country 1 end]]
-            #${log}::debug Country code: [lrange $country 0 0] Name: [lrange $country 1 end]
-        }
+    # Insert the data into the db first; then refresh
+    switch -- $method {
+        -add    {eAssistSetup::modifyCountry $tbl $dbTable $wid $cols}
+        -delete {eAssistSetup::delCountryProv $tbl $dbTable}
+        -query  { #this just allows us to pass through to the rest of the proc}
+        default {}
     }
 
+
+    set region [eAssist_db::dbSelectQuery -columnNames $cols -table $dbTable]
+    
+    #switch -nocase $dbTable {
+    #    countries {set data "[lrange %val 0 1] [lrange %val 2 end]"}
+    #    provinces {set data "[lrange %val 0 1] [lrange %val 2 end]"}
+    #    default {${log}::critical Table isn't set up in [info level]: $dbTable; return}
+    #}
+    
+    $tbl delete 0 end
+    
+    foreach value $region {
+        # the quoting works for the tablelist widget; unknown for listboxes
+        #$tbl insert end "{} [subst [string map "%val $data" $value]]"
+        $tbl insert end "{} $value"
+        #${log}::debug $tbl insert end "{} [subst [string map "%val $data" $value]]"
+        
+    }
     
 } ;# eAssistSetup::loadCtryProv
 
-proc eAssistSetup::modifyCountry {tbl dbTable wid} {
+proc eAssistSetup::modifyCountry {tbl dbTable wid cols} {
     #****f* modifyCountry/eAssistSetup
     # CREATION DATE
     #   09/29/2014 (Monday Sep 29)
@@ -99,13 +117,14 @@ proc eAssistSetup::modifyCountry {tbl dbTable wid} {
     #	tbl = path to the tablelist widget
     #   wid = path to the entry widgets
     #   dbTable = Table that we want to reference in the database
+    #   cols = Column Names
     #   
     #   
     # CHILDREN
     #	N/A
     #   
     # PARENTS
-    #   
+    #   eAssistSetup::loadCtryProv
     #   
     # NOTES
     #   
@@ -128,18 +147,26 @@ proc eAssistSetup::modifyCountry {tbl dbTable wid} {
             lappend valuesToInsert [$item get]
             $item delete 0 end
         }
+        if {[string match -nocase *cbx* $item] == 1} {
+            set cName [$item get]
+        }
     }
     
-    ${log}::debug inserting values: $valuesToInsert
-    # insert into the table widget
-    $tbl insert end "{} $valuesToInsert"
+    # If we're inserting a province, we'll need the country code ID
+    if {$dbTable eq "Provinces"} {
+        lappend valuesToInsert [db eval "SELECT Country_ID FROM Countries WHERE CountryName='$cName'"]
+    }
+    
+    #${log}::debug inserting values: $valuesToInsert
+    ## insert into the table widget
+    #$tbl insert end "{} $valuesToInsert"
     
     # insert into the DB
-    eAssist_db::dbInsert -columnNames "CountryCode CountryName" -table $dbTable -data $valuesToInsert
+    eAssist_db::dbInsert -columnNames $cols -table $dbTable -data $valuesToInsert
 } ;# eAssistSetup::modifyCountry
 
 
-proc eAssistSetup::delCountryProv {tbl dbTable} {
+proc eAssistSetup::delCountryProv {wTbl dbTable} {
     #****f* delCountryProv/eAssistSetup
     # CREATION DATE
     #   10/10/2014 (Friday Oct 10)
@@ -174,15 +201,21 @@ proc eAssistSetup::delCountryProv {tbl dbTable} {
     global log
 
     #$tbl delete [$tbl curselection]
-    ${log}::debug curselection: [$tbl curselection]
+    ${log}::debug curselection: [$wTbl curselection]
+    
+    set row_data [$wTbl get [$wTbl curselection]]
+    set row_id [lrange $row_data 1 1]
+    
+    ${log}::debug row_data: $row_data
+    ${log}::debug row_id: $row_id
 
     # Delete from DB
-    #eAssist_db::delete $dbTable "" [eAssist_db::getRowID $dbTable $args]
+    eAssist_db::delete $dbTable "" $row_id
     
 } ;# eAssistSetup::delCountryProv
 
 
-proc eAssistSetup::editTblEntry {tbl wid} {
+proc eAssistSetup::editTblEntry {tbl wid dbTable idx} {
     #****f* editTblEntry/eAssistSetup
     # CREATION DATE
     #   10/11/2014 (Saturday Oct 11)
@@ -195,7 +228,11 @@ proc eAssistSetup::editTblEntry {tbl wid} {
     #   
     #
     # SYNOPSIS
-    #   eAssistSetup::editTblEntry tbl wid 
+    #   eAssistSetup::editTblEntry tbl wid
+    #   tbl = Tablelist widget path
+    #   wid = Entry Widget path
+    #   dbTable = Name of the db table that we're dealing with
+    #   idx = Index Column
     #
     # FUNCTION
     #	Gets the selected values, and populates the entry widgets that exist in the passed frame
@@ -214,9 +251,14 @@ proc eAssistSetup::editTblEntry {tbl wid} {
     #   
     #   
     #***
-    global log
+    global log tmp
 
+    
+    # Grag the rowid, so that we can update the record instead of inserting a new one.
     set data [$tbl get [$tbl curselection]]
+    set tmp(db,ID) [lrange $data 1 1]
+    ${log}::debug db_ID [lrange $data 1 1]
+    set tmp(db,rowID) [eAssist_db::dbWhereQuery -columnNames rowid -table $dbTable -where $idx='$tmp(db,ID)']
     
     set children [winfo children $wid]
     if {[winfo exists widgets]} {unset widgets}
@@ -227,7 +269,7 @@ proc eAssistSetup::editTblEntry {tbl wid} {
         }
     }
     
-    set x 1 ;# Using 1 because we don't want to insert the numeric into the entry widgets.
+    set x 2 ;# Using 2 because we don't want to insert the row count, or db index into the entry widgets.
     foreach wid $widgets {
         ${log}::debug $wid insert end [lrange $data $x $x]
         $wid delete 0 end
@@ -238,6 +280,56 @@ proc eAssistSetup::editTblEntry {tbl wid} {
     
 } ;# eAssistSetup::editTblEntry
 
+
+proc eAssistSetup::resetEntries {wid} {
+    #****f* resetEntries/eAssistSetup
+    # CREATION DATE
+    #   10/20/2014 (Monday Oct 20)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssistSetup::resetEntries args 
+    #
+    # FUNCTION
+    #	Reset the entry widgets, and unsets the global vars that may have been set
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log tmp
+    
+    if {[info exists tmp(db,rowID)]} {unset tmp(db,rowID)}
+    
+    set children [winfo children $wid]
+    foreach item $children {
+        if {[string match -nocase *entry* $item] == 1} {
+            $item delete 0 end
+        }
+    }
+    
+    
+
+    
+
+    
+} ;# eAssistSetup::resetEntries
 
 proc eAssistSetup::getCountries {win} {
     #****f* getCountries/eAssistSetup
@@ -279,68 +371,68 @@ proc eAssistSetup::getCountries {win} {
 } ;# eAssistSetup::getCountries
 
 
-proc eAssistSetup::countryEditEnd {tbl row col text} {
-    #****f* countryEditEnd/eAssistSetup
-    # CREATION DATE
-    #   09/29/2014 (Monday Sep 29)
-    #
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2014 Casey Ackels
-    #   
-    #
-    # SYNOPSIS
-    #   eAssistSetup::countryEditEnd args 
-    #
-    # FUNCTION
-    #	What does it do?
-    #   
-    #   
-    # CHILDREN
-    #	N/A
-    #   
-    # PARENTS
-    #   
-    #   
-    # NOTES
-    #   
-    #   
-    # SEE ALSO
-    #   
-    #   
-    #***
-    global log
-    
-    set win [$tbl editwinpath]
-    ${log}::debug Tbl: $tbl Row: $row Col: $col Text: $text
-    ${log}::debug win: $win
-    
-
-    #$w(hdr_frame1a).listbox
-    
-    switch -- [$tbl columncget $col -name] {
-        CountryCode { if {[string length $text] ne 2} {
-                            return -code 1 [mc "Two character code only!\nYou entered: $text"]
-                            #break
-                        } else {
-                            set newTxt $text
-                        }
-        }
-        CountryName { foreach val $text {
-                        lappend newTxt [string totitle $val]
-                    }
-        }
-        default     {}
-    }
-    
-    $tbl cellconfigure $row,$col -text $newTxt
-
-    ${log}::debug dbInsert [lrange [$tbl get $row] 1 end]
-    eAssistSetup::dbInsertCountry [lrange [$tbl get $row] 1 end]
-    return $newTxt
-} ;# eAssistSetup::countryEditEnd
+#proc eAssistSetup::countryEditEnd {tbl row col text} {
+#    #****f* countryEditEnd/eAssistSetup
+#    # CREATION DATE
+#    #   09/29/2014 (Monday Sep 29)
+#    #
+#    # AUTHOR
+#    #	Casey Ackels
+#    #
+#    # COPYRIGHT
+#    #	(c) 2014 Casey Ackels
+#    #   
+#    #
+#    # SYNOPSIS
+#    #   eAssistSetup::countryEditEnd args 
+#    #
+#    # FUNCTION
+#    #	What does it do?
+#    #   
+#    #   
+#    # CHILDREN
+#    #	N/A
+#    #   
+#    # PARENTS
+#    #   
+#    #   
+#    # NOTES
+#    #   
+#    #   
+#    # SEE ALSO
+#    #   
+#    #   
+#    #***
+#    global log
+#    
+#    set win [$tbl editwinpath]
+#    ${log}::debug Tbl: $tbl Row: $row Col: $col Text: $text
+#    ${log}::debug win: $win
+#    
+#
+#    #$w(hdr_frame1a).listbox
+#    
+#    switch -- [$tbl columncget $col -name] {
+#        CountryCode { if {[string length $text] ne 2} {
+#                            return -code 1 [mc "Two character code only!\nYou entered: $text"]
+#                            #break
+#                        } else {
+#                            set newTxt $text
+#                        }
+#        }
+#        CountryName { foreach val $text {
+#                        lappend newTxt [string totitle $val]
+#                    }
+#        }
+#        default     {}
+#    }
+#    
+#    $tbl cellconfigure $row,$col -text $newTxt
+#
+#    ${log}::debug dbInsert [lrange [$tbl get $row] 1 end]
+#    eAssistSetup::dbInsertCountry [lrange [$tbl get $row] 1 end]
+#    return $newTxt
+#} ;# eAssistSetup::countryEditEnd
 
 
 proc eAssistSetup::dbInsertCountry {args} {
@@ -440,21 +532,19 @@ proc eAssistSetup::dbGetProvinces {win country} {
     $win delete 0 end
     
     set cName [$country get]
-    set program(db,currentCountryCode)  [db eval "SELECT CountryCode FROM Countries WHERE CountryName='$cName'"]
     
-    ${log}::debug country code: $program(db,currentCountryCode)
+    set program(db,currentCountryID) [db eval "SELECT Country_ID FROM Countries WHERE CountryName='$cName'"]
+    ${log}::debug country code: $program(db,currentCountryID)
     ${log}::debug win: $win
-
-    db eval "SELECT ProvAbbr,
-                    ProvName,
-                    PostalCodeLowEnd,
-                    PostalCodeHighEnd
+    
+    #WHERE Countries.CountryCode = '$program(db,currentCountryID)'" {}
+    db eval "SELECT Prov_ID, ProvAbbr, ProvName, PostalCodeLowEnd, PostalCodeHighEnd
              FROM Provinces
                 INNER JOIN Countries
                     ON Countries.Country_ID = Provinces.CountryID
-                    WHERE Countries.CountryCode = '$program(db,currentCountryCode)'" {
-                        $win insert end [list {} $ProvAbbr $ProvName $PostalCodeHighEnd $PostalCodeLowEnd]
-                        ${log}::debug PROVINCES: [list {} $ProvAbbr $ProvName $PostalCodeHighEnd $PostalCodeLowEnd]
+                    WHERE Countries.Country_ID = '$program(db,currentCountryID)'" {
+                        $win insert end [list {} $Prov_ID $ProvAbbr $ProvName $PostalCodeHighEnd $PostalCodeLowEnd]
+                        ${log}::debug PROVINCES: [list {} $Prov_ID $ProvAbbr $ProvName $PostalCodeHighEnd $PostalCodeLowEnd]
                     }
 
     
@@ -463,167 +553,72 @@ proc eAssistSetup::dbGetProvinces {win country} {
 
 
 
-proc eAssistSetup::provinceEditEnd {tbl row col text} {
-    #****f* provinceEditEnd/eAssistSetup
-    # CREATION DATE
-    #   09/30/2014 (Tuesday Sep 30)
-    #
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2014 Casey Ackels
-    #   
-    #
-    # SYNOPSIS
-    #   eAssistSetup::provinceEditEndCmd args 
-    #
-    # FUNCTION
-    #	What does it do?
-    #   
-    #   
-    # CHILDREN
-    #	N/A
-    #   
-    # PARENTS
-    #   
-    #   
-    # NOTES
-    #   
-    #   
-    # SEE ALSO
-    #   
-    #   
-    #***
-    global log
-
-    set win [$tbl editwinpath]
-    ${log}::debug Tbl: $tbl Row: $row Col: $col Text: $text
-    ${log}::debug win: $win
-
-    
-    switch -- [$tbl columncget $col -name] {
-        ProvAbbr { if {[string length $text] ne 2} {
-                            return -code 1 [mc "Two character code only!\nYou entered: $text"]
-                            #break
-                        } else {
-                            set newTxt [string toupper $text]
-                            set table Provinces
-                        }
-        }
-        ProvName { foreach val $text {
-                        lappend newTxt [string totitle $val]
-                    }
-                    set table Provinces
-                }
-        PostalCodeLowEnd    {set newTxt $text; set table PostalCodes }
-        PostalCodeHighEnd   {set newTxt $text; set table PostalCodes }
-        default     {}
-    }
-    
-    #$tbl cellconfigure $row,$col -text $newTxt
-
-    ${log}::debug dbInsertProv $tbl get
-    #eAssistSetup::dbInsertProv [lrange [$tbl get $row] 1 end]
-    return $newTxt
-
-} ;# eAssistSetup::provinceEditEnd
-
-
-proc eAssistSetup::dbInsertProv {args} {
-    #****f* dbInsertProv/eAssistSetup
-    # CREATION DATE
-    #   09/30/2014 (Tuesday Sep 30)
-    #
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2014 Casey Ackels
-    #   
-    #
-    # SYNOPSIS
-    #   eAssistSetup::dbInsertProv args 
-    #
-    # FUNCTION
-    #	Inserts/Updates Province entries
-    #   
-    #   
-    # CHILDREN
-    #	N/A
-    #   
-    # PARENTS
-    #   
-    #   
-    # NOTES
-    #   
-    #   
-    # SEE ALSO
-    #   
-    #   
-    #***
-    global log program
-
-    set data [$args get 0 end]
-    # This should return the db ID for the current country
-    set countryID [db eval "SELECT Country_ID FROM Countries WHERE CountryCode='$program(db,currentCountryCode)'"]
-    
-    foreach entry $data {
-        set pAbbr [join [lrange $entry 1 1]]
-        set pName [join [lrange $entry 2 2]]
-        set pCodeHi [join [lrange $entry 3 3]]
-        set pCodeLo [join [lrange $entry 4 4]]
-        
-        if {$pAbbr eq {}} {${log}::debug Not inserting into db, no abbreviation yet; break}
-        if {$pName eq {}} {${log}::debug Not inserting into db, no province name yet; break}
-        
-        ${log}::debug $pAbbr $pName $pCodeHi $pCodeLo
-    }
-    
-
-
-
-    
-    #${log}::debug countryID: $countryID
-
-    # Match Country and Province Abbreviation
-    #set dbCheck [eAssist_db::dbWhereQuery -columnNames "ProvAbbr ProvName" -table Provinces -where "CountryID='$countryID' AND ProvAbbr='$pAbbr'"]
-    #set myWhere "CountryID='$countryID' AND ProvAbbr='$pAbbr'"
-    #set myProv "ProvName = '$pName'"
-    #
-    #if {$dbCheck == 0} {
-    #    ${log}::debug Didn't match province abbreviation, trying province name
-    #    # Didn't find the Province Abbreviation in the DB, lets see if we can find the Province Name. The user may have modified the abbreviation.
-    #    set dbCheck [eAssist_db::dbWhereQuery -columnNames "ProvAbbr ProvName" -table Provinces -where "CountryID='$countryID' AND ProvName='$pName'"]
-    #    set myWhere "CountryID='$countryID' AND ProvName='$pName'"
-    #    set myProv "ProvAbbr = '$pAbbr'"
-    #    #${log}::debug Found the CountryName: $dbCheck
-    #}
-    #
-    #${log}::debug CountryID: $countryID
-    #${log}::debug dbCheck: $dbCheck
-    #
-    #if {$dbCheck == ""} {
-    #    # INSERT
-    #    ${log}::debug Inserting into db ... $args
-    #    db eval "INSERT or ABORT INTO Provinces (ProvAbbr, ProvName, PostalCodeLowEnd, PostalCodeHighEnd, CountryID)
-    #        VALUES ('$pAbbr', '$pName', '$pCodeLo', '$pCodeHi', '$countryID')"
-    #} else {
-    #    # UPDATE
-    #    ${log}::debug UPDATEing into db ... $args
-    #    ${log}::debug Elements - myProv: $myProv
-    #    ${log}::debug Elements - LowEnd: $pCodeLo
-    #    ${log}::debug Elements - HighEnd: $pCodeHi
-    #    ${log}::debug Elements - CountryID: $countryID
-    #    #db eval "UPDATE Countries SET CountryCode = '$cCode', CountryName = '$cName' $myWhere"
-    #    db eval "UPDATE Provinces SET $myProv,
-    #                                    PostalCodeLowEnd = '$pCodeLo',
-    #                                    PostalCodeHighEnd = '$pCodeHi'
-    #                            WHERE $myWhere"
-    #}
-
-    
-}
+#proc eAssistSetup::provinceEditEnd {tbl row col text} {
+#    #****f* provinceEditEnd/eAssistSetup
+#    # CREATION DATE
+#    #   09/30/2014 (Tuesday Sep 30)
+#    #
+#    # AUTHOR
+#    #	Casey Ackels
+#    #
+#    # COPYRIGHT
+#    #	(c) 2014 Casey Ackels
+#    #   
+#    #
+#    # SYNOPSIS
+#    #   eAssistSetup::provinceEditEndCmd args 
+#    #
+#    # FUNCTION
+#    #	What does it do?
+#    #   
+#    #   
+#    # CHILDREN
+#    #	N/A
+#    #   
+#    # PARENTS
+#    #   
+#    #   
+#    # NOTES
+#    #   
+#    #   
+#    # SEE ALSO
+#    #   
+#    #   
+#    #***
+#    global log
+#
+#    set win [$tbl editwinpath]
+#    ${log}::debug Tbl: $tbl Row: $row Col: $col Text: $text
+#    ${log}::debug win: $win
+#
+#    
+#    switch -- [$tbl columncget $col -name] {
+#        ProvAbbr { if {[string length $text] ne 2} {
+#                            return -code 1 [mc "Two character code only!\nYou entered: $text"]
+#                            #break
+#                        } else {
+#                            set newTxt [string toupper $text]
+#                            set table Provinces
+#                        }
+#        }
+#        ProvName { foreach val $text {
+#                        lappend newTxt [string totitle $val]
+#                    }
+#                    set table Provinces
+#                }
+#        PostalCodeLowEnd    {set newTxt $text; set table PostalCodes }
+#        PostalCodeHighEnd   {set newTxt $text; set table PostalCodes }
+#        default     {}
+#    }
+#    
+#    #$tbl cellconfigure $row,$col -text $newTxt
+#
+#    ${log}::debug dbInsertProv $tbl get
+#    #eAssistSetup::dbInsertProv [lrange [$tbl get $row] 1 end]
+#    return $newTxt
+#
+#} ;# eAssistSetup::provinceEditEnd
+#
 #
 #proc eAssistSetup::dbInsertProv {args} {
 #    #****f* dbInsertProv/eAssistSetup
@@ -659,58 +654,153 @@ proc eAssistSetup::dbInsertProv {args} {
 #    #***
 #    global log program
 #
-#    set args [join $args]
-#    
-#    ${log}::debug Prov Args: $args
-#    ${log}::debug ProvName: [lrange $args 1 1]
-#
-#    set pAbbr [join [lrange $args 0 0]]
-#    set pName [join [lrange $args 1 1]]
-#    set pCodeHi [join [lrange $args 2 2]]
-#    set pCodeLo [join [lrange $args 3 3]]
-#    
-#    if {$pAbbr eq {}} {${log}::debug Not inserting into db, no abbreviation yet; return}
-#    if {$pName eq {}} {${log}::debug Not inserting into db, no province name yet; return}
-#
+#    set data [$args get 0 end]
 #    # This should return the db ID for the current country
 #    set countryID [db eval "SELECT Country_ID FROM Countries WHERE CountryCode='$program(db,currentCountryCode)'"]
+#    
+#    foreach entry $data {
+#        set pAbbr [join [lrange $entry 1 1]]
+#        set pName [join [lrange $entry 2 2]]
+#        set pCodeHi [join [lrange $entry 3 3]]
+#        set pCodeLo [join [lrange $entry 4 4]]
+#        
+#        if {$pAbbr eq {}} {${log}::debug Not inserting into db, no abbreviation yet; break}
+#        if {$pName eq {}} {${log}::debug Not inserting into db, no province name yet; break}
+#        
+#        ${log}::debug $pAbbr $pName $pCodeHi $pCodeLo
+#    }
+#    
+#
+#
+#
+#    
 #    #${log}::debug countryID: $countryID
 #
 #    # Match Country and Province Abbreviation
-#    set dbCheck [eAssist_db::dbWhereQuery -columnNames "ProvAbbr ProvName" -table Provinces -where "CountryID='$countryID' AND ProvAbbr='$pAbbr'"]
-#    set myWhere "CountryID='$countryID' AND ProvAbbr='$pAbbr'"
-#    set myProv "ProvName = '$pName'"
-#    
-#    if {$dbCheck == 0} {
-#        ${log}::debug Didn't match province abbreviation, trying province name
-#        # Didn't find the Province Abbreviation in the DB, lets see if we can find the Province Name. The user may have modified the abbreviation.
-#        set dbCheck [eAssist_db::dbWhereQuery -columnNames "ProvAbbr ProvName" -table Provinces -where "CountryID='$countryID' AND ProvName='$pName'"]
-#        set myWhere "CountryID='$countryID' AND ProvName='$pName'"
-#        set myProv "ProvAbbr = '$pAbbr'"
-#        #${log}::debug Found the CountryName: $dbCheck
-#    }
-#    
-#    ${log}::debug CountryID: $countryID
-#    ${log}::debug dbCheck: $dbCheck
-#    
-#    if {$dbCheck == ""} {
-#        # INSERT
-#        ${log}::debug Inserting into db ... $args
-#        db eval "INSERT or ABORT INTO Provinces (ProvAbbr, ProvName, PostalCodeLowEnd, PostalCodeHighEnd, CountryID)
-#            VALUES ('$pAbbr', '$pName', '$pCodeLo', '$pCodeHi', '$countryID')"
-#    } else {
-#        # UPDATE
-#        ${log}::debug UPDATEing into db ... $args
-#        ${log}::debug Elements - myProv: $myProv
-#        ${log}::debug Elements - LowEnd: $pCodeLo
-#        ${log}::debug Elements - HighEnd: $pCodeHi
-#        ${log}::debug Elements - CountryID: $countryID
-#        #db eval "UPDATE Countries SET CountryCode = '$cCode', CountryName = '$cName' $myWhere"
-#        db eval "UPDATE Provinces SET $myProv,
-#                                        PostalCodeLowEnd = '$pCodeLo',
-#                                        PostalCodeHighEnd = '$pCodeHi'
-#                                WHERE $myWhere"
-#    }
+#    #set dbCheck [eAssist_db::dbWhereQuery -columnNames "ProvAbbr ProvName" -table Provinces -where "CountryID='$countryID' AND ProvAbbr='$pAbbr'"]
+#    #set myWhere "CountryID='$countryID' AND ProvAbbr='$pAbbr'"
+#    #set myProv "ProvName = '$pName'"
+#    #
+#    #if {$dbCheck == 0} {
+#    #    ${log}::debug Didn't match province abbreviation, trying province name
+#    #    # Didn't find the Province Abbreviation in the DB, lets see if we can find the Province Name. The user may have modified the abbreviation.
+#    #    set dbCheck [eAssist_db::dbWhereQuery -columnNames "ProvAbbr ProvName" -table Provinces -where "CountryID='$countryID' AND ProvName='$pName'"]
+#    #    set myWhere "CountryID='$countryID' AND ProvName='$pName'"
+#    #    set myProv "ProvAbbr = '$pAbbr'"
+#    #    #${log}::debug Found the CountryName: $dbCheck
+#    #}
+#    #
+#    #${log}::debug CountryID: $countryID
+#    #${log}::debug dbCheck: $dbCheck
+#    #
+#    #if {$dbCheck == ""} {
+#    #    # INSERT
+#    #    ${log}::debug Inserting into db ... $args
+#    #    db eval "INSERT or ABORT INTO Provinces (ProvAbbr, ProvName, PostalCodeLowEnd, PostalCodeHighEnd, CountryID)
+#    #        VALUES ('$pAbbr', '$pName', '$pCodeLo', '$pCodeHi', '$countryID')"
+#    #} else {
+#    #    # UPDATE
+#    #    ${log}::debug UPDATEing into db ... $args
+#    #    ${log}::debug Elements - myProv: $myProv
+#    #    ${log}::debug Elements - LowEnd: $pCodeLo
+#    #    ${log}::debug Elements - HighEnd: $pCodeHi
+#    #    ${log}::debug Elements - CountryID: $countryID
+#    #    #db eval "UPDATE Countries SET CountryCode = '$cCode', CountryName = '$cName' $myWhere"
+#    #    db eval "UPDATE Provinces SET $myProv,
+#    #                                    PostalCodeLowEnd = '$pCodeLo',
+#    #                                    PostalCodeHighEnd = '$pCodeHi'
+#    #                            WHERE $myWhere"
+#    #}
 #
 #    
 #}
+##
+##proc eAssistSetup::dbInsertProv {args} {
+##    #****f* dbInsertProv/eAssistSetup
+##    # CREATION DATE
+##    #   09/30/2014 (Tuesday Sep 30)
+##    #
+##    # AUTHOR
+##    #	Casey Ackels
+##    #
+##    # COPYRIGHT
+##    #	(c) 2014 Casey Ackels
+##    #   
+##    #
+##    # SYNOPSIS
+##    #   eAssistSetup::dbInsertProv args 
+##    #
+##    # FUNCTION
+##    #	Inserts/Updates Province entries
+##    #   
+##    #   
+##    # CHILDREN
+##    #	N/A
+##    #   
+##    # PARENTS
+##    #   
+##    #   
+##    # NOTES
+##    #   
+##    #   
+##    # SEE ALSO
+##    #   
+##    #   
+##    #***
+##    global log program
+##
+##    set args [join $args]
+##    
+##    ${log}::debug Prov Args: $args
+##    ${log}::debug ProvName: [lrange $args 1 1]
+##
+##    set pAbbr [join [lrange $args 0 0]]
+##    set pName [join [lrange $args 1 1]]
+##    set pCodeHi [join [lrange $args 2 2]]
+##    set pCodeLo [join [lrange $args 3 3]]
+##    
+##    if {$pAbbr eq {}} {${log}::debug Not inserting into db, no abbreviation yet; return}
+##    if {$pName eq {}} {${log}::debug Not inserting into db, no province name yet; return}
+##
+##    # This should return the db ID for the current country
+##    set countryID [db eval "SELECT Country_ID FROM Countries WHERE CountryCode='$program(db,currentCountryCode)'"]
+##    #${log}::debug countryID: $countryID
+##
+##    # Match Country and Province Abbreviation
+##    set dbCheck [eAssist_db::dbWhereQuery -columnNames "ProvAbbr ProvName" -table Provinces -where "CountryID='$countryID' AND ProvAbbr='$pAbbr'"]
+##    set myWhere "CountryID='$countryID' AND ProvAbbr='$pAbbr'"
+##    set myProv "ProvName = '$pName'"
+##    
+##    if {$dbCheck == 0} {
+##        ${log}::debug Didn't match province abbreviation, trying province name
+##        # Didn't find the Province Abbreviation in the DB, lets see if we can find the Province Name. The user may have modified the abbreviation.
+##        set dbCheck [eAssist_db::dbWhereQuery -columnNames "ProvAbbr ProvName" -table Provinces -where "CountryID='$countryID' AND ProvName='$pName'"]
+##        set myWhere "CountryID='$countryID' AND ProvName='$pName'"
+##        set myProv "ProvAbbr = '$pAbbr'"
+##        #${log}::debug Found the CountryName: $dbCheck
+##    }
+##    
+##    ${log}::debug CountryID: $countryID
+##    ${log}::debug dbCheck: $dbCheck
+##    
+##    if {$dbCheck == ""} {
+##        # INSERT
+##        ${log}::debug Inserting into db ... $args
+##        db eval "INSERT or ABORT INTO Provinces (ProvAbbr, ProvName, PostalCodeLowEnd, PostalCodeHighEnd, CountryID)
+##            VALUES ('$pAbbr', '$pName', '$pCodeLo', '$pCodeHi', '$countryID')"
+##    } else {
+##        # UPDATE
+##        ${log}::debug UPDATEing into db ... $args
+##        ${log}::debug Elements - myProv: $myProv
+##        ${log}::debug Elements - LowEnd: $pCodeLo
+##        ${log}::debug Elements - HighEnd: $pCodeHi
+##        ${log}::debug Elements - CountryID: $countryID
+##        #db eval "UPDATE Countries SET CountryCode = '$cCode', CountryName = '$cName' $myWhere"
+##        db eval "UPDATE Provinces SET $myProv,
+##                                        PostalCodeLowEnd = '$pCodeLo',
+##                                        PostalCodeHighEnd = '$pCodeHi'
+##                                WHERE $myWhere"
+##    }
+##
+##    
+##}

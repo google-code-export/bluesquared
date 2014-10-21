@@ -79,8 +79,9 @@ proc eAssistSetup::countries_GUI {} {
         ttk::label $f1_b.txt2 -text [mc "Name"]
         ttk::entry $f1_b.entry2
         
-        ttk::button $f1_b.btn1 -text [mc "Add"] -command "eAssistSetup::modifyCountry $f1.listbox Countries $f1_b"
-        ttk::button $f1_b.btn2 -text [mc "Delete"] -command "eAssistSetup::delCountryProv $f1.listbox"
+        #ttk::button $f1_b.btn1 -text [mc "Add"] -command "eAssistSetup::modifyCountry $f1.listbox Countries $f1_b"
+        ttk::button $f1_b.btn1 -text [mc "Add"] -command "eAssistSetup::loadCtryProv -add $f1.listbox $f1_b Countries {Country_ID CountryCode CountryName}"
+        ttk::button $f1_b.btn2 -text [mc "Delete"] -command "eAssistSetup::loadCtryProv -delete $f1.listbox $f1_b Countries {Country_ID CountryCode CountryName}"
         
         grid $f1_b.txt1 -column 0 -row 0 -padx 2p -pady 2p -sticky nwe
         grid $f1_b.entry1 -column 1 -row 0 -padx 2p -pady 2p
@@ -91,8 +92,9 @@ proc eAssistSetup::countries_GUI {} {
         grid $f1_b.btn2 -column 2 -row 1 -padx 0p -pady 0p -sticky nwe
     
     tablelist::tablelist $f1.listbox -columns {
-                                                0   "..."
-                                                0  "2-Digit Code"
+                                                0   "..." center
+                                                0   "Country_ID" center
+                                                0  "2-Digit Code" center
                                                 50  "Name"} \
                                         -showlabels yes \
                                         -height 10 \
@@ -115,11 +117,15 @@ proc eAssistSetup::countries_GUI {} {
         $f1.listbox columnconfigure 0 -name "count" \
                                             -showlinenumbers 1 \
                                             -labelalign center
+        
+        $f1.listbox columnconfigure 1 -name "Country_ID" \
+                                            -labelalign center \
+                                            -hide yes
     
-        $f1.listbox columnconfigure 1 -name "CountryCode" \
+        $f1.listbox columnconfigure 2 -name "CountryCode" \
                                             -labelalign center
         
-        $f1.listbox columnconfigure 2 -name "CountryName" \
+        $f1.listbox columnconfigure 3 -name "CountryName" \
                                             -labelalign center
 
     ttk::scrollbar $f1.scrolly -orient v -command [list $f1.listbox yview]
@@ -137,15 +143,10 @@ proc eAssistSetup::countries_GUI {} {
     ::autoscroll::autoscroll $f1.scrolly ;# Enable the 'autoscrollbar'
     ::autoscroll::autoscroll $f1.scrollx
     
-    set countries [eAssist_db::dbSelectQuery -columnNames "CountryCode CountryName" -table Countries]
-    if {$countries != ""} {
-        foreach country $countries {
-            $f1.listbox insert end [list {} [lrange $country 0 0] [lrange $country 1 end]]
-            ${log}::debug Country code: [lrange $country 0 0] Name: [lrange $country 1 end]
-        }
-    }
+    eAssistSetup::loadCtryProv -show $f1.listbox $f1_b Countries {Country_ID CountryCode CountryName}
     
-
+    # Populate the entries with the selected row so we can edit/modify the data.
+    bind [$f1.listbox bodytag] <Double-ButtonRelease-1> "eAssistSetup::editTblEntry $f1.listbox $f1_b Countries Country_ID"
     
     #
     # --- Frame 2
@@ -174,8 +175,8 @@ proc eAssistSetup::countries_GUI {} {
         ttk::entry $f2_b.entry4
        
         # See the bindings when updating these commands
-        ttk::button $f2_b.btn1 -text [mc "Add"] -command "eAssistSetup::modifyCountry $f2.tbl2 $f2_b"
-        ttk::button $f2_b.btn2 -text [mc "Delete"] -command "eAssistSetup::delCountryProv $f2.tbl2"
+        ttk::button $f2_b.btn1 -text [mc "Add"] -command "eAssistSetup::loadCtryProv -add $f2.tbl2 $f2_b Provinces {Prov_ID ProvAbbr ProvName PostalCodeLowEnd PostalCodeHighEnd CountryID}; ea::tools::modifyButton $f2_b.btn1 -text [mc Add]"; #eAssistSetup::modifyCountry $f2.tbl2 $f2_b
+        ttk::button $f2_b.btn2 -text [mc "Delete"] -command "eAssistSetup::loadCtryProv -delete $f2.tbl2 $f2_b Provinces {Prov_ID ProvAbbr ProvName PostalCodeLowEnd PostalCodeHighEnd CountryID}"
         
         grid $f2_b.txt0 -column 0 -row 0 -sticky nse -pady 1p -padx 2p
         grid $f2_b.cbx1 -column 1 -row 0 -sticky ew
@@ -195,11 +196,12 @@ proc eAssistSetup::countries_GUI {} {
 
 
     tablelist::tablelist $f2.tbl2 -columns {
-                                                0   "..."
-                                                0 "Abbreviation"
-                                                50 "Name"
-                                                25 "PostCode Low End"
-                                                25 "PostCode High End"} \
+                                                0   "..." center
+                                                0   "Prov_ID" center
+                                                0   "Abbreviation" center
+                                                50  "Name"
+                                                25  "PostCode Low End"
+                                                25  "PostCode High End"} \
                                         -showlabels yes \
                                         -height 10 \
                                         -selectbackground yellow \
@@ -221,21 +223,25 @@ proc eAssistSetup::countries_GUI {} {
                                             -showlinenumbers 1 \
                                             -labelalign center
         
-        $f2.tbl2 columnconfigure 1 -name "ProvAbbr" \
+        $f2.tbl2 columnconfigure 1 -name "Prov_ID" \
+                                            -labelalign center \
+                                            -hide yes
+        
+        $f2.tbl2 columnconfigure 2 -name "ProvAbbr" \
                                             -labelalign center
         
-        $f2.tbl2 columnconfigure 2 -name "ProvName" \
+        $f2.tbl2 columnconfigure 3 -name "ProvName" \
                                             -labelalign center
         
-        $f2.tbl2 columnconfigure 3 -name "PostalCodeLowEnd" \
+        $f2.tbl2 columnconfigure 4 -name "PostalCodeLowEnd" \
                                             -labelalign center
         
-        $f2.tbl2 columnconfigure 4 -name "PostalCodeHighEnd" \
+        $f2.tbl2 columnconfigure 5 -name "PostalCodeHighEnd" \
                                             -labelalign center
 
         
-    ttk::scrollbar $f2.scrolly -orient v -command [list $f2.listbox yview]
-    ttk::scrollbar $f2.scrollx -orient h -command [list $f2.listbox xview]
+    ttk::scrollbar $f2.scrolly -orient v -command [list $f2.tbl2 yview]
+    ttk::scrollbar $f2.scrollx -orient h -command [list $f2.tbl2 xview]
     
     grid $f2.tbl2 -column 0 -row 1 -sticky news
     
@@ -248,10 +254,14 @@ proc eAssistSetup::countries_GUI {} {
     ::autoscroll::autoscroll $f2.scrolly ;# Enable the 'autoscrollbar'
     ::autoscroll::autoscroll $f2.scrollx
     
+    #bind $f2_b.cbx1 <<ComboboxSelected>> "eAssistSetup::loadCtryProv -show $f2.tbl2 {} Provinces {Prov_ID ProvAbbr ProvName PostalCodeLowEnd PostalCodeHighEnd} $f2_b.cbx1"; #eAssistSetup::dbGetProvinces $f2.tbl2 %W
     bind $f2_b.cbx1 <<ComboboxSelected>> "eAssistSetup::dbGetProvinces $f2.tbl2 %W"
-    bind $f2_b.btn1 <Return> "eAssistSetup::modifyCountry $f2.tbl2 $f2_b"
+    #bind $f2_b.btn1 <Return> "eAssistSetup::modifyCountry $f2.tbl2 $f2_b"
     
     # Populate the entries with the selected row so we can edit/modify the data.
-    bind [$f2.tbl2 bodytag] <Double-ButtonRelease-1> "eAssistSetup::editTblEntry $f2.tbl2 $f2_b"
+    bind [$f2.tbl2 bodytag] <Double-ButtonRelease-1> "eAssistSetup::editTblEntry $f2.tbl2 $f2_b Provinces Prov_ID; ea::tools::modifyButton $f2_b.btn1 -text [mc Modify]"
+    
+    # Clear entries when selecting another record
+    bind [$f2.tbl2 bodytag] <ButtonRelease-1> "eAssistSetup::resetEntries $f2_b; ea::tools::modifyButton $f2_b.btn1 -text [mc Add]"
 
 } ;# eAssistSetup::countries_GUI

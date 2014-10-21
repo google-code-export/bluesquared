@@ -29,6 +29,8 @@
 
 namespace eval eAssist_Global {}
 
+namespace eval ea::tools {}
+
 proc eAssist_Global::resetFrames {args} {
     #****f* resetFrames/eAssist_Global
     # AUTHOR
@@ -520,6 +522,63 @@ proc eAssist_Global::validate {val validation char args} {
 return $returnValue
     
 } ;# eAssist_Global::validate
+
+
+proc ea::tools::modifyButton {wid args} {
+    #****f* tools::modifyButton/ea
+    # CREATION DATE
+    #   10/20/2014 (Monday Oct 20)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::tools::modifyButton args 
+    #
+    # FUNCTION
+    #	Modifies the button based on what was passed
+    #	wid = path to the widget
+    #	-text New name that the widget should have
+    #	-state normal or disabled
+    #	-command New command
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    foreach {key value} $args {
+	switch -- $key {
+	    -text	{set btnConfig(txt) "-text $value"; ${log}::debug Set btnConfig(txt)}
+	    -state	{set btnConfig(state) "-state $value"; ${log}::debug Set btnConfig(state)}
+	    -command	{set btnConfig(command) "-command $value"; ${log}::debug Set btnConfig(command)}
+	    default	{${log}::notice [info level 1] $key doesn't exist}
+	}
+    }
+
+    if {[array exists btnConfig]} {
+	foreach val [array names btnConfig] {
+	    $wid configure {*}$btnConfig($val)
+	}
+	array unset btnConfig
+    }
+
+} ;# ea::tools::modifyButton
 
 
 proc eAssist_Global::launchFilters {} {
