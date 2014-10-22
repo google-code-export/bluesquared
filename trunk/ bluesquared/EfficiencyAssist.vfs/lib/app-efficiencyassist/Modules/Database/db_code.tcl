@@ -23,7 +23,9 @@
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 package provide eAssist_db 1.0
 
-namespace eval eAssist_db {}
+namespace eval eAssist_db {} ;# Old do not use
+namespace eval ea::db {}
+
 
 
 proc eAssist_db::loadDB {} {
