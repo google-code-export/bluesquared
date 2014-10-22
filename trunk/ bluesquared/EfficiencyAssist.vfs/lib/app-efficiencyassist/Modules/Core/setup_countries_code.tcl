@@ -38,7 +38,7 @@ proc eAssistSetup::loadCtryProv {method tbl wid dbTable cols args} {
     #
     # SYNOPSIS
     #   eAssistSetup::loadCtryProv method tbl wid dbTable cols args
-    #   method = -add | -delete
+    #   method = -add | -delete | -query
     #   tbl = table widget
     #   wid = entry widgets
     #   dbTable = Table in db
