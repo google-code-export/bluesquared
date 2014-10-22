@@ -502,18 +502,21 @@ proc eAssist_Global::validate {val validation char args} {
     foreach {key value} $args {
 		switch -- $key {
 			-length	{ ${log}::debug Length: [string length $val] - $val
-					if {$value < [string length $val]} {set returnValue 0; ${log}::debug only $value chars not ([string length $val]), breaking; break}
+					if {$value < [string length $val]} {bell; set returnValue 0; ${log}::debug only $value chars not ([string length $val]), breaking; break}
 				}
-			-alpha	{ ${log}::debug Alnum: [string is alnum $char] - $char
-					if {$value eq "no" & [string is alnum $char] == 1} {set returnValue 0; ${log}::debug NaN, found one - breaking; break}
+			-alpha	{ ${log}::debug Alpha: [string is alpha $char] - $char
+					if {$value eq "no" & [string is alnum $char] == 1} {bell; set returnValue 0; ${log}::debug NaN, found one - breaking; break}
 					
 				}
 			-space	{ ${log}::debug Space: [string is space $char] - $char
-					if {$value eq "no" & [string is space $char] == 1} {set returnValue 0; ${log}::debug No Spaces, found one - breaking; break}
+					if {$value eq "no" & [string is space $char] == 1} {bell; set returnValue 0; ${log}::debug No Spaces, found one - breaking; break}
 					
 				}
 			-punc	{ ${log}::debug Punc: [string is punc $char] - $char
-					if {$value eq "no" & [string is punc $char] == 1} {set returnValue 0; ${log}::debug No Punctuation, found one - breaking; break}
+					if {$value eq "no" & [string is punc $char] == 1} {bell; set returnValue 0; ${log}::debug No Punctuation, found one - breaking; break}
+				}
+			-integer	{ ${log}::debug Integer: [string is integer $char] - $char
+					if {$value eq "only" & [string is integer $char] == 0} {bell; set returnValue 0; ${log}::debug Integers Only - breaking; break}
 				}
 			default	{${log}::debug -DEFAULT-}
 		}

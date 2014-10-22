@@ -171,6 +171,10 @@ proc eAssistSetup::addressHeaders_GUI {} {
     
     ::autoscroll::autoscroll $w(hdr_frame1a).scrolly ;# Enable the 'autoscrollbar'
     ::autoscroll::autoscroll $w(hdr_frame1a).scrollx
+	
+	ttk::button $w(hdr_frame1a).btn1 -text [mc "Add Headers"] -command {eAssistSetup::editHeaders}
+	
+	grid $w(hdr_frame1a).btn1 -column 0 -row 2 -sticky w
 
     
     #
@@ -210,3 +214,136 @@ proc eAssistSetup::addressHeaders_GUI {} {
     }
 	
 } ;# eAssistSetup::addressHeaders_GUI
+
+
+proc eAssistSetup::editHeaders {args} {
+    #****f* editHeaders/eAssistSetup
+    # CREATION DATE
+    #   10/21/2014 (Tuesday Oct 21)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssistSetup::editHeaders args 
+    #
+    # FUNCTION
+    #	Add/Edit headers
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   The prefixed number to the entry/combo/check widgets depicts which sequence they are in, within the DB.
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log tmp_headerOpts
+	
+	set wid .modHeader
+	
+	if {[winfo exists $wid)] == 1} {destroy $wid}
+    
+    # .. Create the dialog window
+    toplevel $wid
+    wm transient $wid .
+    wm title $wid [mc "Add/Edit Headers"]
+
+    # Put the window in the center of the parent window
+    set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
+    set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
+    #wm geometry .filterEditor 625x375+${locX}+${locY}
+    wm geometry $wid +${locX}+${locY}
+
+	
+	## --------
+	## General setup
+	array set tmp_headerOpts {
+		07_ckbtn1 0
+		06_ckbtn2 1
+		09_ckbtn3 0
+	}
+	
+	
+	## ---------
+	## Frame 1 / General widgets
+	
+	set f1 [ttk::labelframe $wid.f1 -text [mc "Header Setup"] -padding 10]
+	pack $f1 -padx 2p -pady 2p
+	
+    ttk::label $f1.txt1 -text [mc "Internal Header"]
+	ttk::entry $f1.01_entry1
+	
+	ttk::label $f1.txt2 -text [mc "Output Header"]
+	ttk::entry $f1.03_entry2
+	
+	ttk::label $f1.txt3 -text [mc "Max Length"]
+	ttk::entry $f1.02_entry3 -validate all -validatecommand {eAssist_Global::validate %W %d %S -integer only}
+	
+	ttk::label $f1.txt4 -text [mc "Column Width"]
+	ttk::entry $f1.08_entry4 -validate all -validatecommand {eAssist_Global::validate %W %d %S -integer only}
+	
+	ttk::label $f1.txt5 -text [mc "Highlight"]
+	ttk::combobox $f1.05_cbox1 -values [list "" Red Yellow] -state readonly -width 15
+	
+	ttk::label $f1.txt6 -text [mc "Widgets"]
+	ttk::combobox $f1.04_cbox2 -values [list "" ttk::entry ttk::combobox] -state readonly -width 15
+	
+	ttk::checkbutton $f1.07_ckbtn1 -text [mc "Required"] -variable tmp_headerOpts(07_ckbtn1)
+	ttk::checkbutton $f1.06_ckbtn2 -text [mc "Always Display?"] -variable tmp_headerOpts(06_ckbtn2)
+	ttk::checkbutton $f1.09_ckbtn3 -text [mc "Resize to String width"] -variable tmp_headerOpts(09_ckbtn3)
+	
+	
+	
+	grid $f1.txt1 -column 0 -row 0 -padx 2p -pady 2p -sticky e
+	grid $f1.01_entry1 -column 1 -row 0 -padx 2p -pady 2p -sticky w
+	
+	grid $f1.txt2 -column 0 -row 1 -padx 2p -pady 2p -sticky e
+	grid $f1.03_entry2 -column 1 -row 1 -padx 2p -pady 2p -sticky w
+	
+	grid $f1.txt3 -column 0 -row 2 -padx 2p -pady 2p -sticky e
+	grid $f1.02_entry3 -column 1 -row 2 -padx 2p -pady 2p -sticky w
+	
+	grid $f1.txt4 -column 0 -row 3 -padx 2p -pady 2p -sticky e
+	grid $f1.08_entry4 -column 1 -row 3 -padx 2p -pady 2p -sticky w	
+	
+	grid $f1.txt5 -column 0 -row 4 -padx 2p -pady 2p -sticky e
+	grid $f1.05_cbox1 -column 1 -row 4 -padx 2p -pady 2p -sticky w
+	
+	grid $f1.txt6 -column 0 -row 5 -padx 2p -pady 2p -sticky e
+	grid $f1.04_cbox2 -column 1 -row 5 -padx 2p -pady 2p -sticky w
+	
+	grid $f1.07_ckbtn1 -column 1 -row 6 -sticky w
+	grid $f1.06_ckbtn2 -column 1 -row 7 -sticky w
+	grid $f1.09_ckbtn3 -column 1 -row 8 -sticky w
+	
+	## ---------
+	## Buttons
+	
+	set btns [ttk::frame $wid.btns -padding 10]
+	pack $btns -padx 2p -pady 2p -anchor se
+	
+	ttk::button $btns.cncl -text [mc "Cancel"] -command "destroy $wid"
+	ttk::button $btns.save -text [mc "OK"] -command "ea::db::writeHeaderToDB $f1 Headers"
+	ttk::button $btns.svnew -text [mc "OK > New"]
+	
+	grid $btns.cncl -column 0 -row 0 -padx 2p -pady 2p -sticky e
+	grid $btns.save -column 1 -row 0 -padx 2p -pady 2p -sticky e
+	grid $btns.svnew -column 2 -row 0 -padx 2p -pady 2p -sticky e
+	
+	## --------
+	## Options
+	focus $f1.01_entry1
+
+    
+} ;# eAssistSetup::editHeaders
