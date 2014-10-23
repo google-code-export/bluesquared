@@ -164,35 +164,49 @@ proc eAssistSetup::addressHeaders_GUI {} {
 
 
     
-    #
-    #-------- Frame 1b
-    #
-    set w(hdr_frame1b) [ttk::labelframe $w(hdr_frame1).b -text [mc "Sub-Headers"]]
-    pack $w(hdr_frame1b) -expand yes -fill both -ipadx 5p -ipady 5p
+
+    ##--------
+	# Frame 1b
+    set w(hdr_frame1b) [ttk::labelframe $w(hdr_frame1).b -text [mc "Sub-Headers"] -padding 10]
+    pack $w(hdr_frame1b) -expand yes -fill both
     
     ttk::label $w(hdr_frame1b).label1 -text [mc "Header Name"]
 
     ttk::combobox $w(hdr_frame1b).cbox1 -width 20 \
-							-state readonly
+							-state readonly \
                             -textvariable masterHeader \
                             -postcommand [list ea::db::getInternalHeader $w(hdr_frame1b).cbox1]
     
     ttk::entry $w(hdr_frame1b).entry1 -width 20 -textvariable insertChildHeader
     
-    ttk::button $w(hdr_frame1b).btn1 -text [mc "Add"] -command {eAssistSetup::addToChildHeader $w(hdr_frame1b).lbox1 $w(hdr_frame1b).entry1 $insertChildHeader $parentHeader}
-    ttk::button $w(hdr_frame1b).btn2 -text [mc "Delete"] -command {eAssistSetup::removeHeader child $w(hdr_frame1b).lbox1 $parentHeader}
+    #ttk::button $w(hdr_frame1b).btn1 -text [mc "Add"] -command {eAssistSetup::addToChildHeader $w(hdr_frame1b).lbox1 $w(hdr_frame1b).entry1 $insertChildHeader $parentHeader}
+    ttk::button $w(hdr_frame1b).btn1 -text [mc "Add"] -command "ea::db::addSubHeaders $w(hdr_frame1b).lbox1 $w(hdr_frame1b).entry1 $w(hdr_frame1b).cbox1"
+	ttk::button $w(hdr_frame1b).btn2 -text [mc "Delete"] -command "ea::db::delSubHeaders $w(hdr_frame1b).lbox1 $w(hdr_frame1b).cbox1"
+	#ttk::button $w(hdr_frame1b).btn2 -text [mc "Delete"] -command {eAssistSetup::removeHeader child $w(hdr_frame1b).lbox1 $parentHeader}
     
-    listbox $w(hdr_frame1b).lbox1 -height 8 -width 20
+    listbox $w(hdr_frame1b).lbox1 -yscrollcommand [list $w(hdr_frame1b).scrolly set] \
+                                -xscrollcommand [list $w(hdr_frame1b).scrollx set] \
+								-height 8 -width 20
     
-    #-------- Grid Frame 1b
+	ttk::scrollbar $w(hdr_frame1b).scrolly -orient v -command [list $w(hdr_frame1b).lbox1 yview]
+    ttk::scrollbar $w(hdr_frame1b).scrollx -orient h -command [list $w(hdr_frame1b).lbox1 xview]
+	
+	::autoscroll::autoscroll $w(hdr_frame1b).scrolly ;# Enable the 'autoscrollbar'
+    ::autoscroll::autoscroll $w(hdr_frame1b).scrollx
+	
+	
+    ##--------
+	# Grid Frame 1b
     grid $w(hdr_frame1b).label1 -column 0 -row 0
     grid $w(hdr_frame1b).cbox1 -column 1 -row 0
     
     grid $w(hdr_frame1b).entry1 -column 1 -row 1 -sticky news
-    grid $w(hdr_frame1b).btn1 -column 2 -row 1
-    
+    grid $w(hdr_frame1b).btn1 -column 3 -row 1 -sticky ne -padx 3p
+    grid $w(hdr_frame1b).btn2 -column 3 -row 2 -sticky ne -padx 3p
+	
     grid $w(hdr_frame1b).lbox1 -column 1 -row 2 -sticky news
-    grid $w(hdr_frame1b).btn2 -column 2 -row 2 -sticky new
+	grid $w(hdr_frame1b).scrolly -column 2 -row 2 -sticky ns
+	grid $w(hdr_frame1b).scrollx -column 1 -row 3 -sticky ws
     
     ##----------
 	## Binding
