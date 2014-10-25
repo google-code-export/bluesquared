@@ -21,6 +21,53 @@
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
+proc importFiles::initVars {args} {
+    #****f* initVars/importFiles
+    # CREATION DATE
+    #   10/24/2014 (Friday Oct 24)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   importFiles::initVars args 
+    #
+    # FUNCTION
+    #	Initilize variables
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log headerParent headerAddress 
+
+    set headerParent(headerList) [eAssist_db::dbSelectQuery -columnNames InternalHeaderName -table Headers]
+    set headerParent(whiteList) [eAssist_db::dbWhereQuery -columnNames InternalHeaderName -table Headers -where AlwaysDisplay=1]
+    
+    # Setup header array with subheaders
+    foreach hdr $headerParent(headerList) {
+        # Get the HeaderID
+        #set id [eAssist_db::dbWhereQuery -columnNames Header_ID -table Headers -where "InternalHeaderName='$hdr'"]
+        
+        # Get the subheaders for the current header
+        #set $headerAddress($hdr) [eAssist_db::leftOuterJoin -cols SubHeaderName -table Headers -jtable SubHeaders -where "HeaderID=Header_ID AND InternalHeaderName='$hdr'"]
+        set headerAddress($hdr) [db eval "SELECT SubHeaderName FROM Headers LEFT OUTER JOIN SubHeaders WHERE HeaderID=Header_ID AND InternalHeaderName='$hdr'"]
+    }
+} ;# importFiles::initVars
 
 proc importFiles::readFile {fileName lbox} {
     #****f* readFile/importFiles
@@ -87,7 +134,14 @@ proc importFiles::readFile {fileName lbox} {
                     }
                 
                 foreach hdr $headerParent(headerList) {
+                    # Get the HeaderID
+                    #set id [eAssist_db::dbWhereQuery -columnNames Header_ID -table Headers -where "InternalHeaderName='$hdr'"]
+                    
+                    # Get the subheaders for the current header
+                    #set subheaders [eAssist_db::leftOuterJoin -cols SubHeaderName -table SubHeaders -jtable Headers -where "HeaderID=Header_ID AND HeaderID=$id"]
+                    
                     if {[lsearch -nocase $headerAddress($hdr) $temp] != -1} {
+                    #if {[lsearch -nocase $subheaders $temp] != -1} {}
                         #${log}::debug Found a Header Match: [lsearch -nocase $headerAddress($hdr) $temp]
                         #${log}::debug Number of matched headers: $hdr_lines
                         incr hdr_lines
@@ -107,18 +161,6 @@ proc importFiles::readFile {fileName lbox} {
                     }
                 }
             }
-            
-            
-            # ** This should be a user settable option! **
-            # While 'city' should be universal, a requirement no less, it is still possible to not have a column named 'city'.
-            #if {[string match -nocase *city* $line] || [string match -nocase *address* $line] || [string match -nocase *state* $line] || [string match -nocase *zip* $line]} {}
-            #            ${log}::notice Found the Header row - $line
-            #            lappend process(dataList) $line
-            #            set gateway 1
-            #    {} else {}
-            #        ${log}::notice Searching for the header row ...
-            #        continue
-            #{}
         } else {
             lappend process(dataList) $line
         }
@@ -142,15 +184,35 @@ proc importFiles::readFile {fileName lbox} {
         # Insert all headers, regardless if they match or not.
         $lbox insert end $header
         
-        foreach headerName $headerParent(headerList) {
-            if {$process(Header) != ""} {
+        if {$options(AutoAssignHeader) == 1} {
+            foreach headerName $headerParent(headerList) {
+                # Get the HeaderID
+                #set id [eAssist_db::dbWhereQuery -columnNames Header_ID -table Headers -where "InternalHeaderName='$headerName'"]
+                set id [db eval "SELECT Header_ID FROM Headers WHERE InternalHeaderName='$headerName'"]
+                # Get the subheaders for the current header
+                #set subheaders [eAssist_db::leftOuterJoin -cols SubHeaderName -table SubHeaders -jtable Headers -where "HeaderID=Header_ID AND HeaderID=$id"]
+                set subheaders [db eval "SELECT SubHeaderName FROM SubHeaders LEFT OUTER JOIN Headers WHERE HeaderID=Header_ID AND HeaderID=$id"]
+                
+                if {$process(Header) != ""} {
+                    if {[lsearch -nocase $subheaders $header] != -1} {
+                        eAssistHelper::autoMap $headerName $header
+                        ${log}::debug MAPPING - $headerName TO $header
+                    }
                     # headerAddress($headername) = various spellings of the headername.
                     # Now we check to see if we can auto-map the headers with the information that we are already aware of.
-                    if {[lsearch -nocase $headerAddress($headerName) $header] != -1} {
-                        if {$options(AutoAssignHeader) == 1} {
-                            eAssistHelper::autoMap $headerName $header
-                        }
-                    }
+                    #if {[lsearch -nocase $headerAddress($headerName) $header] != -1} {
+                    #    if {$options(AutoAssignHeader) == 1} {
+                    #        eAssistHelper::autoMap $headerName $header
+                    #    }
+                    #}
+
+                    
+                    #if {[lsearch -nocase $subheaders $header] != -1} {
+                    #    if {$options(AutoAssignHeader) == 1} {
+                    #        eAssistHelper::autoMap $headerName $header
+                    #    }
+                    #}
+                }
             }
         }
     }
@@ -182,6 +244,11 @@ proc importFiles::processFile {win} {
     #	
     #
     # NOTES
+    #   headerParent(headerList) - List of InternalHeaderName
+    #   headerParent(outPutHeader) - List of Output Headers
+    #   headerParent(whiteList) - List of headers that should always be displayed
+    #   headerAddress() - Contains the subheaders associated with the listed master header
+    #   headerParams() - Contains the setup params for the specified header
     #
     # SEE ALSO
     #   IFMenus::tblPopup
@@ -202,12 +269,12 @@ proc importFiles::processFile {win} {
     
     # Whitelist for required columns, so that they won't be hidden.   
     ## Dynamically query the header setup params, to know which columns should be whitelisted.
-    if {[info exists headerParent(whiteList)]} {unset headerParent(whiteList)}
-    foreach item $headerParent(headerList) {
-        if {[lindex $headerParams($item) 4] eq "Yes"} {
-            lappend headerParent(whiteList) $item
-        }
-    }
+    #if {[info exists headerParent(whiteList)]} {unset headerParent(whiteList)}
+    #foreach item $headerParent(headerList) {
+    #    if {[lindex $headerParams($item) 4] eq "Yes"} {
+    #        lappend headerParent(whiteList) $item
+    #    }
+    #}
     # Ensure the 'count' column is whitelisted
     if {[lsearch $headerParent(whiteList) count] == -1} {lappend headerParent(whiteList) count}
       
@@ -245,6 +312,10 @@ proc importFiles::processFile {win} {
 
         for {set x 0} {$ColumnCount > $x} {incr x} {
             set ColumnName [$files(tab3f2).tbl columncget $x -name]
+            
+            # Figure out if the listData contains more chars than allowed; at the same time set the highlight configuration if it does exceed the limits
+            set headerStringLength [join [eAssist_db::dbWhereQuery -columnNames HeaderMaxLength -table Headers -where InternalHeaderName='$ColumnName']]
+            set bgColor [join [eAssist_db::dbWhereQuery -columnNames Highlight -table Headers -where InternalHeaderName='$ColumnName']]
 
             set tmpHeader [lindex $FileHeaders [lsearch -nocase $FileHeaders *$ColumnName]]
 
@@ -277,6 +348,7 @@ proc importFiles::processFile {win} {
                 if {[lsearch -nocase $headerParent(whiteList) $ColumnName] == -1} {
                     # If we dont have an index for it, then lets hide the column aswell.
                     # This will not hide columns that have no data in it, just columns that were not in the original file.
+                    # WARNING - If importing more than one file it is possible for a column that has data in it from the first file, to be hidden by the second file.
                 
                     ${log}::notice $ColumnName is not on the white list
                     ${log}::notice $ColumnName doesn't contain any data
@@ -287,12 +359,13 @@ proc importFiles::processFile {win} {
             } else {
                 set listData [string trim [lindex $l_line $index]]
 
-                # Figure out if the listData contains more chars than allowed; at the same time set the highlight configuration if it does exceed the limits
-                if {[string length $listData] > [lindex $headerParams($ColumnName) 0]} {
+                
+                #OLD if {[string length $listData] > [lindex $headerParams($ColumnName) 0]} {}
+                if {[string length $listData] > $headerStringLength} {
                     #${log}::debug List: $listData - Length: [string length $listData]
                     lappend maxCharColumn $x
                     
-                    set bgColor [lindex $headerParams($ColumnName) 3]
+                    #OLD set bgColor [lindex $headerParams($ColumnName) 3]
                     
                     if {$bgColor != ""} {
                         set backGround $bgColor
@@ -309,13 +382,13 @@ proc importFiles::processFile {win} {
                                     }
                     }
                     state       {
-                        set getZip [lindex $FileHeaders [lsearch -nocase $FileHeaders *zip]]
-                        set idxZip [string trimleft [lrange [split $getZip _] 0 0] 0]
+                        #set getZip [lindex $FileHeaders [lsearch -nocase $FileHeaders *zip]]
+                        #set idxZip [string trimleft [lrange [split $getZip _] 0 0] 0]
                         
-                        importFiles::detectCountry $l_line $listData $idxZip                        
+                        #importFiles::detectCountry $l_line $listData $idxZip                        
                     }
                     *zip        {
-                        ${log}::debug Zip code: $listData
+                        #${log}::debug Zip code: $listData
                     }
                     default     {}
                 }
@@ -389,6 +462,7 @@ proc importFiles::startCmd {tbl row col text} {
     #	
     #
     # NOTES
+    #   dist() - Contains all distribution types
     #
     # SEE ALSO
     #
@@ -595,27 +669,41 @@ proc importFiles::insertColumns {tbl} {
         incr x
         $tbl insertcolumns end 0 $hdr
         
-        set myWidget [lindex $headerParams($hdr) 2]
+        # Set a default widget type
+        #OLD set myWidget [lindex $headerParams($hdr) 2]
+        set myWidget [eAssist_db::dbWhereQuery -columnNames Widget -table Headers -where InternalHeaderName='$hdr']
         if {$myWidget == ""} {
-            # Just in case an entry wasn't filled out, lets make a default.
             set myWidget ttk::entry
         }
         
-        if {[lindex $headerParams($hdr) 5] eq "Yes"} {
+        
+        ## Query Headers table for values, then issue the columnconfigure command.
+        # Setting the color to red if it is a required column.
+        #OLD if {[lindex $headerParams($hdr) 5] eq "Yes"} {}
+        set reqCol [eAssist_db::dbWhereQuery -columnNames Required -table Headers -where InternalHeaderName='$hdr']
+        
+        if {$reqCol == 1} {
             set hdrFG red
             } else {
                 set hdrFG black
         }
+        
+        set widthCol [join [eAssist_db::dbWhereQuery -columnNames DefaultWidth -table Headers -where InternalHeaderName='$hdr']]
+        ${log}::debug ---WidthCOL---: $widthCol
+        
+        if {$widthCol == ""} {set widthCol 0}
 
         $tbl columnconfigure $x \
                             -name $hdr \
                             -labelalign center \
                             -editable yes \
                             -editwindow $myWidget \
-                            -labelforeground $hdrFG
+                            -labelforeground $hdrFG \
+                            -width $widthCol
         
+        # This should be listed as an option to the columnconfigure above; use 0 if the value has not been set
         # Ensure that we don't have to manually expand this column ...
-        if {$hdr eq "DistributionType"} {$tbl columnconfigure $x -width $distWidth}
+        #if {$hdr eq "DistributionType"} {$tbl columnconfigure $x -width $distWidth}
         
     }
 	

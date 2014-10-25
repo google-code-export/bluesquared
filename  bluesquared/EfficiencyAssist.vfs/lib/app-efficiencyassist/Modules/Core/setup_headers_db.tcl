@@ -413,14 +413,64 @@ proc ea::db::delSubHeaders {widListbox widCombobox} {
     #***
     global log
 
-    ${log}::debug SELECTION [$widListbox get [$widListbox curselection]]
-    ${log}::debug HEADER [$widCombobox get]
+    #${log}::debug SELECTION [$widListbox get [$widListbox curselection]]
+    #${log}::debug HEADER [$widCombobox get]
     set masterHeader [$widCombobox get]
     set childHeader [$widListbox get [$widListbox curselection]]
     
-    eAssist_db::delete SubHeaders SubHeaderName [$widListbox curselection]
+    eAssist_db::delete SubHeaders SubHeaderName $childHeader
 
     # Update the listbox widget
     ea::db::getSubHeaders $masterHeader $widListbox
     
 } ;# ea::db::delSubHeaders
+
+
+proc ea::db::delMasterHeader {widTable} {
+    #****f* delMasterHeader/ea::db
+    # CREATION DATE
+    #   10/24/2014 (Friday Oct 24)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::db::delMasterHeader widTable 
+    #
+    # FUNCTION
+    #	Deletes the selected headers; this will delete all child headers also
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    
+    set data [$widTable get [$widTable curselection]]
+    #${log}::debug data: $data
+    
+    set curSelection [$widTable curselection]
+    set headerID [lrange $data 1 1]
+    
+    # Delete from the widget
+    $widTable delete $curSelection $curSelection
+    
+    # Delete from the DB
+    eAssist_db::delete Headers Header_ID $headerID
+    
+} ;# ea::db::delMasterHeader
