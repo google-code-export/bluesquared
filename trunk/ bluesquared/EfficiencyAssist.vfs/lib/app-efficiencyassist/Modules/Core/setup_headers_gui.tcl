@@ -78,9 +78,11 @@ proc eAssistSetup::addressHeaders_GUI {} {
 	
 		ttk::button $w(hdr_frame1b).btn1 -text [mc "Add"] -command {eAssistSetup::Headers add}
 		ttk::button $w(hdr_frame1b).btn2 -text [mc "Edit"] -command {eAssistSetup::Headers edit $w(hdr_frame1a).listbox}
+		ttk::button $w(hdr_frame1b).btn3 -text [mc "Delete"] -command {ea::db::delMasterHeader $w(hdr_frame1a).listbox}
 		
 		grid $w(hdr_frame1b).btn1 -column 0 -row 0 -padx 2p -pady 0p -sticky new
 		grid $w(hdr_frame1b).btn2 -column 1 -row 0 -padx 2p -pady 0p -sticky new
+		grid $w(hdr_frame1b).btn3 -column 2 -row 0 -padx 2p -pady 0p -sticky new
     
     tablelist::tablelist $w(hdr_frame1a).listbox -columns {
                                                     0   "..." center
@@ -179,10 +181,8 @@ proc eAssistSetup::addressHeaders_GUI {} {
     
     ttk::entry $w(hdr_frame1b).entry1 -width 20 -textvariable insertChildHeader
     
-    #ttk::button $w(hdr_frame1b).btn1 -text [mc "Add"] -command {eAssistSetup::addToChildHeader $w(hdr_frame1b).lbox1 $w(hdr_frame1b).entry1 $insertChildHeader $parentHeader}
     ttk::button $w(hdr_frame1b).btn1 -text [mc "Add"] -command "ea::db::addSubHeaders $w(hdr_frame1b).lbox1 $w(hdr_frame1b).entry1 $w(hdr_frame1b).cbox1"
 	ttk::button $w(hdr_frame1b).btn2 -text [mc "Delete"] -command "ea::db::delSubHeaders $w(hdr_frame1b).lbox1 $w(hdr_frame1b).cbox1"
-	#ttk::button $w(hdr_frame1b).btn2 -text [mc "Delete"] -command {eAssistSetup::removeHeader child $w(hdr_frame1b).lbox1 $parentHeader}
     
     listbox $w(hdr_frame1b).lbox1 -yscrollcommand [list $w(hdr_frame1b).scrolly set] \
                                 -xscrollcommand [list $w(hdr_frame1b).scrollx set] \
@@ -210,6 +210,11 @@ proc eAssistSetup::addressHeaders_GUI {} {
     
     ##----------
 	## Binding
+	bind [$w(hdr_frame1a).listbox bodytag] <Double-1> {
+		eAssistSetup::Headers edit $w(hdr_frame1a).listbox
+		#[$w(hdr_frame1a).listbox get [$w(hdr_frame1a).listbox curselection]]
+	}
+	
     bind $w(hdr_frame1b).cbox1 <<ComboboxSelected>> {
         # Display the child headers associated with the parent header
 		ea::db::getSubHeaders $masterHeader $w(hdr_frame1b).lbox1
@@ -266,7 +271,6 @@ proc eAssistSetup::Headers {{mode add} widTable} {
     # Put the window in the center of the parent window
     set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
     set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
-    #wm geometry .filterEditor 625x375+${locX}+${locY}
     wm geometry $wid +${locX}+${locY}
 
 	
@@ -338,7 +342,7 @@ proc eAssistSetup::Headers {{mode add} widTable} {
 	pack $btns -padx 2p -pady 2p -anchor se
 	
 	ttk::button $btns.cncl -text [mc "Cancel"] -command "destroy $wid"
-	ttk::button $btns.save -text [mc "OK"] -command "ea::db::writeHeaderToDB $f1 $widTable Headers"
+	ttk::button $btns.save -text [mc "OK"] -command "ea::db::writeHeaderToDB $f1 $widTable Headers; destroy $wid"
 	ttk::button $btns.svnew -text [mc "OK > New"] -state disable
 	
 	grid $btns.cncl -column 0 -row 0 -padx 2p -pady 2p -sticky e

@@ -174,8 +174,8 @@ proc eAssist_db::dbInsert {args} {
     set data $cleansedData
     
     if {[llength $colNames] != [llength $cleansedData]} {
-	${log}::notice [info level 1] Mismatched columns and data to insert into db. Dropping [lrange $colNames 0 0]
-	set colNames [lrange $colNames 1 end]
+        ${log}::notice [info level 1] Mismatched columns and data to insert into db. Dropping [lrange $colNames 0 0]
+        set colNames [lrange $colNames 1 end]
     }
        
     # If rowID exists, issue an update statement.
@@ -200,10 +200,17 @@ proc eAssist_db::dbInsert {args} {
     }
     
     if {$dbCheck eq ""} {
-        # Data doesn't exist, lets insert...
+        # No preexisting data, lets insert...
         if {[llength $colNames] == 1} {
             # Only inserting into one column
-            db eval "INSERT or ABORT INTO $tbl $colNames VALUES ($data)"
+            set colNames [join $colNames]
+            set data [join $data] ;# Remove the braces (could be a list)
+            ${log}::debug Insert_COLS: $colNames
+            ${log}::debug Insert_TABLE: $tbl
+            ${log}::debug Insert_DATA: $data
+            ${log}::debug INSERT or ABORT INTO $tbl $colNames VALUES ($data)
+            db eval "INSERT or ABORT INTO $tbl ($colNames) VALUES ($data)"
+            
         } else {
             ${log}::debug Insert_COLS: [join $colNames ,]
             ${log}::debug Insert_Data: [join $data ,]
@@ -252,6 +259,8 @@ proc eAssist_db::delete {table col args} {
     #***
     global log
     ${log}::debug --START-- [info level 1]
+    
+    set args [join $args]
     
     if {$col != ""} {
         ${log}::debug "DELETE from $table WHERE $col='$args'"
@@ -788,3 +797,55 @@ proc eAssist_db::getRowID {tbl args} {
 
     
 } ;# eAssist_db::getRowID
+
+
+proc eAssist_db::leftOuterJoin {args} {
+    #****f* leftOuterJoin/eAssist_db
+    # CREATION DATE
+    #   10/24/2014 (Friday Oct 24)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssist_db::leftOuterJoin -cols value -table value -jtable value -where value1...valueN
+    #
+    # FUNCTION
+    #	Issues a SELECT statement on the columns and tables given in the argument
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    foreach {key value} $args {
+        switch -- $key {
+            -cols   {set cols [join $value]}
+            -table  {set dbTable $value}
+            -jtable {set jdbTable $value}
+            -where  {set whereStmt [join $value]}
+        }
+    }
+    ${log}::debug cols: $cols
+    ${log}::debug table: $dbTable
+    ${log}::debug jtable: $jdbTable
+    ${log}::debug where: $whereStmt]
+    
+    db eval "SELECT $cols FROM $dbTable LEFT OUTER JOIN $jdbTable WHERE $whereStmt"
+
+} ;# eAssist_db::leftOuterJoin

@@ -32,35 +32,36 @@ intlSetup(LICENSEList) NLR
 intlSetup(TERMSList) DDP
 intlSetup(enterUOM) 
 intlSetup(enterPayer) 
-headerParent(whiteList) Company Notes DistributionType ContainerType PackageType ShippingClass InternalNotes DestinationIdentifier count
-headerParent(headerList) Company Attention Address1 Address2 Address3 City State Zip Country Phone Version Quantity Notes ShipDate DistributionType CarrierMethod 3rdPartyBilling ArriveDate ContainerType PackageType PackageQty ShippingClass Email InternalNotes DestinationIdentifier
+headerParent(whiteList) Company Attention Address1 City State Zip Version Quantity Notes DistributionType ShipVia ShippingClass
+headerParent(headerList) 3rdPartyBilling Address1 Address2 Address3 ArriveDate Attention City Company ContainerType Country DistributionType Notes PackageType Phone Quantity ShipDate ShipVia ShippingClass State Version Zip
 headerParent(outPutHeader) ShipToCompany ShipToAttention ShipToAddressLine1 ShipToAddressLine2 ShipToAddressLine3 ShipToCity ShipToState ShipToPostalCode ShipToCountry ShipToPhone Version ShipQuantity UserNotes ShipToDate DistributionType CarrierMethod 3rdPartyBilling ArriveDate ContainerType PackageType PackageQty ShippingClass Email InternalNotes
-headerAddress(ShippingClass) shippingclass
-headerAddress(Address2) addr2 add2 addressline2 {address line 2} shiptoaddressline2
-headerAddress(State) state st st. province state/province shiptostate
-headerAddress(Address3) add3 addr3 addressline3 {address line 3} shiptoaddressline3
-headerAddress(City) city shiptocity
+headerAddress(ShippingClass) ShippingClass
+headerAddress(Address2) Addr2 Add2 AddressLine2 {Address Line 2} ShipToAddressLine2
+headerAddress(State) State St St. Province State/Province ShipToState
+headerAddress(Address3) Add3 Addr3 AddressLine3 {Address Line 3} ShipToAddressLine3
+headerAddress(City) City ShipToCity
 headerAddress(PackageQty) packageqty
-headerAddress(DistributionType) distributiontype {dist type}
-headerAddress(ShipDate) {ship date} ship shipdate shiptodate
-headerAddress(PackageType) packagetype
-headerAddress(Attention) Atten attn attention contact {contact name} name Shiptoattention
+headerAddress(DistributionType) DistributionType {Dist Type}
+headerAddress(ShipDate) {Ship Date} ShipDate Ship ShipToDate
+headerAddress(PackageType) PackageType
+headerAddress(Attention) Atten Attn Attention Contact {Contact Name} Name ShipToAttention
 headerAddress(ShipTo) {Ship To}
 headerAddress(Email) UserEmail
 headerAddress(CarrierMethod) carrier carriermethod
-headerAddress(Notes) {user notes} notes usernotes
-headerAddress(Phone) phone ph shiptophone {Contact Phone}
-headerAddress(3rdPartyBilling) 3rdpartybilling
-headerAddress(Zip) zip {postal code} shiptopostalcode
-headerAddress(Country) country shiptocountry
+headerAddress(Notes) Notes {User Notes} UserNotes
+headerAddress(Phone) Phone Ph {Contact Phone} ShipToPhone
+headerAddress(3rdPartyBilling) 3rdPartyBilling
+headerAddress(Zip) Zip {Postal Code} PostalCode ShipToPostalCode {Zip Code}
+headerAddress(Country) Country ShipToCountry
+headerAddress(ShipVia) ShipVia
 headerAddress(DestinationIdentifier) destinationidentifier
-headerAddress(ContainerType) containertype
-headerAddress(Version) version vers
+headerAddress(ContainerType) ContainerType
+headerAddress(Version) Version Vers
 headerAddress(InternalNotes) {Internal Notes} internalnotes
-headerAddress(ArriveDate) arrivedate
-headerAddress(Quantity) qty copies quantity shipquantity
-headerAddress(Company) destination company {company name} business shiptocompany {destination name}
-headerAddress(Address1) add1 addr {Address Line 1} addressline1 Address addr1 shiptoaddressline1
+headerAddress(ArriveDate) ArriveDate
+headerAddress(Quantity) Qty Quantity Copies ShipQuantity
+headerAddress(Company) Destination Company {Company Name} Business ShipToCompany {Destination Name}
+headerAddress(Address1) Add1 Addr {Address Line 1} Addressline1 Address Addr1 ShipToAddressLine1
 headerParams(ShippingClass) 20 ShippingClass ttk::combobox {} Yes Yes {}
 headerParams(Attention) 24 ShipToAttention ttk::entry {} No Yes {}
 headerParams(CarrierMethod) 32 CarrierMethod ttk::combobox {} No {} {}
