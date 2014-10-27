@@ -21,7 +21,7 @@
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
-proc importFiles::initVars {args} {
+proc importFiles::initVars {} {
     #****f* initVars/importFiles
     # CREATION DATE
     #   10/24/2014 (Friday Oct 24)
@@ -34,10 +34,10 @@ proc importFiles::initVars {args} {
     #   
     #
     # SYNOPSIS
-    #   importFiles::initVars args 
+    #   importFiles::initVars 
     #
     # FUNCTION
-    #	Initilize variables
+    #	Initilize variables with values from the DB. These will be values that were put into the DB from Setup
     #   
     #   
     # CHILDREN
@@ -53,21 +53,30 @@ proc importFiles::initVars {args} {
     #   
     #   
     #***
-    global log headerParent headerAddress 
+    global log headerParent headerAddress dist
 
-    set headerParent(headerList) [eAssist_db::dbSelectQuery -columnNames InternalHeaderName -table Headers]
+    #set headerParent(headerList) [eAssist_db::dbSelectQuery -columnNames InternalHeaderName -table Headers]
+    #[ISSUE 19] There should be a column in the Header setup to determine how these are ordered; right now it is based on when it was setup. i.e. number 15, will show up in the 15th column.
+    set headerParent(headerList) [db eval "SELECT InternalHeaderName FROM Headers ORDER BY Header_ID ASC"]
     set headerParent(whiteList) [eAssist_db::dbWhereQuery -columnNames InternalHeaderName -table Headers -where AlwaysDisplay=1]
+    
+    set dist(distributionTypes) [db eval "SELECT DistributionTypeName From DistributionTypes"]
     
     # Setup header array with subheaders
     foreach hdr $headerParent(headerList) {
         # Get the HeaderID
         #set id [eAssist_db::dbWhereQuery -columnNames Header_ID -table Headers -where "InternalHeaderName='$hdr'"]
         
+        ## --
         # Get the subheaders for the current header
-        #set $headerAddress($hdr) [eAssist_db::leftOuterJoin -cols SubHeaderName -table Headers -jtable SubHeaders -where "HeaderID=Header_ID AND InternalHeaderName='$hdr'"]
+        ## -- 23393.55 microseconds per iteration to run (100 times)
+        # set $headerAddress($hdr) [eAssist_db::leftOuterJoin -cols SubHeaderName -table Headers -jtable SubHeaders -where "HeaderID=Header_ID AND InternalHeaderName='$hdr'"]
+        ## -- 3078.12 microseconds per iteration to run (100 times)
         set headerAddress($hdr) [db eval "SELECT SubHeaderName FROM Headers LEFT OUTER JOIN SubHeaders WHERE HeaderID=Header_ID AND InternalHeaderName='$hdr'"]
     }
 } ;# importFiles::initVars
+
+importFiles::initVars
 
 proc importFiles::readFile {fileName lbox} {
     #****f* readFile/importFiles
