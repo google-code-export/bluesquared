@@ -279,6 +279,8 @@ proc eAssist::buttonBarGUI {args} {
             lib::savePreferences
             #$mb.file entryconfigure 1 -state disable
             eAssist_Global::getGeom $module 845x573+247+156
+            ${log}::debug Height [winfo height .]
+            ${log}::debug Width [winfo width .]
         }
         default     {}
     }
@@ -461,3 +463,49 @@ proc eAssist::statusBar {args} {
     
     ${log}::debug --END-- [info level 1]
 } ;# eAssist::statusBar
+
+
+proc eAssist::detectHeightWidth {} {
+    #****f* detectHeightWidth/eAssist
+    # CREATION DATE
+    #   10/30/2014 (Thursday Oct 30)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssist::detectHeightWidth args 
+    #
+    # FUNCTION
+    #	Figure out if we were maximized the last time we were closed
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    if {[winfo screenheight . ] == [winfo height .]} {
+        #wm attributes . -zoomed 1
+        wm state . zoomed
+        } elseif {[winfo screenwidth .] == [winfo width .]} {
+           #wm attributes . -zoomed 1
+           wm state . zoomed
+        }
+
+    
+} ;# eAssist::detectHeightWidth
