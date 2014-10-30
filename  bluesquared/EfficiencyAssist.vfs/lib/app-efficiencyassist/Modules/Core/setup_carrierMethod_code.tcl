@@ -22,6 +22,83 @@
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
+proc eAssistSetup::controlCarrierSetup {{modify add} {entryPath ""} {lboxPath ""} args} {
+    #****f* controlCarrierSetup/eAssistSetup
+    # CREATION DATE
+    #   10/28/2014 (Tuesday Oct 28)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssistSetup::controlCarrierSetup <add|delete> <widgetPath> -columnNames <value> -table <value> 
+    #
+    # FUNCTION
+    #	This is a wrapper around a few other procs; that can control/edit the entries in the CarrierSetup window
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+    
+    if {$entryPath eq "" || $lboxPath eq ""} {return -errorcode 1 "Must have path to widget"}
+
+    foreach {key value} $args {
+        switch -- $key {
+            -columnNames    {set cols $value}
+            -table          {set dbTable $value}
+        }
+    }
+    
+    
+    switch -- $modify {
+        add     { if {[$entryPath get] eq ""} {return}
+                    set data [list [$entryPath get]]; $entryPath delete 0 end
+                    #ADD/MODIFY to db
+                    ${log}::debug dbInsert -columnNames $cols -table $dbTable -data $data
+                    eAssist_db::dbInsert -columnNames $cols -table $dbTable -data $data
+        }
+        delete  { if {[$lboxPath curselection] eq ""} {return}
+                    set data [$lboxPath get [$lboxPath curselection]]
+                    #DELETE from DB
+                    ${log}::debug delete $dbTable $cols $data
+                    eAssist_db::delete $dbTable $cols $data
+                }
+        query  {}
+        default {${log}::debug [info level 1] $modify is unknown}
+    }
+    
+
+
+
+    #READ from DB
+    $lboxPath delete 0 end
+    ${log}::debug $lboxPath insert end [eAssist_db::dbSelectQuery -columnNames $cols -table $dbTable]
+    #$lboxPath insert end [set list [eAssist_db::dbSelectQuery -columnNames $cols -table $dbTable]]
+    foreach record [eAssist_db::dbSelectQuery -columnNames $cols -table $dbTable] {
+        $lboxPath insert end $record
+    }
+     
+
+    
+} ;# eAssistSetup::controlCarrierSetup
+
+
 proc eAssistSetup::addCarrierSetup {varType entryField listBox} {
     #****f* addCarrierSetup/eAssistSetup
     # AUTHOR

@@ -113,7 +113,7 @@ proc eAssistSetup::addressHeaders_GUI {} {
                                         -editstartcommand {eAssistSetup::startCmdHdr} \
                                         -editendcommand {eAssistSetup::endCmdHdr}
     
-        $w(hdr_frame1a).listbox columnconfigure 0 -name "count" \
+        $w(hdr_frame1a).listbox columnconfigure 0 -name "OrderNumber" \
                                             -showlinenumbers 1 \
                                             -labelalign center
 		

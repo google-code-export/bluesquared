@@ -583,6 +583,46 @@ proc ea::tools::modifyButton {wid args} {
 
 } ;# ea::tools::modifyButton
 
+proc ea::tools::bindings {wid binding cmd} {
+    #****f* bindingsCarrierSetup/ea::tools
+    # CREATION DATE
+    #   10/28/2014 (Tuesday Oct 28)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::tools::bindings <wid> {binding1 .. bindingN} {cmd}
+    #
+    # FUNCTION
+    #	Add bindings to widgets; this is useful if adding multiple bindings for the same command.
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    foreach bd $binding {
+            bind $wid <$bd> $cmd
+    }
+
+} ;# ea::tools::bindings
+
 
 proc eAssist_Global::launchFilters {} {
     #****f* launchFilters/eAssist_Global
