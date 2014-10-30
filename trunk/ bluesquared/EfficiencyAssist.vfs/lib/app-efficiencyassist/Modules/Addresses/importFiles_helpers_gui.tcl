@@ -219,11 +219,14 @@ proc eAssistHelper::insertItems {tbl} {
 		foreach header $curCol {
 			incr x
 			incr i
-			${log}::debug Header: $header / Widgets: [lrange $headerParams($header) 2 2]
+			#${log}::debug Header: $header / Widgets: [lrange $headerParams($header) 2 2]
 			# Check to make sure that the column hasn't been hidden, if it is, lets stop the current loop.
 			if {[$tbl columncget $header -hide] == 1} {continue}
 			
-			set wid [string tolower [lrange $headerParams($header) 2 2]]
+			set wid [catch {[string tolower [lrange $headerParams($header) 2 2]]} err]
+			
+			# default to ttk::entry
+			if {[info exists err]} {set wid ttk::entry}
 			
 			if {$wid eq "ttk::combobox"} {
 				switch -glob -- [string tolower $header] {
@@ -254,7 +257,7 @@ proc eAssistHelper::insertItems {tbl} {
 					packagetype			{
 						${log}::debug PackageType
 						ttk::label $f2.txt$i -text [mc "$header"]
-						$wid $f2.$x$header -values $packagingSetup(Packages) -textvariable txtVariable
+						$wid $f2.$x$header -values $packagingSetup(PackageType) -textvariable txtVariable
 						$f2.$x$header delete 0 end
 						$f2.$x$header configure -state readonly
 						
@@ -264,7 +267,7 @@ proc eAssistHelper::insertItems {tbl} {
 					containertype		{
 						${log}::debug ContainerType
 						ttk::label $f2.txt$i -text [mc "$header"]
-						$wid $f2.$x$header -values $packagingSetup(Containers) -textvariable txtVariable
+						$wid $f2.$x$header -values $packagingSetup(ContainerType) -textvariable txtVariable
 						$f2.$x$header delete 0 end
 						$f2.$x$header configure -state readonly
 						
@@ -292,6 +295,7 @@ proc eAssistHelper::insertItems {tbl} {
 						${log}::debug General
 						ttk::label $f2.txt$i -text [mc "$header"]
 						# Create the widget specified in Setup for the column; typically will be ttk::entry
+						#if {$wid eq ""} {set wid ttk::entry}
 						$wid $f2.$x$header -textvariable txtVariable
 				
 						grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p

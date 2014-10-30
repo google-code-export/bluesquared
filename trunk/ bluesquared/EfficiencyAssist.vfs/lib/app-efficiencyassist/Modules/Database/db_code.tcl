@@ -60,7 +60,7 @@ proc eAssist_db::loadDB {} {
     
     sqlite3 db $myDB
     
-    eAssist_db::initContainers
+    #eAssist_db::initContainers
     eAssist_db::getEmailSetup
     
 	
@@ -68,47 +68,47 @@ proc eAssist_db::loadDB {} {
 } ;# eAssist_db::loadDB
 
 
-proc eAssist_db::initContainers {} {
-    #****f* initContainers/eAssist_db
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2011-2014 Casey Ackels
-    #
-    # FUNCTION
-    #	Initialize variables for the Containers table
-    #
-    # SYNOPSIS
-    #
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	eAssist_db::loadDB
-    #
-    # NOTES
-    #
-    # SEE ALSO
-    #
-    #***
-    global log packagingSetup
-    ${log}::debug --START-- [info level 1]
-    
-    db eval {SELECT Container from Containers} {
-        #${log}::debug Container: $Container
-        lappend packagingSetup(Containers) $Container
-    }
-
-    db eval {SELECT Package from Packages} {
-        #${log}::debug Container: $Package
-        lappend packagingSetup(Packages) $Package
-    }
-    
-    
-    ${log}::debug --END-- [info level 1]
-} ;# eAssist_db::initContainers
+#proc eAssist_db::initContainers {} {
+#    #****f* initContainers/eAssist_db
+#    # AUTHOR
+#    #	Casey Ackels
+#    #
+#    # COPYRIGHT
+#    #	(c) 2011-2014 Casey Ackels
+#    #
+#    # FUNCTION
+#    #	Initialize variables for the Containers table
+#    #
+#    # SYNOPSIS
+#    #
+#    #
+#    # CHILDREN
+#    #	N/A
+#    #
+#    # PARENTS
+#    #	eAssist_db::loadDB
+#    #
+#    # NOTES
+#    #
+#    # SEE ALSO
+#    #
+#    #***
+#    global log packagingSetup
+#    ${log}::debug --START-- [info level 1]
+#    
+#    db eval {SELECT Container from Containers} {
+#        #${log}::debug Container: $Container
+#        lappend packagingSetup(Containers) $Container
+#    }
+#
+#    db eval {SELECT Package from Packages} {
+#        #${log}::debug Container: $Package
+#        lappend packagingSetup(Packages) $Package
+#    }
+#    
+#    
+#    ${log}::debug --END-- [info level 1]
+#} ;# eAssist_db::initContainers
 
 
 
