@@ -389,6 +389,14 @@ proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
 					unset err
 				}			
 			}
+		} elseif {[llength $cells] > 1} {
+			# We may copy one cell, but want to paste it multiple times
+			${log}::debug MULTIPLE CELLS were selected, we only have $txtVar to paste!
+			foreach cell $cells {
+				${log}::debug $tbl cellconfigure $cell -text $txtVar
+				$tbl cellconfigure $cell -text $txtVar
+			}
+			
 		} else {
 			# Pasting a single cell
 			${log}::debug Inserting $txtVar - $cells

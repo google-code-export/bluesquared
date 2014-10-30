@@ -449,6 +449,22 @@ proc eAssist_Global::getGeom {module args} {
 		${log}::notice Geometry does NOT exist for $module - Using $args
 	}
 	
+	set dims [split $options(geom,$module) x]
+	set dims [split $dims +]
+	
+	set dims [join $dims]
+	${log}::notice [winfo screenwidth .] == [lindex $dims 0]
+	${log}::notice [winfo screenheight . ] == [lindex $dims 1]
+
+	
+	if {[winfo screenheight . ] == [lindex $dims 1]} {
+        #wm attributes . -zoomed 1
+        wm state . zoomed
+        } elseif {[winfo screenwidth .] == [lindex $dims 0]} {
+           #wm attributes . -zoomed 1
+           wm state . zoomed
+    }
+	
 	
     ${log}::debug --END-- [info level 1]
 } ;# eAssist_Global::getGeom
