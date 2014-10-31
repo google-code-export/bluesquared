@@ -494,3 +494,62 @@ proc eAssistHelper::multiCells {} {
 	
     ${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::multiCells
+
+
+proc eAssistHelper::fillCountry {} {
+    #****f* fillCountry/eAssistHelper
+    # CREATION DATE
+    #   10/30/2014 (Thursday Oct 30)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssistHelper::fillCountry  
+    #
+    # FUNCTION
+    #	Fills the country column with the correct country
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    set rowCount [$files(tab3f2).tbl size]
+	set colCount [expr {[$files(tab3f2).tbl columncount] - 1}]
+	
+	# Find the country column
+	for {set x 0} {$colCount >= $x} {incr x} {
+		set colName [string tolower [$files(tab3f2).tbl columncget $x -name]]
+		switch -nocase $colName {
+			state		{set colStateIdx $x}
+			zip			{set colZipIdx $x}
+			country		{set colCountryIdx $x}
+		}
+	}
+	
+	for {set x 0} {$rowCount > $x} {incr x} {
+		# row,col
+		#${log}::debug Zip Codes: [$files(tab3f2).tbl cellcget $x,$colZipIdx -text]
+		#set zip3 [string range [$files(tab3f2).tbl cellcget $x,$colZipIdx -text] 0 2]
+		
+		# Ensure the state value matches the Zip
+		
+	}
+    
+} ;# eAssistHelper::fillCountry

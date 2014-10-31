@@ -43,10 +43,10 @@ proc export::DataToExport {} {
     #${log}::debug --START-- [info level 1]
     
     
-    if {[info exists mySettings(job,fileName)] != 1} {
-        ${log}::debug Job number is not filled in!
-        return
-    }
+    #if {[info exists mySettings(job,fileName)] != 1} {
+    #    ${log}::debug Job number is not filled in!
+    #    return
+    #}
     
     foreach val [list Number Name Title] {
         if {![info exists job($val)]} {
@@ -90,7 +90,13 @@ proc export::DataToExport {} {
     set colCount [$files(tab3f2).tbl columncount]
     for {set x 0} {$colCount > $x} {incr x} {
         #lappend colNames [$files(tab3f2).tbl columncget $x -name]
-        lappend colNames [db eval "SELECT OutputHeaderName FROM Headers where InternalHeaderName='[$files(tab3f2).tbl columncget $x -name]'"]
+        # Just in case the header doesn't exist in the db; but we have it in the tablelist...
+        set outputColNames [db eval "SELECT OutputHeaderName FROM Headers where InternalHeaderName='[$files(tab3f2).tbl columncget $x -name]'"]
+        if {$outputColNames eq ""} {
+            lappend colNames [$files(tab3f2).tbl columncget $x -name]
+        } else {
+            lappend colNames [db eval "SELECT OutputHeaderName FROM Headers where InternalHeaderName='[$files(tab3f2).tbl columncget $x -name]'"]
+        }
     }
     chan puts $myFile(data) [::csv::join "$colNames OrderType"]
     ${log}::debug HEADER: [::csv::join "$colNames OrderType"]

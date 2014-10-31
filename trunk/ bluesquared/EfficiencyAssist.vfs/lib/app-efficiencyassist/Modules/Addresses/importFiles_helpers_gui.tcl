@@ -223,10 +223,11 @@ proc eAssistHelper::insertItems {tbl} {
 			# Check to make sure that the column hasn't been hidden, if it is, lets stop the current loop.
 			if {[$tbl columncget $header -hide] == 1} {continue}
 			
-			set wid [catch {[string tolower [lrange $headerParams($header) 2 2]]} err]
+			#set wid [catch {[string tolower [lrange $headerParams($header) 2 2]]} err]
+			set wid [db eval "SELECT Widget FROM Headers WHERE InternalHeaderName='$header'"]
 			
 			# default to ttk::entry
-			if {[info exists err]} {set wid ttk::entry}
+			#if {$wid eq ""} {set wid ttk::entry}
 			
 			if {$wid eq "ttk::combobox"} {
 				switch -glob -- [string tolower $header] {
