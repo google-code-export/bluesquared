@@ -1,6 +1,6 @@
 GS_filePathSetup(checkToggle) 0
-GS_filePathSetup(labelDirectory) C:/Users/Casey.Ackels/Downloads
 GS_filePathSetup(lookInDirectory) C:/Users/Casey.Ackels/Downloads
+GS_filePathSetup(labelDirectory) C:/Users/Casey.Ackels/Downloads
 GS_filePathSetup(enable,Bartender) 1
 GS_filePathSetup(saveInDirectory) C:/Users/Casey.Ackels/Desktop
 company(address2) 
@@ -15,25 +15,25 @@ company(addr2)
 company(addr3) 
 company(address1) 2840 NW 35th Ave
 company(company) Journal Graphics
-logSettings(displayConsole) 1
 logSettings(currentLogLevel) Debug
+logSettings(displayConsole) 1
 logSettings(loglevel) debug
 logSettings(levels) Debug Info Notice Warn Error Critical Alert Emergency
-boxLabelInfo(labelNames) 4Line 3Line 5Line
-boxLabelInfo(currentBoxLabel) 5Line
 boxLabelInfo(3Line,labelSetup) 3 C:/Users/Casey.Ackels/Downloads
+boxLabelInfo(currentBoxLabel) 5Line
+boxLabelInfo(labelNames) 4Line 3Line 5Line
 boxLabelInfo(4Line,labelSetup) 5 C:/Users/Casey.Ackels/Downloads
 boxLabelInfo(5Line,labelSetup) 5 C:/Users/Casey.Ackels/Downloads
-intlSetup(enterTerms) 
-intlSetup(enterLicense) 
-intlSetup(UOMList) Each Box
 intlSetup(PAYERList) SENDER THIRDPARTY
-intlSetup(enterPayer) 
-intlSetup(enterUOM) 
-intlSetup(TERMSList) DDP
+intlSetup(UOMList) Each Box
+intlSetup(enterLicense) 
+intlSetup(enterTerms) 
 intlSetup(LICENSEList) NLR
+intlSetup(TERMSList) DDP
+intlSetup(enterUOM) 
+intlSetup(enterPayer) 
+headerParent(whiteList) Company Attention Address1 City State Zip Country Version Quantity Notes DistributionType ShipVia ShippingClass
 headerParent(headerList) Company Attention Address1 Address2 Address3 City State Zip Country Phone Version Quantity Notes ShipDate DistributionType ShipVia 3rdPartyBilling ArriveDate ContainerType PackageType ShippingClass
-headerParent(whiteList) Company Attention Address1 City State Zip Version Quantity Notes DistributionType ShipVia ShippingClass OrderNumber
 headerParent(outPutHeader) ShipToCompany ShipToAttention ShipToAddressLine1 ShipToAddressLine2 ShipToAddressLine3 ShipToCity ShipToState ShipToPostalCode ShipToCountry ShipToPhone Version ShipQuantity UserNotes ShipToDate DistributionType CarrierMethod 3rdPartyBilling ArriveDate ContainerType PackageType PackageQty ShippingClass Email InternalNotes
 headerAddress(ShippingClass) ShippingClass
 headerAddress(Address2) Addr2 Add2 AddressLine2 {Address Line 2} ShipToAddressLine2
@@ -47,21 +47,21 @@ headerAddress(PackageType) PackageType
 headerAddress(Attention) Atten Attn Attention Contact {Contact Name} Name ShipToAttention
 headerAddress(ShipTo) {Ship To}
 headerAddress(Email) UserEmail
-headerAddress(Notes) Notes {User Notes} UserNotes
 headerAddress(CarrierMethod) carrier carriermethod
-headerAddress(Phone) Phone Ph {Contact Phone} ShipToPhone
+headerAddress(Notes) Notes {User Notes} UserNotes
 headerAddress(3rdPartyBilling) 3rdPartyBilling
+headerAddress(Phone) Phone Ph {Contact Phone} ShipToPhone
 headerAddress(Zip) Zip {Postal Code} PostalCode ShipToPostalCode {Zip Code}
-headerAddress(Country) Country ShipToCountry
 headerAddress(ShipVia) ShipVia
-headerAddress(ContainerType) ContainerType
+headerAddress(Country) Country ShipToCountry
 headerAddress(DestinationIdentifier) destinationidentifier
-headerAddress(Version) Version Vers
+headerAddress(ContainerType) ContainerType
 headerAddress(InternalNotes) {Internal Notes} internalnotes
-headerAddress(Quantity) Qty Quantity Copies ShipQuantity
-headerAddress(Address1) Add1 Addr {Address Line 1} Addressline1 Address Addr1 ShipToAddressLine1
-headerAddress(Company) Destination Company {Company Name} Business ShipToCompany {Destination Name}
+headerAddress(Version) Version Vers
 headerAddress(ArriveDate) ArriveDate
+headerAddress(Company) Destination Company {Company Name} Business ShipToCompany {Destination Name}
+headerAddress(Address1) Add1 Addr {Address Line 1} Addressline1 Address Addr1 ShipToAddressLine1
+headerAddress(Quantity) Qty Quantity Copies ShipQuantity
 headerParams(ShippingClass) 20 ShippingClass ttk::combobox {} Yes Yes {}
 headerParams(Attention) 24 ShipToAttention ttk::entry {} No Yes {}
 headerParams(CarrierMethod) 32 CarrierMethod ttk::combobox {} No {} {}
@@ -69,10 +69,10 @@ headerParams(2Yes) ShippingClass 2No ShippingClass ttk::combobox {} Yes Yes {}
 headerParams(InternalNotes) 200 InternalNotes ttk::entry {} Yes {} {}
 headerParams(Address1) 32 ShipToAddressLine1 ttk::entry {} No Yes {}
 headerParams(Address2) 32 ShipToAddressLine2 ttk::entry {} {} {} {}
-headerParams(Address3) 32 ShipToAddressLine3 ttk::entry {} {} {} {}
 headerParams(City) 24 ShipToCity ttk::entry {} No Yes {}
-headerParams(PackageQty) 10 PackageQty ttk::entry {} {} {} {}
+headerParams(Address3) 32 ShipToAddressLine3 ttk::entry {} {} {} {}
 headerParams(DistributionType) 32 DistributionType ttk::combobox {} Yes Yes {}
+headerParams(PackageQty) 10 PackageQty ttk::entry {} {} {} {}
 headerParams(PackageType) 32 PackageType ttk::combobox {} Yes {} {}
 headerParams(Email) 45 Email ttk::entry {} No No {}
 headerParams(Notes) 200 UserNotes ttk::entry {} Yes {} {}
@@ -110,29 +110,29 @@ headerParams(ShipDate) 10 ShipToDate ttk::entry {} {} {} {}
 headerParams(2) Attention ShipToAttention 24 {} {} ttk::entry 1 1 {}
 headerParams(20) PackageType PackageType 32 {} {} ttk::combobox {} {} {}
 headerParams(19) ContainerType ContainerType 32 {} {} ttk::combobox {} {} {}
-headerParams(3) Address1 ShipToAddressLine1 32 {} {} ttk::entry 1 1 {}
 headerParams(21) ShippingClass ShippingClass 20 {} {} ttk::combobox 1 1 {}
-headerParams(4) Address2 ShipToAddressLine2 32 {} {} ttk::entry {} 0 {}
+headerParams(3) Address1 ShipToAddressLine1 32 {} {} ttk::entry 1 1 {}
 headerParams(22) testHeader testHeaderO 10 {} {} ttk::entry 1 1 0
+headerParams(4) Address2 ShipToAddressLine2 32 {} {} ttk::entry {} 0 {}
 headerParams(5) Address3 ShipToAddressLine3 32 {} {} ttk::entry {} {} {}
 headerParams(6) City ShipToCity 24 {} {} ttk::entry 1 1 {}
 headerParams(7) State ShipToState 2 {} {} ttk::entry 1 1 {}
 headerParams(8) Zip ShipToPostalCode 10 {} {} ttk::entry 1 1 {}
 headerParams(9) Country ShipToCountry 24 {} {} ttk::entry {} 0 {}
 headerParams(3rdPartyBilling) 20 3rdPartyBilling ttk::entry {} {} {} {}
-headerParams(Quantity) 22 ShipQuantity ttk::entry {} No No {}
 headerParams(2No) PackageType 32 PackageType ttk::combobox {} {} {} {}
+headerParams(Quantity) 22 ShipQuantity ttk::entry {} No No {}
 dist(distributionTypes) {00. Customer Tearsheets} {01. Customer Samples} {02. Internal Samples} {03. Customer Copies} {04. Freight} {05. Small Package} {06. JG Mail} {07. UPS Import} {08. JG Inventory} {09. USPS Import} {10. Overs} {13. FedEx Import}
 setup(smallPackageCarrierName) UPS FedEX UPS-NRI
 setup(smallPackageCarriers) {UPS 947919 {}} {FedEX 5555555 {}} {UPS-NRI 5656566 {}}
-carrierSetup(ShippingClass) {Proof 1} {Proof 2} Samples {Promotional Samples} Buyout {Mail Drop} {Job Component} {Return materials to Customer} {Internal Samples} {Finished Product}
-carrierSetup(CarrierList) {Peninsula Freight} UPS {FedEx Freight} {Oak Harbor} {Old Dominion}
-carrierSetup(enterShipmentType) 
-carrierSetup(enterRateType) 
 carrierSetup(PaymentType) Prepaid {Third Party}
-carrierSetup(enterPaymentType) 
-carrierSetup(enterCarrier) 
-carrierSetup(PAYMENT) Prepaid {Third Party}
-carrierSetup(ShipmentType) {Small Package} {Truck Load}
-carrierSetup(RateType) Pallet Volume
+carrierSetup(enterRateType) 
+carrierSetup(enterShipmentType) 
+carrierSetup(CarrierList) {Peninsula Freight} UPS {FedEx Freight} {Oak Harbor} {Old Dominion}
+carrierSetup(ShippingClass) {Proof 1} {Proof 2} Samples {Promotional Samples} Buyout {Mail Drop} {Job Component} {Return materials to Customer} {Internal Samples} {Finished Product}
 carrierSetup(enterShippingClass) 
+carrierSetup(RateType) Pallet Volume
+carrierSetup(ShipmentType) {Small Package} {Truck Load}
+carrierSetup(PAYMENT) Prepaid {Third Party}
+carrierSetup(enterCarrier) 
+carrierSetup(enterPaymentType) 

@@ -331,13 +331,11 @@ proc importFiles::processFile {win} {
             }
             
             
-            if {$index == ""} {               
-                #${log}::debug Index: $index
-                ## Set the default if no data for versions exist.
-                if {[string tolower $ColumnName] eq "version"} {
-                    set l_line "Version 1"
-                    if {[lsearch $process(versionList) $l_line] == -1} {lappend process(versionList) $l_line}
-                    lappend newRow $l_line
+            if {$index eq ""} {
+
+                if {[$files(tab3f2).tbl columncget $x -name] eq "Version"} {
+                    #${log}::debug Found Version Column!
+                    lappend newRow "Version 1"
                 } else {
                     lappend newRow ""
                 }
@@ -348,17 +346,40 @@ proc importFiles::processFile {win} {
                     # This will not hide columns that have no data in it, just columns that were not in the original file.
                     # WARNING - If importing more than one file it is possible for a column that has data in it from the first file, to be hidden by the second file.
                 
-                    ${log}::notice $ColumnName is not on the white list
-                    ${log}::notice $ColumnName doesn't contain any data
-                    ${log}::notice Hiding $ColumnName ...
+                    #${log}::notice $ColumnName is not on the white list
+                    #${log}::notice $ColumnName doesn't contain any data
+                    #${log}::notice Hiding $ColumnName ...
                     $files(tab3f2).tbl columnconfigure $x -hide yes
+                    
                 }
 
             } else {
                 set listData [string trim [lindex $l_line $index]]
+                #${log}::debug l_line: $l_line
+                #${log}::debug Index: $index
+                #${log}::debug listData: $listData
 
+                # Dynamically build the list of versions
+                # the switch args, must equal the internal header name
+                switch -nocase $ColumnName {
+                    company     {set listData [join [split $listData ,] ""] ;# remove all comma's}
+                    attention   {set listData [join [split $listData ,] ""] ;# remove all comma's}
+                    address1    {set listData [join [split $listData ,] ""] ;# remove all comma's}
+                    address2    {set listData [join [split $listData ,] ""] ;# remove all comma's}
+                    address3    {set listData [join [split $listData ,] ""] ;# remove all comma's}
+                    city        {set listData [join [split $listData ,] ""] ;# remove all comma's}
+                    state       {set listData [join [split $listData ,]] ;# remove all comma's}
+                    zip         {set listData [join [split $listData ,]] ;# remove all comma's}
+                    version    {
+                                # There is another instance of this above, to handle the case where the file may not have a version colum at all.
+                                if {$listData eq ""} {set listData "Version 1"} else {set listData [join [split $listData ,] ""] ;# remove all comma's}
+                                if {[lsearch $process(versionList) $listData] == -1} {
+                                        lappend process(versionList) $listData
+                                    }
+                        }
+                    default     {}
+                }
                 
-                #OLD if {[string length $listData] > [lindex $headerParams($ColumnName) 0]} {}
                 if {[string length $listData] > $headerStringLength} {
                     #${log}::debug List: $listData - Length: [string length $listData]
                     lappend maxCharColumn $x
@@ -372,27 +393,6 @@ proc importFiles::processFile {win} {
                     }
                 }
                 
-                # Dynamically build the list of versions
-                switch -nocase $ColumnName {
-                    version    {
-                                # There is another instance of this above, to handle the case where the file may not have a version colum at all.
-                                if {$listData eq ""} {set listData "Version 1"}
-                                if {[lsearch $process(versionList) $listData] == -1} {
-                                        lappend process(versionList) $listData
-                                    }
-                    }
-                    state       {
-                        #set getZip [lindex $FileHeaders [lsearch -nocase $FileHeaders *zip]]
-                        #set idxZip [string trimleft [lrange [split $getZip _] 0 0] 0]
-                        
-                        #importFiles::detectCountry $l_line $listData $idxZip                        
-                    }
-                    *zip        {
-                        #${log}::debug Zip code: $listData
-                    }
-                    default     {}
-                }
-                
                 
                 # Create the list of values
                 lappend newRow $listData
@@ -403,7 +403,8 @@ proc importFiles::processFile {win} {
 
         }
         $files(tab3f2).tbl insert end $newRow
-        #${log}::debug Final Record: $newRow
+        #${log}::debug Raw Record: $record
+        #${log}::debug Record: $newRow
         
         if {[info exists maxCharColumn] == 1} {
             foreach column $maxCharColumn {

@@ -52,7 +52,7 @@ proc vUpdate::saveCurrentVersion {} {
     ${log}::debug Entering SaveCurrentVersion
     
     # Check to see if we've ran this before ...
-    if {[info exists $program(Version)] == 0} {
+    if {[info exists program(Version)] == 0} {
         set firstRun 1
         ${log}::debug firstRun: $firstRun
     }

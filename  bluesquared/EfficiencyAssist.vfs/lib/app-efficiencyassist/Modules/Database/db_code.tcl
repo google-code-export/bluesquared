@@ -708,7 +708,7 @@ proc eAssist_db::dbWhereQuery {args} {
     global log
     
     foreach {key value} $args {
-        ${log}::debug KEY: $key VALUE: $value
+        #${log}::debug KEY: $key VALUE: $value
         switch -- $key {
             -columnNames {set colNames $value}
             -table {set tbl $value; if {[llength $value] != 1} {return -code 1 [mc "wrong # args: Should be -table value"]}}
@@ -729,9 +729,9 @@ proc eAssist_db::dbWhereQuery {args} {
         
         
     if {[llength $colNames] == 1} {
-        ${log}::debug colNames: $colNames
-        ${log}::debug tbl: $tbl
-        ${log}::debug where: $where
+        #${log}::debug colNames: $colNames
+        #${log}::debug tbl: $tbl
+        #${log}::debug where: $where
         set returnQuery [db eval "SELECT $colNames FROM $tbl WHERE $where"]
     } else {
         foreach val $colNames {
