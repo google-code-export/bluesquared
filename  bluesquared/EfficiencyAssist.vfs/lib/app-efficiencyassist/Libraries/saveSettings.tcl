@@ -79,7 +79,7 @@ proc eAssistSetup::SaveGlobalSettings {} {
     }
     
     # Update Header parameters; we'll get an error if we haven't gone to the Header page
-    catch {eAssistSetup::saveHeaderParams} err
+    #catch {eAssistSetup::saveHeaderParams} err
     
     
     ${log}::notice Starting to write out Setup settings ...
@@ -101,55 +101,55 @@ proc eAssistSetup::SaveGlobalSettings {} {
     foreach value [array names logSettings] {
             chan puts $fd "logSettings($value) $logSettings($value)"
     }
-    
-    foreach value [array names boxLabelInfo] {
-        #${log}::debug boxLabelInfo: $value
-            chan puts $fd "boxLabelInfo($value) $boxLabelInfo($value)"
-    }
-    
-    foreach value [array names intlSetup] {
-            chan puts $fd "intlSetup($value) $intlSetup($value)"
-    }
-    
-    foreach value [array names headerParent] {
-            chan puts $fd "headerParent($value) $headerParent($value)"
-    }
-    
-    foreach value [array names headerAddress] {
-            chan puts $fd "headerAddress($value) $headerAddress($value)"
-    }
-    
-    foreach value [array names headerParams] {
-            chan puts $fd "headerParams($value) $headerParams($value)"
-    }
-
-    
-    foreach value [array names headerBoxes] {
-            chan puts $fd "headerBoxes($value) $headerBoxes($value)"
-    }
-    
-    foreach value [array names dist] {
-            chan puts $fd "dist($value) $dist($value)"
-    }
- 
-    
-    if {[info exists setup(smallPackageCarrierName)] == 1} {
-        chan puts $fd "setup(smallPackageCarrierName) $setup(smallPackageCarrierName)"
-        #${log}::debug smallPackageCarrierName: [lrange $setup(smallPackageCarriers) 0 end-1]
-    }
-    
-    if {[info exists setup(smallPackageCarriers)] == 1} {
-        chan puts $fd "setup(smallPackageCarriers) $setup(smallPackageCarriers)"
-        foreach carrier $setup(smallPackageCarriers) {
-            lappend testCarrier [join [lrange $carrier 0 0]]
-        }
-        #${log}::debug carriers: $testCarrier
-    }
-    
-    foreach value [array names carrierSetup] {
-        #if {![info exists carrierSetup($value)]} {continue}
-        chan puts $fd "carrierSetup($value) $carrierSetup($value)"
-    }
+    #
+    #foreach value [array names boxLabelInfo] {
+    #    #${log}::debug boxLabelInfo: $value
+    #        chan puts $fd "boxLabelInfo($value) $boxLabelInfo($value)"
+    #}
+    #
+    #foreach value [array names intlSetup] {
+    #        chan puts $fd "intlSetup($value) $intlSetup($value)"
+    #}
+    #
+    #foreach value [array names headerParent] {
+    #        chan puts $fd "headerParent($value) $headerParent($value)"
+    #}
+    #
+    #foreach value [array names headerAddress] {
+    #        chan puts $fd "headerAddress($value) $headerAddress($value)"
+    #}
+    #
+    #foreach value [array names headerParams] {
+    #        chan puts $fd "headerParams($value) $headerParams($value)"
+    #}
+    #
+    #
+    #foreach value [array names headerBoxes] {
+    #        chan puts $fd "headerBoxes($value) $headerBoxes($value)"
+    #}
+    #
+    #foreach value [array names dist] {
+    #        chan puts $fd "dist($value) $dist($value)"
+    #}
+    #
+    #
+    #if {[info exists setup(smallPackageCarrierName)] == 1} {
+    #    chan puts $fd "setup(smallPackageCarrierName) $setup(smallPackageCarrierName)"
+    #    #${log}::debug smallPackageCarrierName: [lrange $setup(smallPackageCarriers) 0 end-1]
+    #}
+    #
+    #if {[info exists setup(smallPackageCarriers)] == 1} {
+    #    chan puts $fd "setup(smallPackageCarriers) $setup(smallPackageCarriers)"
+    #    foreach carrier $setup(smallPackageCarriers) {
+    #        lappend testCarrier [join [lrange $carrier 0 0]]
+    #    }
+    #    #${log}::debug carriers: $testCarrier
+    #}
+    #
+    #foreach value [array names carrierSetup] {
+    #    #if {![info exists carrierSetup($value)]} {continue}
+    #    chan puts $fd "carrierSetup($value) $carrierSetup($value)"
+    #}
     
     #foreach value [array names packagingSetup] {
     #    #if {![info exists packagingSetup($value)]} {continue}

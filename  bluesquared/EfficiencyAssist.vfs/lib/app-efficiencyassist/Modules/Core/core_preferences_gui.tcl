@@ -121,7 +121,7 @@ proc eAssistPref::launchBatchMakerPref {} {
     # SEE ALSO
     #
     #***
-    global log pref internal mySettings setup
+    global log pref internal mySettings setup settings
     # Reset Frames
 
     ##

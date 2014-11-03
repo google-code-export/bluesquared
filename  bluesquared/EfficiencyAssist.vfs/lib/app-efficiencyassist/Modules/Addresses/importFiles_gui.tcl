@@ -439,19 +439,13 @@ proc importFiles::eAssistGUI {} {
         set colName [$files(tab3f2).tbl columncget [$files(tab3f2).tbl containingcolumn %x] -name]
         #${log}::debug Column Name: $colName
         
-        if {$colName eq "count"} {
+        if {$colName eq "OrderNumber"} {
             $files(tab3f2).tbl configure -selecttype row
         } else {
             $files(tab3f2).tbl configure -selecttype cell
         }
     }
-    
-# bind [.tbl bodytag] <Button-1> {printClickedCell %W %x %y}
-#
-#proc printClickedCell {w x y} {
-#    foreach {tbl x y} [tablelist::convEventFields $w $x $y] {}
-#    puts "clicked on cell [$tbl containingcell $x $y]"
-#}   
+   
     
     bind $bodyTag <Control-v> {
         eAssistHelper::insValuesToTableCells -hotkey $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]
