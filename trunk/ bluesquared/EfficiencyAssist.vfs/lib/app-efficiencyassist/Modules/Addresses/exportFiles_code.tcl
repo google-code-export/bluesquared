@@ -42,15 +42,23 @@ proc export::DataToExport {} {
     global log headerParent files mySettings job
     #${log}::debug --START-- [info level 1]
     
+    #set mySettings(job,fileName) "%number %title %name"
     
-    #if {[info exists mySettings(job,fileName)] != 1} {
-    #    ${log}::debug Job number is not filled in!
-    #    return
-    #}
+    if {[info exists mySettings(job,fileName)] != 1} {
+        # Set the default format for the file name.
+        set mySettings(job,fileName) "%number %title %name"
+    }
     
-    foreach val [list Number Name Title] {
+    foreach val [list Title Name Number] {
         if {![info exists job($val)]} {
             ${log}::debug Aborting... job($val) doesn't exist. Please fill in the $val field.
+                set answer [tk_messageBox -message "Please put in a Job $val" \
+                        -icon question -type yesno \
+                        -detail "Select \"Yes\" to open the Project Setup window."]
+                switch -- $answer {
+                        yes {eAssistHelper::projSetup}
+                        no {exit}
+                }
             return
             }
     }
@@ -71,14 +79,23 @@ proc export::DataToExport {} {
     # don't open the file yet, because we may have canceled the Save As dialog...
     set myFile(data) [file join [eAssist_Global::SaveFile $fileName]]
     
+    ${log}::debug myFile(data): $myFile(data)
+    
     if {$myFile(data) eq {}} {
         ${log}::notice Aborting... The Save As window was closed without a file name.
         #${log}::debug ERROR: $err
         return
     } else {
-        # open the file
-        set myFile(data) [open $myFile(data) w]
+        set fd [catch {[open $myFile(data) w]} err]
     }
+    
+    if {[info exists err]} {
+        ${log}::debug CATCH ERR: $err
+        tk_messageBox -message "The file is open in another program, please close before exporting." \
+                        -icon warning -type ok \
+                        -detail "$myFile(data)"
+        return
+        }
     
         
     # HEADER: Write output
@@ -98,7 +115,7 @@ proc export::DataToExport {} {
             lappend colNames [db eval "SELECT OutputHeaderName FROM Headers where InternalHeaderName='[$files(tab3f2).tbl columncget $x -name]'"]
         }
     }
-    chan puts $myFile(data) [::csv::join "$colNames OrderType"]
+    chan puts $fd [::csv::join "$colNames OrderType"]
     ${log}::debug HEADER: [::csv::join "$colNames OrderType"]
     ${log}::debug ROWS:
 
@@ -107,9 +124,9 @@ proc export::DataToExport {} {
         # RECORDS: Write output one row at a time.
         # Version is a hardcoded value, this should be moved to a user option.
         ${log}::debug [::csv::join "[$files(tab3f2).tbl get $x] Version"]
-        chan puts $myFile(data) [::csv::join "[$files(tab3f2).tbl get $x] Version"]
+        chan puts $fd) [::csv::join "[$files(tab3f2).tbl get $x] Version"]
     }
     
-	chan close $myFile(data)
+	chan close $fd
     #${log}::debug --END-- [info level 1]
 } ;# export::DataToExport

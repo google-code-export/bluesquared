@@ -113,8 +113,16 @@ proc eAssist_Global::fileAccessibility {folder file} {
     global log
     #${log}::debug --START-- [info level 1]
     
-    set fileRead 0
-    set fileWrite 0
+    # Does the file exist?
+    if {[file exists [file join $folder $file]]} {
+        #set defaultValue 0
+        set fileRead 0
+        set fileWrite 0
+    } else {
+        return -1
+    }
+   
+
     
     # READ FILE
     if {[file readable [file join $folder $file]]} {
@@ -133,7 +141,7 @@ proc eAssist_Global::fileAccessibility {folder file} {
 
     } else {
         #console show
-        #${log}::critical -FAIL- Cannot write to $file file for saving. Check the file permissions and try again.
+        ${log}::critical -FAIL- Cannot write to $file file for saving. Check the file permissions and try again.
     }
 	
     
