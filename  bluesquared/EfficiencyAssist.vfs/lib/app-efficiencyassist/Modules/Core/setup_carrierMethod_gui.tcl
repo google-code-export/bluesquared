@@ -69,9 +69,9 @@ proc eAssistSetup::carrierMethod_GUI {} {
     #
     # Setup the notebook
     #
-    $w(carrier) add [ttk::frame $w(carrier).ctbl] -text [mc "Build Carrier Tables"]
-    $w(carrier) add [ttk::frame $w(carrier).bcarrier] -text [mc "Build Carrier"]
-    $w(carrier) add [ttk::frame $w(carrier).bshipvia] -text [mc "Build Ship Via"] -state disabled
+    $w(carrier) add [ttk::frame $w(carrier).ctbl] -text [mc "General"]
+    $w(carrier) add [ttk::frame $w(carrier).shipvia] -text [mc "Ship Via"]
+    $w(carrier) add [ttk::frame $w(carrier).advanced] -text [mc "Advanced"] -state disabled
     $w(carrier) add [ttk::frame $w(carrier).frtrates] -text [mc "Freight Rates"] -state disabled
     $w(carrier) add [ttk::frame $w(carrier).upsrates] -text [mc "UPS Rates"] -state disabled
     $w(carrier) add [ttk::frame $w(carrier).fedexrates] -text [mc "FedEx Rates"] -state disabled
@@ -80,7 +80,7 @@ proc eAssistSetup::carrierMethod_GUI {} {
 
     
     ##
-    ## Tab 1 (Build Carrier Tables)
+    ## Tab 1 (General)
     ##
     
     #
@@ -88,9 +88,7 @@ proc eAssistSetup::carrierMethod_GUI {} {
     #
     set f1 [ttk::labelframe $w(carrier).ctbl.f1 -text [mc "Payment Types"] -padding 10]
     grid $f1 -column 0 -row 0 -pady 5p -padx 5p -sticky new
-    
-    #grid columnconfigure $w(carrier).ctbl $f1 -weight 1
-    #grid rowconfigure $w(carrier).ctbl $f1 -weight 1
+
     
     ttk::entry $f1.entry -textvariable carrierSetup(enterPaymentType)
         tooltip::tooltip $f1.entry [mc "Use the Enter Key to add items"]
@@ -155,40 +153,14 @@ proc eAssistSetup::carrierMethod_GUI {} {
     
     # Populate the listbox if we have existing data
     eAssistSetup::controlCarrierSetup query $f2.entry $f2.lbox -columnNames ShipmentType -table ShipmentTypes
-    
-    ## Bindings
-    #bind $f2.entry <Return> {
-    #    eAssistSetup::addCarrierSetup SHIPMENT $f2.entry $f2.lbox
-    #}
-    #
-    #bind $f2.entry <KP_Enter> {
-    #    # Keypad Enter key
-    #    eAssistSetup::addCarrierSetup SHIPMENT $f2.entry $f2.lbox
-    #}
-    #
-    #bind $f2.lbox <Delete> {
-    #    eAssistSetup::delCarrierSetup SHIPMENT $f2.lbox
-    #}
-    #
-    #bind $f2.lbox <BackSpace> {
-    #    eAssistSetup::delCarrierSetup SHIPMENT $f2.lbox
-    #}
-    #
-    ## Populate the listbox if we have existing data
-    #if {[info exists carrierSetup(ShipmentType)] == 1} {
-    #    foreach item $carrierSetup(ShipmentType) {
-    #        $f2.lbox insert end $item
-    #    }
-    #}
+
     
     #
     # --- Frame 3, Carriers
     #
     set f3 [ttk::labelframe $w(carrier).ctbl.f3 -text [mc "Carriers"] -padding 10]
     grid $f3 -column 2 -row 0 -pady 5p -padx 5p -sticky news
-    
-    #grid columnconfigure $w(carrier).ctbl $f3 -weight 1
-    #grid rowconfigure $w(carrier).ctbl $f3 -weight 1
+
     
     ttk::entry $f3.entry -textvariable carrierSetup(enterCarrier)   
     listbox $f3.lbox -width 30 \
@@ -213,35 +185,7 @@ proc eAssistSetup::carrierMethod_GUI {} {
     
     # Populate the listbox if we have existing data
     eAssistSetup::controlCarrierSetup query $f3.entry $f3.lbox -columnNames Name -table Carriers
-    ## Bindings
-    #bind $f3.entry <Return> {
-    #    eAssistSetup::addCarrierSetup CARRIERS $f3.entry $f3.lbox
-    #    # Always display the last entry
-    #    $f3.lbox see end
-    #}
-    #
-    #bind $f3.entry <KP_Enter> {
-    #    eAssistSetup::addCarrierSetup CARRIERS $f3.entry $f3.lbox
-    #    # Always display the last entry
-    #    $f3.lbox see end
-    #} ;# So both enter key's work the same way
-    #
-    #bind $f3.lbox <Delete> {
-    #    eAssistSetup::delCarrierSetup CARRIERS $f3.lbox
-    #}
-    #
-    #bind $f3.lbox <BackSpace> {
-    #    eAssistSetup::delCarrierSetup CARRIERS $f3.lbox
-    #}
-    #
-    #
-    ## Populate the listbox if we have existing data
-    #set carrierDB [eAssist_db::dbSelectQuery -columnNames Name -table Carriers]
-    #if {$carrierDB ne ""} {
-    #    foreach item [eAssist_db::dbSelectQuery -columnNames Name -table Carriers] {
-    #        $f3.lbox insert end $item
-    #    }
-    #}
+
     
     #
     # --- Frame 4, Rate Types
@@ -274,41 +218,13 @@ proc eAssistSetup::carrierMethod_GUI {} {
     
     # Populate the listbox if we have existing data
     eAssistSetup::controlCarrierSetup query $f4.entry $f4.lbox -columnNames RateType -table RateTypes
-    
-    
-    ## Bindings
-    #bind $f4.entry <Return> {
-    #    eAssistSetup::addCarrierSetup RATES $f4.entry $f4.lbox
-    #    # Always display the last entry
-    #    $f3.lbox see end
-    #}
-    #
-    #bind $f4.entry <KP_Enter> {
-    #    eAssistSetup::addCarrierSetup RATES $f4.entry $f4.lbox
-    #    # Always display the last entry
-    #    $f3.lbox see end
-    #} ;# So both enter key's work the same way
-    #
-    #bind $f4.lbox <Delete> {
-    #    eAssistSetup::delCarrierSetup RATES $f4.lbox
-    #}
-    #
-    #bind $f4.lbox <BackSpace> {
-    #    eAssistSetup::delCarrierSetup RATES $f4.lbox
-    #}
-    #
-    ## Populate the listbox if we have existing data
-    #if {[info exists carrierSetup(RateType)] == 1} {
-    #    foreach item $carrierSetup(RateType) {
-    #        $f4.lbox insert end $item
-    #    }
-    #}
-    
+
     
     #
     # --- Frame 5, Shipping Class
     #
     set f5 [ttk::labelframe $w(carrier).ctbl.f5 -text [mc "Shipping Class"] -padding 10]
+    
     grid $f5 -column 1 -row 1 -pady 5p -padx 5p -sticky news
     
     ttk::entry $f5.entry -textvariable carrierSetup(enterShippingClass)    
@@ -336,61 +252,142 @@ proc eAssistSetup::carrierMethod_GUI {} {
     eAssistSetup::controlCarrierSetup query $f5.entry $f5.lbox -columnNames ShippingClass -table ShippingClasses
     
     
-    ## Bindings
-    #bind $f5.entry <Return> {
-    #    eAssistSetup::addCarrierSetup SHIPPINGCLASS $f5.entry $f5.lbox
-    #    # Always display the last entry
-    #    $f3.lbox see end
-    #}
-    #
-    #bind $f5.entry <KP_Enter> {
-    #    eAssistSetup::addCarrierSetup SHIPPINGCLASS $f5.entry $f5.lbox
-    #    # Always display the last entry
-    #    $f3.lbox see end
-    #} ;# So both enter key's work the same way
-    #
-    #bind $f5.lbox <Delete> {
-    #    eAssistSetup::delCarrierSetup SHIPPINGCLASS $f5.lbox
-    #}
-    #
-    #bind $f5.lbox <BackSpace> {
-    #    eAssistSetup::delCarrierSetup SHIPPINGCLASS $f5.lbox
-    #}
-    #
-    ## Populate the listbox if we have existing data
-    #if {[info exists carrierSetup(ShippingClass)] == 1} {
-    #    foreach item $carrierSetup(ShippingClass) {
-    #        $f5.lbox insert end $item
-    #    }
-    #}
-    
     ##
-    ## Tab 2 (Build Carrier)
+    ## Tab 2 (Ship Via)
     ##
     
     #
-    # --- Frame 1 Carrier
+    # --- Frame 1 Payment Types
     #
-    set f1_bcarrier [ttk::labelframe $w(carrier).bcarrier.f1 -text [mc "Carrier"] -padding 10]
-    grid $f1_bcarrier -column 0 -row 0 -pady 5p -padx 5p -sticky new
+    set f1S [ttk::labelframe $w(carrier).shipvia.f1 -text [mc "Ship Via Setup"] -padding 10]
+    pack $f1S -anchor nw -pady 5p -padx 5p
+    #grid $f1S -column 0 -row 0 -pady 5p -padx 5p -sticky new
     
-    ttk::label $f1_bcarrier.txt -text [mc "Carrier"]
-    ttk::combobox $f1_bcarrier.cbox -values [$f3.lbox get 0 end] \
-                                    -state readonly
-    ttk::label $f1_bcarrier.txt1 -text [mc "Weight Range"]
-    ttk::entry $f1_bcarrier.entry1
+    ttk::label $f1S.txt1 -text [mc "Ship Via Code"]
+    ttk::entry $f1S.entry1
     
-    ttk::label $f1_bcarrier.txt2 -text [mc "to"]
-    ttk::entry $f1_bcarrier.entry2
+    ttk::label $f1S.txt2 -text [mc "Ship Via Name"]
+    ttk::entry $f1S.entry2
     
-    ## Grid
-    grid $f1_bcarrier.txt -column 0 -row 0 -sticky news
-    grid $f1_bcarrier.cbox -column 1 -row 0 -sticky news
+    ttk::label $f1S.txt3 -text [mc "Carrier"]
+    ttk::combobox $f1S.cbox1
     
-    grid $f1_bcarrier.txt1 -column 0 -row 1 -sticky news
-    grid $f1_bcarrier.entry1 -column 1 -row 1
-    grid $f1_bcarrier.txt2 -column 2 -row 1
-    grid $f1_bcarrier.entry2 -column 3 -row 1
+    ttk::label $f1S.txt4 -text [mc "Payment Type"]
+    ttk::combobox $f1S.cbox2
+    
+    ttk::label $f1S.txt5 -text [mc "Shipment Type"]
+    ttk::combobox $f1S.cbox3
+    
+    ttk::label $f1S.txt6 -text [mc "Rate Type"]
+    ttk::combobox $f1S.cbox4
+    
+
+    
+    grid $f1S.txt1 -column 0 -row 0 -pady 2p -padx 2p -sticky nse
+    grid $f1S.entry1 -column 1 -row 0 -pady 2p -padx 2p -sticky news
+    grid $f1S.txt2 -column 0 -row 1 -pady 2p -padx 2p -sticky nse
+    grid $f1S.entry2 -column 1 -row 1 -pady 2p -padx 2p -sticky news
+    grid $f1S.txt3 -column 0 -row 2 -pady 2p -padx 2p -sticky nse
+    grid $f1S.cbox1 -column 1 -row 2 -pady 2p -padx 2p -sticky news
+    grid $f1S.txt4 -column 0 -row 3 -pady 2p -padx 2p -sticky nse
+    grid $f1S.cbox2 -column 1 -row 3 -pady 2p -padx 2p -sticky news
+    
+    grid $f1S.txt5 -column 3 -row 0 -pady 2p -padx 2p -sticky nse
+    grid $f1S.cbox3 -column 4 -row 0 -pady 2p -padx 2p -sticky news
+    grid $f1S.txt6 -column 3 -row 1 -pady 2p -padx 2p -sticky nse
+    grid $f1S.cbox4 -column 4 -row 1 -pady 2p -padx 2p -sticky news
+    
+    #ttk::button $f1S.btn1 -text [mc "Add"]
+    #ttk::button $f1S.btn2 -text [mc "Delete"]
+    #grid $f1S.btn1 -column 5 -row 0 -rowspan 2;#-pady 2p -padx 2p -sticky new
+    #grid $f1S.btn2 -column 5 -row 1 -rowspan 2;#-pady 2p -padx 2p -sticky new
+    
+    ##
+    ## Sub frame for the buttons
+    ##
+    set f1aS [ttk::frame $w(carrier).shipvia.f1a]
+    pack $f1aS -anchor n -side top -pady 10p ;#-padx 5p
+    #grid $f1aS -column 5 -row 0 -rowspan 5 ;#-pady 2p -padx 2p -sticky ne
+    
+    
+    ttk::button $f1aS.btn1 -text [mc "Add"]
+    ttk::button $f1aS.btn2 -text [mc "Delete"]
+    grid $f1aS.btn1 -column 0 -row 0 ;#-pady 2p -padx 2p -sticky new
+    grid $f1aS.btn2 -column 0 -row 1 ;#-pady 2p -padx 2p -sticky new
+    
+    
+    set f2S [ttk::frame $w(carrier).shipvia.f2 -padding 10]
+    pack $f2S -anchor sw -fill both -expand yes ;#-fill both -side bottom;#-pady 5p -padx 5p
+    #grid $f2S -column 0 -row 0 -sticky new
+    
+    tablelist::tablelist $f2S.tbl -columns {
+                                                0   "..." center
+                                                0   "Ship Via Code" center
+                                                0   "Ship Via Name" center
+                                                25  "Carrier"
+                                                0   "Payment Type"
+                                                0   "Shipment Type"
+                                                0   "Rate Type"} \
+                                        -showlabels yes \
+                                        -height 10 \
+                                        -selectbackground yellow \
+                                        -selectforeground black \
+                                        -stripebackground lightblue \
+                                        -exportselection yes \
+                                        -showseparators yes \
+                                        -fullseparators yes \
+                                        -selectmode extended \
+                                        -editselectedonly 1 \
+                                        -selecttype row \
+                                        -yscrollcommand [list $f2S.scrolly set] \
+                                        -xscrollcommand [list $f2S.scrollx set] \
+                                        -editstartcommand {eAssistSetup::placeholder} \
+                                        -editendcommand {eAssistSetup::provinceEditEnd}
+                                                
+        # The internal names are the same spelling/capitalization as the db columns in table Countries
+        $f2S.tbl columnconfigure 0 -name "count" \
+                                            -showlinenumbers 1 \
+                                            -labelalign center
+        
+        $f2S.tbl columnconfigure 1 -name "ShipViaCode" \
+                                            -labelalign center \
+                                            -hide yes
+        
+        $f2S.tbl columnconfigure 2 -name "ShipViaName" \
+                                            -labelalign center
+        
+        $f2S.tbl columnconfigure 3 -name "Carrier" \
+                                            -labelalign center
+        
+        $f2S.tbl columnconfigure 4 -name "PaymentType" \
+                                            -labelalign center
+        
+        $f2S.tbl columnconfigure 5 -name "ShipmentType" \
+                                            -labelalign center
+        
+        $f2S.tbl columnconfigure 5 -name "RateType" \
+                                            -labelalign center
+        
+        
+    ttk::scrollbar $f2S.scrolly -orient v -command [list $f2S.tbl yview]
+    ttk::scrollbar $f2S.scrollx -orient h -command [list $f2S.tbl xview]
+	
+    grid $f2S.tbl -column 0 -row 0 -sticky news
+    grid columnconfigure $f2S $f2S.tbl -weight 1
+    grid rowconfigure $f2S $f2S.tbl -weight 1
+    
+    grid $f2S.scrolly -column 1 -row 1 -sticky nse
+    grid $f2S.scrollx -column 0 -row 2 -sticky ews
+    
+    ::autoscroll::autoscroll $f2S.scrolly ;# Enable the 'autoscrollbar'
+    ::autoscroll::autoscroll $f2S.scrollx
+    
+    #grid columnconfigure $f2S.tbl -weight 1
+    #grid rowconfigure $f2S.tbl -weight 1
+    
+   
+    
+    
 } ;# eAssistSetup::carrierMethod_GUI
 
 
