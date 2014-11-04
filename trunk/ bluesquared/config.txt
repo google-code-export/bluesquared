@@ -1,6 +1,6 @@
 GS_filePathSetup(checkToggle) 0
-GS_filePathSetup(lookInDirectory) C:/Users/Casey.Ackels/Downloads
 GS_filePathSetup(labelDirectory) C:/Users/Casey.Ackels/Downloads
+GS_filePathSetup(lookInDirectory) C:/Users/Casey.Ackels/Downloads
 GS_filePathSetup(enable,Bartender) 1
 GS_filePathSetup(saveInDirectory) C:/Users/Casey.Ackels/Desktop
 company(address2) 
@@ -15,7 +15,7 @@ company(addr2)
 company(addr3) 
 company(address1) 2840 NW 35th Ave
 company(company) Journal Graphics
-logSettings(currentLogLevel) Debug
 logSettings(displayConsole) 1
+logSettings(currentLogLevel) Debug
 logSettings(loglevel) debug
 logSettings(levels) Debug Info Notice Warn Error Critical Alert Emergency
