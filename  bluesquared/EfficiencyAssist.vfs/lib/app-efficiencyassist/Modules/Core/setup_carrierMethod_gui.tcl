@@ -257,77 +257,75 @@ proc eAssistSetup::carrierMethod_GUI {} {
     ##
     
     #
-    # --- Frame 1 Payment Types
-    #
-    set f1S [ttk::labelframe $w(carrier).shipvia.f1 -text [mc "Ship Via Setup"] -padding 10]
-    pack $f1S -anchor nw -pady 5p -padx 5p
-    #grid $f1S -column 0 -row 0 -pady 5p -padx 5p -sticky new
+    # --- Frame 1 Container Frame
+    set f1C [ttk::frame $w(carrier).shipvia.f1]
+    pack $f1C -anchor n -fill x
+    
+    set f1S [ttk::labelframe $w(carrier).shipvia.f1.a -text [mc "Ship Via Setup"] -padding 10]
+    grid $f1S -column 0 -row 0 -pady 5p -padx 5p -sticky n
     
     ttk::label $f1S.txt1 -text [mc "Ship Via Code"]
-    ttk::entry $f1S.entry1
-    
-    ttk::label $f1S.txt2 -text [mc "Ship Via Name"]
-    ttk::entry $f1S.entry2
+    ttk::entry $f1S.01entry1
     
     ttk::label $f1S.txt3 -text [mc "Carrier"]
-    ttk::combobox $f1S.cbox1
+    ttk::combobox $f1S.03cbox1 -postcommand "$f1S.03cbox1 configure -values [list [eAssist_db::dbSelectQuery -columnNames Name -table Carriers]]"
+    bind $f1S.03cbox1 <FocusIn> "$f1S.03cbox1 configure -values [list [eAssist_db::dbSelectQuery -columnNames Name -table Carriers]]"
+    bind $f1S.03cbox1 <KeyRelease> [list AutoComplete::AutoCompleteComboBox $f1S.03cbox1 %K]
     
     ttk::label $f1S.txt4 -text [mc "Payment Type"]
-    ttk::combobox $f1S.cbox2
+    ttk::combobox $f1S.04cbox2 -postcommand "$$f1S.04cbox2 configure -values [list [eAssist_db::dbSelectQuery -columnNames Payer -table FreightPayer]]"
+    bind $f1S.04cbox2 <FocusIn> "$f1S.04cbox2 configure -values [list [eAssist_db::dbSelectQuery -columnNames Payer -table FreightPayer]]"
+    bind $f1S.04cbox2 <KeyRelease> [list AutoComplete::AutoCompleteComboBox $f1S.04cbox2 %K]
     
     ttk::label $f1S.txt5 -text [mc "Shipment Type"]
-    ttk::combobox $f1S.cbox3
+    ttk::combobox $f1S.05cbox3 -postcommand "$f1S.05cbox3 configure -values [list [eAssist_db::dbSelectQuery -columnNames ShipmentType -table ShipmentTypes]]"
+    bind $f1S.05cbox3 <FocusIn> "$f1S.05cbox3 configure -values [list [eAssist_db::dbSelectQuery -columnNames ShipmentType -table ShipmentTypes]]"
+    bind $f1S.05cbox3 <KeyRelease> [list AutoComplete::AutoCompleteComboBox $f1S.05cbox3 %K]
+
+    #bind $f1S.cbox1 <<ComboboxSelected>> "$f1S.cbox1 configure -values [list [eAssist_db::dbSelectQuery -columnNames Name -table Carriers]]"
     
-    ttk::label $f1S.txt6 -text [mc "Rate Type"]
-    ttk::combobox $f1S.cbox4
-    
+    ttk::label $f1S.txt2 -text [mc "Ship Via Name"]
+    ttk::entry $f1S.02entry2
 
     
     grid $f1S.txt1 -column 0 -row 0 -pady 2p -padx 2p -sticky nse
-    grid $f1S.entry1 -column 1 -row 0 -pady 2p -padx 2p -sticky news
-    grid $f1S.txt2 -column 0 -row 1 -pady 2p -padx 2p -sticky nse
-    grid $f1S.entry2 -column 1 -row 1 -pady 2p -padx 2p -sticky news
-    grid $f1S.txt3 -column 0 -row 2 -pady 2p -padx 2p -sticky nse
-    grid $f1S.cbox1 -column 1 -row 2 -pady 2p -padx 2p -sticky news
-    grid $f1S.txt4 -column 0 -row 3 -pady 2p -padx 2p -sticky nse
-    grid $f1S.cbox2 -column 1 -row 3 -pady 2p -padx 2p -sticky news
+    grid $f1S.01entry1 -column 1 -row 0 -pady 2p -padx 2p -sticky news
+    grid $f1S.txt3 -column 0 -row 1 -pady 2p -padx 2p -sticky nse
+    grid $f1S.03cbox1 -column 1 -row 1 -pady 2p -padx 2p -sticky news
+    grid $f1S.txt4 -column 0 -row 2 -pady 2p -padx 2p -sticky nse
+    grid $f1S.04cbox2 -column 1 -row 2 -pady 2p -padx 2p -sticky news
+    grid $f1S.txt5 -column 0 -row 3 -pady 2p -padx 2p -sticky nse
+    grid $f1S.05cbox3 -column 1 -row 3 -pady 2p -padx 2p -sticky news
     
-    grid $f1S.txt5 -column 3 -row 0 -pady 2p -padx 2p -sticky nse
-    grid $f1S.cbox3 -column 4 -row 0 -pady 2p -padx 2p -sticky news
-    grid $f1S.txt6 -column 3 -row 1 -pady 2p -padx 2p -sticky nse
-    grid $f1S.cbox4 -column 4 -row 1 -pady 2p -padx 2p -sticky news
-    
-    #ttk::button $f1S.btn1 -text [mc "Add"]
-    #ttk::button $f1S.btn2 -text [mc "Delete"]
-    #grid $f1S.btn1 -column 5 -row 0 -rowspan 2;#-pady 2p -padx 2p -sticky new
-    #grid $f1S.btn2 -column 5 -row 1 -rowspan 2;#-pady 2p -padx 2p -sticky new
-    
-    ##
-    ## Sub frame for the buttons
-    ##
-    set f1aS [ttk::frame $w(carrier).shipvia.f1a]
-    pack $f1aS -anchor n -side top -pady 10p ;#-padx 5p
-    #grid $f1aS -column 5 -row 0 -rowspan 5 ;#-pady 2p -padx 2p -sticky ne
-    
-    
-    ttk::button $f1aS.btn1 -text [mc "Add"]
-    ttk::button $f1aS.btn2 -text [mc "Delete"]
-    grid $f1aS.btn1 -column 0 -row 0 ;#-pady 2p -padx 2p -sticky new
-    grid $f1aS.btn2 -column 0 -row 1 ;#-pady 2p -padx 2p -sticky new
-    
+    grid $f1S.txt2 -column 3 -row 0 -pady 2p -padx 2p -sticky nse
+    grid $f1S.02entry2 -column 4 -row 0 -pady 2p -padx 2p -sticky news
+    #grid $f1S.txt6 -column 3 -row 1 -pady 2p -padx 2p -sticky nse
+    #grid $f1S.cbox4 -column 4 -row 1 -pady 2p -padx 2p -sticky news
+
+    ## BUTTONS
+    set f1aS [ttk::frame $w(carrier).shipvia.f1.b -padding 10 ]
+    grid $f1aS -column 1 -row 0 -pady 5p -sticky n
     
     set f2S [ttk::frame $w(carrier).shipvia.f2 -padding 10]
-    pack $f2S -anchor sw -fill both -expand yes ;#-fill both -side bottom;#-pady 5p -padx 5p
-    #grid $f2S -column 0 -row 0 -sticky new
+    
+    ttk::button $f1aS.btn1 -text [mc "Add"] -command "eAssistSetup::controlShipVia add -wid $f1S -tbl $f2S.tbl -dbtbl Carriers -btn $f1aS"
+    ttk::button $f1aS.btn2 -text [mc "Delete"] -state disabled -command "eAssistSetup::controlShipVia delete -wid $f1S -tbl $f2S.tbl -dbtbl Carriers -btn $f1aS"
+    ttk::button $f1aS.btn3 -text [mc "Clear"] -state disabled -command "eAssistSetup::controlShipVia clear -wid $f1S -tbl $f2S.tbl -dbtbl Carriers -btn $f1aS"
+    grid $f1aS.btn1 -column 0 -row 0 ;#-pady 2p -padx 2p -sticky new
+    grid $f1aS.btn2 -column 0 -row 1 ;#-pady 2p -padx 2p -sticky new
+    grid $f1aS.btn3 -column 0 -row 2
+    
+    ## Table list
+    #set f2S [ttk::frame $w(carrier).shipvia.f2 -padding 10]
+    pack $f2S -anchor sw -fill both -expand yes 
     
     tablelist::tablelist $f2S.tbl -columns {
                                                 0   "..." center
                                                 0   "Ship Via Code" center
-                                                0   "Ship Via Name" center
+                                                30  "Ship Via Name"
                                                 25  "Carrier"
-                                                0   "Payment Type"
-                                                0   "Shipment Type"
-                                                0   "Rate Type"} \
+                                                0   "Payment Type" center
+                                                0   "Shipment Type" center} \
                                         -showlabels yes \
                                         -height 10 \
                                         -selectbackground yellow \
@@ -340,9 +338,7 @@ proc eAssistSetup::carrierMethod_GUI {} {
                                         -editselectedonly 1 \
                                         -selecttype row \
                                         -yscrollcommand [list $f2S.scrolly set] \
-                                        -xscrollcommand [list $f2S.scrollx set] \
-                                        -editstartcommand {eAssistSetup::placeholder} \
-                                        -editendcommand {eAssistSetup::provinceEditEnd}
+                                        -xscrollcommand [list $f2S.scrollx set]
                                                 
         # The internal names are the same spelling/capitalization as the db columns in table Countries
         $f2S.tbl columnconfigure 0 -name "count" \
@@ -351,7 +347,6 @@ proc eAssistSetup::carrierMethod_GUI {} {
         
         $f2S.tbl columnconfigure 1 -name "ShipViaCode" \
                                             -labelalign center \
-                                            -hide yes
         
         $f2S.tbl columnconfigure 2 -name "ShipViaName" \
                                             -labelalign center
@@ -363,9 +358,6 @@ proc eAssistSetup::carrierMethod_GUI {} {
                                             -labelalign center
         
         $f2S.tbl columnconfigure 5 -name "ShipmentType" \
-                                            -labelalign center
-        
-        $f2S.tbl columnconfigure 5 -name "RateType" \
                                             -labelalign center
         
         
@@ -382,11 +374,24 @@ proc eAssistSetup::carrierMethod_GUI {} {
     ::autoscroll::autoscroll $f2S.scrolly ;# Enable the 'autoscrollbar'
     ::autoscroll::autoscroll $f2S.scrollx
     
-    #grid columnconfigure $f2S.tbl -weight 1
-    #grid rowconfigure $f2S.tbl -weight 1
+    # Populate the entries with the selected row so we can edit/modify the data.
+    bind [$f2S.tbl bodytag] <Double-ButtonRelease-1> "
+        eAssistSetup::editShipVia $f1S $f2S.tbl {}
+        ea::tools::modifyButton $f1aS.btn1 -text [mc Modify]
+        ea::tools::modifyButton $f1aS.btn2 -state enabled
+        ea::tools::modifyButton $f1aS.btn3 -state enabled
+    "
     
-   
+    #bind [$f2S.tbl bodytag] <ButtonRelease-1> "eAssistSetup::controlShipVia clear -wid $f1S -tbl $f2S.tbl -dbtbl Carriers -btn $f1aS"
     
+    # Refresh tbl and reread from db
+    $f2S.tbl delete 0 end
+    set recordList [eAssist_db::dbSelectQuery -columnNames "ShipViaCode ShipViaName CarrierName FreightPayerType ShipmentType" -table ShipVia]
+    #$tbl insert end "{} $valueList"
+    foreach record $recordList {
+        $f2S.tbl insert end "{} $record"
+    }
+
     
 } ;# eAssistSetup::carrierMethod_GUI
 

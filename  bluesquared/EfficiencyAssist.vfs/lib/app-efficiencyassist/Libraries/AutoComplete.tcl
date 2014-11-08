@@ -18,57 +18,6 @@
 
 namespace eval AutoComplete {}
 
-#proc AutoComplete::ToTitle {win action validation value valuelist} {
-#    #****f* ToTitle/AutoComplete
-#    # CREATION DATE
-#    #   10/11/2014 (Saturday Oct 11)
-#    #
-#    # AUTHOR
-#    #	Casey Ackels
-#    #
-#    # COPYRIGHT
-#    #	(c) 2014 Casey Ackels
-#    #   
-#    #
-#    # SYNOPSIS
-#    #   AutoComplete::ToTitle win action validation value valuelist 
-#    #
-#    # FUNCTION
-#    #	Returns the data in a ToTitle fashion; this is a wrapper around AutoComplete::AutoComplete
-#    #   
-#    #   
-#    # CHILDREN
-#    #	AutoComplete::AutoComplete
-#    #   
-#    # PARENTS
-#    #   
-#    #   
-#    # NOTES
-#    #   
-#    #   
-#    # SEE ALSO
-#    #   
-#    #   
-#    #***
-#    global log
-#    #set value ""
-#    #set newVal ""
-#    #if {[info exists newVal]} {unset newVal}
-#
-#    if {[llength $value] == 1} {
-#        set value [string totitle $value]
-#    } else {
-#        foreach val $value {
-#            lappend newVal [string totitle $val]
-#        }
-#        #set value $newVal
-#    }
-#    
-#    ${log}::debug ToTitle: $value
-#    #return [lsort -dict [eAssist_db::dbSelectQuery -columnNames ProvName -table Provinces]]
-#    AutoComplete::AutoComplete $win $action $validation $value $valuelist
-#} ;# AutoComplete::ToTitle
-
 
 proc AutoComplete::AutoComplete {win action validation value valuelist {capitalize 1}} {
     #****f* AutoComplete/AutoComplete
@@ -80,6 +29,7 @@ proc AutoComplete::AutoComplete {win action validation value valuelist {capitali
     #   
     #
     # SYNOPSIS
+    #   This is for the ttk::entry widget
     #   AutoComplete::AutoComplete %W %d %v %P <list to search on> ?upper|title?
     #
     # FUNCTION
@@ -136,6 +86,78 @@ proc AutoComplete::AutoComplete {win action validation value valuelist {capitali
    return 1
     
 } ;# AutoComplete::AutoComplete
+
+
+proc AutoComplete::AutoCompleteComboBox {path key} {
+    #****f* AutoCompleteComboBox/AutoComplete
+    # CREATION DATE
+    #   11/07/2014 (Friday Nov 07)
+    #
+    # AUTHOR
+    #	Torsten Berg
+    #
+    # COPYRIGHT
+    #	(c) Torsten Berg
+    #   
+    #
+    # SYNOPSIS
+    #   Autocomplete for the ttk::combobox
+    #   AutoComplete::AutoCompleteComboBox path key 
+    #
+    # FUNCTION
+    #   Inserts matched values into the combobox. If you keep typing, it will replace the current value with the next one that matches.
+    #
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   From http://wiki.tcl.tk/15780
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    ${log}::debug PRESSED $path __ $key
+    
+    if {[string length $key] > 1 && [string tolower $key] != $key} {
+            ${log}::debug Length is less than 1.
+            #bind $path <KeyRelease> break
+            return
+        }
+    
+    set text [string map [list {[} {\[} {]} {\]}] [$path get]]
+    if {[string equal $text ""]} {return}
+    
+    set values [$path cget -values]
+    set x [lsearch -nocase $values $text*]
+    if {$x < 0} {
+        #${log}::debug No Matches
+        ##set index [expr {[$path index insert] -1}]
+        #set index [$path index insert]
+        ##$path set [lindex $values $x]
+        ##$path icursor $index
+        ##$path selection range insert end
+        #${log}::debug $path delete $index
+        #$path delete $index
+
+        return
+    } else {
+        set index [$path index insert]
+        $path set [lindex $values $x]
+        $path icursor $index
+        $path selection range insert end
+    }
+
+    
+} ;# AutoComplete::AutoCompleteComboBox
+
 
 ###
 ### -- This is useful if we want to search on ShipViaCode, and return the name of the carrier.

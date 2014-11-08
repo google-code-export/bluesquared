@@ -246,3 +246,281 @@ proc eAssistSetup::delCarrierSetup {varType listBox} {
 	
     ${log}::debug --END-- [info level 1]
 } ;# eAssistSetup::delCarrierSetup
+
+
+proc eAssistSetup::controlShipVia {{control add} args} {
+    #****f* controlShipVia/eAssistSetup
+    # CREATION DATE
+    #   11/06/2014 (Thursday Nov 06)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssistSetup::controlShipVia args 
+    #
+    # FUNCTION
+    #	Adds/Modifies the ship via configurations
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+    
+    foreach {key value} $args {
+        switch -- $key {
+            -wid    {set wid $value}
+            -tbl    {set tbl $value}
+            -dbtbl  {set dbTbl $value}
+            -btn    {set btns $value}
+        }
+    }
+
+    switch -- $control {
+        add     {eAssistSetup::addShipVia $wid $tbl}
+        delete  {eAssistSetup::deleteShipVia $wid $tbl}
+        clear   {eAssistSetup::clearShipVia $wid}
+    }
+    
+    
+    # Refresh tbl and reread from db
+    $tbl delete 0 end
+    set recordList [eAssist_db::dbSelectQuery -columnNames "ShipViaCode ShipViaName CarrierName FreightPayerType ShipmentType" -table ShipVia]
+    #$tbl insert end "{} $valueList"
+    foreach record $recordList {
+        $tbl insert end "{} $record"
+    }
+    
+    # Make sure the button text says 'add'.
+    ea::tools::modifyButton $btns.btn1 -text [mc "Add"]
+    ea::tools::modifyButton $btns.btn2 -state disabled
+    ea::tools::modifyButton $btns.btn3 -state disabled
+    
+} ;# eAssistSetup::controlShipVia
+
+proc eAssistSetup::addShipVia {wid tbl} {
+    #****f* addShipVia/eAssistSetup
+    # CREATION DATE
+    #   11/07/2014 (Friday Nov 07)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssistSetup::addShipVia wid tbl 
+    #
+    # FUNCTION
+    #	Adds the values from the entry/comboboxes to the db
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+    if {[info exists childList]} {unset childList}
+    if {[info exists valueList]} {unset valueList}
+    
+    foreach child [winfo children $wid] {
+        if {[string match -nocase *entry* $child] == 1 || [string match -nocase *cbox* $child] == 1} {
+            lappend childList $child 
+        }
+    }
+    
+    set childList [lsort $childList]
+    ${log}::debug childList: $childList
+    
+
+    foreach child $childList {
+        if {[$child get] eq ""} {
+            ${log}::debug $child is empty!
+            lappend valueList ""
+            return
+        } else {
+            ${log}::debug VALUES [$child get]
+            lappend valueList [$child get]
+            $child delete 0 end
+        }
+    }
+
+    ${log}::debug values: $valueList
+    
+
+    # add to table and db
+    $tbl insert end "{} $valueList"
+    eAssist_db::dbInsert -columnNames "ShipViaCode ShipViaName CarrierName FreightPayerType ShipmentType" -table ShipVia -data $valueList
+    
+} ;# eAssistSetup::addShipVia
+
+proc eAssistSetup::editShipVia {wid tbl args} {
+    #****f* editShipVia/eAssistSetup
+    # CREATION DATE
+    #   11/07/2014 (Friday Nov 07)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssistSetup::editShipVia args 
+    #
+    # FUNCTION
+    #	Populates the pertinent comboboxes and entry fields so that we can edit the data
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log tmp
+    
+    # Make sure all the widgets are cleared out
+    eAssistSetup::clearShipVia $wid
+
+    if {[info exists childList]} {unset childList}
+    
+    foreach child [winfo children $wid] {
+        if {[string match -nocase *entry* $child] == 1 || [string match -nocase *cbox* $child] == 1} {
+            lappend childList $child 
+        }
+    }
+    
+    set childList [lsort $childList]
+    set data [lrange [$tbl get [$tbl curselection]] 1 end]
+    
+    foreach wid $childList value $data {
+        $wid insert end $value
+    }
+    set shipViaCode [lrange $data 0 0]
+    
+    set tmp(db,rowID) [eAssist_db::getRowID ShipVia ShipViaCode='$shipViaCode']
+    
+    ${log}::debug shipVia: $shipViaCode
+    ${log}::debug rowID: $tmp(db,rowID)
+} ;# eAssistSetup::editShipVia
+
+
+proc eAssistSetup::deleteShipVia {wid tbl} {
+    #****f* deleteShipVia/eAssistSetup
+    # CREATION DATE
+    #   11/07/2014 (Friday Nov 07)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssistSetup::deleteShipVia args 
+    #
+    # FUNCTION
+    #	Delets the ship via, resets buttons, and clears out the widgets
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    set shipViaCode [lrange [$tbl get [$tbl curselection]] 1 1]
+    
+    eAssist_db::delete ShipVia ShipViaCode $shipViaCode
+    
+    eAssistSetup::clearShipVia $wid
+    
+} ;# eAssistSetup::deleteShipVia
+
+proc eAssistSetup::clearShipVia {wid} {
+    #****f* clearShipVia/eAssistSetup
+    # CREATION DATE
+    #   11/07/2014 (Friday Nov 07)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssistSetup::clearShipVia wid 
+    #
+    # FUNCTION
+    #	Clears the data from the widgets
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    foreach child [winfo children $wid] {
+        if {[string match -nocase *entry* $child] == 1 || [string match -nocase *cbox* $child] == 1} {
+            $child delete 0 end
+        }
+    }
+
+    
+} ;# eAssistSetup::clearShipVia
