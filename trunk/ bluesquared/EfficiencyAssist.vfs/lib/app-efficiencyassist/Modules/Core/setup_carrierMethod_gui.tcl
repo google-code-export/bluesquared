@@ -368,8 +368,8 @@ proc eAssistSetup::carrierMethod_GUI {} {
     grid columnconfigure $f2S $f2S.tbl -weight 1
     grid rowconfigure $f2S $f2S.tbl -weight 1
     
-    grid $f2S.scrolly -column 1 -row 1 -sticky nse
-    grid $f2S.scrollx -column 0 -row 2 -sticky ews
+    grid $f2S.scrolly -column 1 -row 0 -sticky nse
+    grid $f2S.scrollx -column 0 -row 1 -sticky ews
     
     ::autoscroll::autoscroll $f2S.scrolly ;# Enable the 'autoscrollbar'
     ::autoscroll::autoscroll $f2S.scrollx

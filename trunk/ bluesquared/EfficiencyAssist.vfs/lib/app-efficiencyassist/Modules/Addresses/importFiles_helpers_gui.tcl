@@ -245,10 +245,10 @@ proc eAssistHelper::insertItems {tbl} {
 						#$btnBar.ok configure -command "eAssistHelper::insValuesToTableCells [list $tbl] $txtVariable $origCells; destroy .di"
 						
 					}
-					carriermethod		{
+					shipvia		{
 						${log}::debug CarrierMethod
 						ttk::label $f2.txt$i -text [mc "$header"]
-						$wid $f2.$x$header -values $carrierSetup(CarrierList) -textvariable txtVariable
+						$wid $f2.$x$header -values $carrierSetup(ShipViaName) -textvariable txtVariable
 						$f2.$x$header delete 0 end
 						$f2.$x$header configure -state readonly
 						

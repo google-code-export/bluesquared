@@ -86,33 +86,35 @@ proc export::DataToExport {} {
         #${log}::debug ERROR: $err
         return
     } else {
-        set fd [catch {[open $myFile(data) w]} err]
-    }
-    
-    if {[info exists err]} {
-        ${log}::debug CATCH ERR: $err
-        tk_messageBox -message "The file is open in another program, please close before exporting." \
-                        -icon warning -type ok \
-                        -detail "$myFile(data)"
-        return
+        #set fd [catch {[open $myFile(data) w]} err]
+        if {[file exists $myFile(data)] && ![file writable $myFile(data)]} {
+            tk_messageBox -message "The file is open in another program, please close before exporting." \
+                            -icon warning -type ok \
+                            -detail "$myFile(data)"
+            return
+        } else {
+            set fd [open $myFile(data) w]
         }
+        ${log}::debug fd: $fd
+    }
+
     
         
     # HEADER: Write output
     # OrderType is a hardcoded value, this should be moved to a user option.
     #   OrderType is the Column name, Version is the value.
-    #chan puts $myFile(data) [::csv::join "OrderNumber $headerParent(outPutHeader) OrderType"]
-    #${log}::debug [::csv::join "OrderNumber $headerParent(outPutHeader) OrderType"]
     if {[info exists colNames]} {unset colNames}
     set colCount [$files(tab3f2).tbl columncount]
     for {set x 0} {$colCount > $x} {incr x} {
-        #lappend colNames [$files(tab3f2).tbl columncget $x -name]
+        set tblName [$files(tab3f2).tbl columncget $x -name]
+        if {$tblName eq "ShipVia"} {set shipViaIDX $x; ${log}::debug shipViaIDX: $shipViaIDX}
         # Just in case the header doesn't exist in the db; but we have it in the tablelist...
-        set outputColNames [db eval "SELECT OutputHeaderName FROM Headers where InternalHeaderName='[$files(tab3f2).tbl columncget $x -name]'"]
+        set outputColNames [db eval "SELECT OutputHeaderName FROM Headers where InternalHeaderName='$tblName'"]
+        
         if {$outputColNames eq ""} {
             lappend colNames [$files(tab3f2).tbl columncget $x -name]
         } else {
-            lappend colNames [db eval "SELECT OutputHeaderName FROM Headers where InternalHeaderName='[$files(tab3f2).tbl columncget $x -name]'"]
+            lappend colNames [db eval "SELECT OutputHeaderName FROM Headers where InternalHeaderName='$tblName'"]
         }
     }
     chan puts $fd [::csv::join "$colNames OrderType"]
@@ -122,11 +124,16 @@ proc export::DataToExport {} {
     set rowCount [$files(tab3f2).tbl size]
     for {set x 0} {$rowCount > $x} {incr x} {
         # RECORDS: Write output one row at a time.
-        # Version is a hardcoded value, this should be moved to a user option.
-        ${log}::debug [::csv::join "[$files(tab3f2).tbl get $x] Version"]
-        chan puts $fd) [::csv::join "[$files(tab3f2).tbl get $x] Version"]
+        set record [$files(tab3f2).tbl get $x]
+        set shipViaName [lindex $record $shipViaIDX] ; ${log}::debug shipViaName: $shipViaName
+        # The apostrophe is so we can open the file up in Excel without the leading zero disappearing. (It formats the cell for TEXT instead of INTEGER)
+        set record [lreplace $record $shipViaIDX $shipViaIDX '[db eval "SELECT ShipViaCode FROM ShipVia where ShipViaName='$shipViaName'"]]
+        # Version is a hardcoded value, this should be a header option, with a drop down in the spreadsheet
+        ${log}::debug [::csv::join "$record Version"]
+        chan puts $fd [::csv::join "$record Version"]
     }
     
 	chan close $fd
     #${log}::debug --END-- [info level 1]
 } ;# export::DataToExport
+        
