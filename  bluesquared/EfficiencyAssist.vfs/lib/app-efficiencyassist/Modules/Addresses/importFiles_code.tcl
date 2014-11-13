@@ -71,7 +71,7 @@ proc importFiles::initVars {args} {
     
     set dist(distributionTypes) [db eval "SELECT DistTypeName FROM DistributionTypes"]
     set carrierSetup(ShippingClass) [db eval "SELECT ShippingClass FROM ShippingClasses"]
-    set carrierSetup(CarrierList) [db eval "SELECT Name FROM Carriers"]
+    set carrierSetup(ShipViaName) [db eval "SELECT ShipViaName FROM ShipVia"]
     
     set packagingSetup(ContainerType) [db eval "SELECT Container FROM Containers"]
     set packagingSetup(PackageType) [db eval "SELECT Package FROM Packages"]
@@ -483,8 +483,8 @@ proc importFiles::startCmd {tbl row col text} {
                                 set process(startTblText) $text
                                 ${log}::debug StartCmd: $process(startTblText)
             }
-            "carriermethod"     {
-                                $w configure -values $carrierSetup(CarrierList) -state readonly
+            ShipVia             {
+                                $w configure -values $carrierSetup(ShipViaName) -state readonly
             }
             "quantity"          {
                                     if {![string is integer $text]} {
@@ -512,24 +512,25 @@ proc importFiles::startCmd {tbl row col text} {
         
         $tbl cellconfigure $row,$col -text $text
 
-    set idx [lsearch -nocase [array names headerParams] $colName]
+    #set idx [lsearch -nocase [array names headerParams] $colName]
+    set stringLength [eAssist_db::dbWhereQuery -columnNames HeaderMaxLength -table Headers -where InternalHeaderName='$colName']
+    set bgColor [join [eAssist_db::dbWhereQuery -columnNames Highlight -table Headers -where InternalHeaderName='$colName']]
 
-    if {$idx != -1} {
-        if {[string length $text] > [lindex $headerParams($colName) 0]} {
-            ${log}::debug length [string length $text]
-                
-            set bgColor [lindex $headerParams($colName) 3]
-            if {$bgColor != ""} {
-                set backGround $bgColor
-            } else {
-                set backGround yellow
-            }
+    #if {$idx != -1} {}
+    if {[string length $text] > $stringLength} {
+        ${log}::debug length [string length $text]
+            
+        if {$bgColor != ""} {
+            set backGround $bgColor
         } else {
-            set backGround SystemWindow
+            # Default color
+            set backGround yellow
         }
+    } else {
+        set backGround SystemWindow
+    }
     # Update the internal list with the current text so that we can run calculations on it.
     $tbl cellconfigure $row,$col -background $backGround
-    }
 
         
     return $text
@@ -599,24 +600,25 @@ proc importFiles::endCmd {tbl row col text} {
     }
     
     $tbl cellconfigure $row,$col -text $text
-    set idx [lsearch -nocase [array names headerParams] $colName]
     
-    if {$idx != -1} {
-        if {[string length $text] > [lindex $headerParams($colName) 0]} {
-            ${log}::debug length [string length $text]
-                
-            set bgColor [lindex $headerParams($colName) 3]
-            if {$bgColor != ""} {
-                set backGround $bgColor
-            } else {
-                set backGround yellow
-            }
+    set stringLength [eAssist_db::dbWhereQuery -columnNames HeaderMaxLength -table Headers -where InternalHeaderName='$colName']
+    set bgColor [join [eAssist_db::dbWhereQuery -columnNames Highlight -table Headers -where InternalHeaderName='$colName']]
+
+    if {[string length $text] > $stringLength} {
+        ${log}::debug length [string length $text]
+            
+        if {$bgColor != ""} {
+            set backGround $bgColor
         } else {
-            set backGround SystemWindow
+            # Default color
+            set backGround yellow
         }
+    } else {
+        set backGround SystemWindow
+    }
+    
     # Update the internal list with the current text so that we can run calculations on it.
     $tbl cellconfigure $row,$col -background $backGround
-    }
 
     if {$updateCount == 1} {
         set job(TotalCopies) [eAssistHelper::calcSamples $tbl $col]
