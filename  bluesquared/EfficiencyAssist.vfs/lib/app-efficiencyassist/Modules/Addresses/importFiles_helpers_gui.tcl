@@ -418,3 +418,61 @@ proc eAssistHelper::projSetup {} {
 	
     
 } ;# eAssistHelper::projSetup
+
+
+proc eAssistHelper::importProgBar {args} {
+    #****f* importProgBar/eAssistHelper
+    # CREATION DATE
+    #   11/18/2014 (Tuesday Nov 18)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssistHelper::importProgBar args 
+    #
+    # FUNCTION
+    #	Displays a progress bar when importing a file.
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+	#	Set length: $::gwin(importpbar) configure -maximum <value>
+	# 	Update: $::gwin(importpbar) step <value>
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+	set w .pb
+    if {[winfo exists w]} {destroy $w}
+
+    toplevel $w
+    wm transient $w .
+    wm title $w [mc "Progress Bar"]
+    
+    set locX [expr {[winfo screenwidth . ] / 4 + [winfo x .]}]
+    set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
+    wm geometry $w +${locX}+${locY}
+
+    set f1 [ttk::labelframe $w.f1 -text [mc "Importing Records"] -padding 10]
+    pack $f1 -fill both -expand yes -padx 5p -pady 5p
+	
+    set ::gwin(importpbar) [ttk::progressbar $f1.pbar]
+	
+	grid $::gwin(importpbar) -column 0 -row 0 -sticky news
+
+    
+} ;# eAssistHelper::importProgBar
