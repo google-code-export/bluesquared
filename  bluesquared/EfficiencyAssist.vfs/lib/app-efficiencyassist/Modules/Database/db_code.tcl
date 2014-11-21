@@ -684,8 +684,8 @@ proc eAssist_db::dbWhereQuery {args} {
     #   
     #
     # SYNOPSIS
-    #   dbCSR::dbWhereQuery -columnNames ?value(s)? -table <tableName> -where <where clause>
-    #   Example: dbCSR::dbWhereQuery -columnNames {FirstName LastName} -table CSRS -where Status=1
+    #   eAssist_db::dbWhereQuery -columnNames ?value(s)? -table <tableName> -where <where clause>
+    #   Example: eAssist_db::dbWhereQuery -columnNames {FirstName LastName} -table CSRS -where Status=1
     #   
     #
     # FUNCTION
