@@ -126,8 +126,8 @@ proc export::DataToExport {} {
         # RECORDS: Write output one row at a time.
         set record [$files(tab3f2).tbl get $x]
         set shipViaName [lindex $record $shipViaIDX] ; ${log}::debug shipViaName: $shipViaName
-        # The apostrophe is so we can open the file up in Excel without the leading zero disappearing. (It formats the cell for TEXT instead of INTEGER)
-        set record [lreplace $record $shipViaIDX $shipViaIDX '[db eval "SELECT ShipViaCode FROM ShipVia where ShipViaName='$shipViaName'"]]
+        # WARNING If you open the file with Excel you will needd to fix the 'ship via' column; because the leading zero's will be dropped.
+        set record [lreplace $record $shipViaIDX $shipViaIDX [db eval "SELECT ShipViaCode FROM ShipVia where ShipViaName='$shipViaName'"]]
         # Version is a hardcoded value, this should be a header option, with a drop down in the spreadsheet
         ${log}::debug [::csv::join "$record Version"]
         chan puts $fd [::csv::join "$record Version"]

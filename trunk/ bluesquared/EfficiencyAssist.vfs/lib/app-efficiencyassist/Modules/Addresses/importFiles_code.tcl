@@ -276,7 +276,7 @@ proc importFiles::processFile {win} {
     }
 
     
-    # Ensure the 'count' column is whitelisted
+    # Ensure the 'count/OrderNumber' column is whitelisted
     if {[lsearch $headerParent(whiteList) OrderNumber] == -1} {lappend headerParent(whiteList) OrderNumber}
       
     set process(versionList) ""
@@ -286,8 +286,18 @@ proc importFiles::processFile {win} {
     set FileHeaders [lsort [array names position]]
     #${log}::debug FileHeaders: $FileHeaders
     
+    
+    # launch progress bar window
+    eAssistHelper::importProgBar
+    ${log}::debug Launching Progress Bar
+    
+    # configure value of progress bar (number of total records)
+    set max [expr {$process(numOfRecords) + 1}]
+    $::gwin(importpbar) configure -maximum $max
+    ${log}::debug configuring Progress Bar with -maximum $max
+
     foreach record $process(dataList) {
-        # .. Skip over any 'blank' lines in Excel
+        # .. Skip over any 'blank' lines in found in the file
         if {[string is punc $record] == 1} {continue}
             
         ## Ensure we have good data; if we don't, lets try to fix it
@@ -333,6 +343,7 @@ proc importFiles::processFile {win} {
             
             if {$index eq ""} {
 
+                # Create a default version if, a version isn't found in the file. Planner defaults to 'Version 1'.
                 if {[$files(tab3f2).tbl columncget $x -name] eq "Version"} {
                     #${log}::debug Found Version Column!
                     lappend newRow "Version 1"
@@ -413,9 +424,15 @@ proc importFiles::processFile {win} {
         unset maxCharColumn
         }
         
+        # Update Progress Bar ...
+        $::gwin(importpbar) step 1
+        ${log}::debug Updating Progress Bar - [$::gwin(importpbar) cget -value]
+        
         unset newRow
         set x 0
     }
+    # Ensure the progress bar is at the max, by the time we get to this point
+    $::gwin(importpbar) configure -value $max
     
     # save the original version list as origVersionList, so we can keep the process(versionList) variable updated with user changed versions
     if {[info exists process(versionList)]} {
@@ -695,8 +712,7 @@ proc importFiles::insertColumns {tbl} {
                             -width $widthCol
     }
 	
-    #${log}::debug --END-- [info level 1]
-} ;# ::insertColumns
+} ;# importFiles::insertColumns
 
 
 proc importFiles::enableMenuItems {} {
