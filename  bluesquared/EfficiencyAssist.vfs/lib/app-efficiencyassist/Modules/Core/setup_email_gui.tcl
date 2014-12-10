@@ -178,7 +178,7 @@ proc eAssistSetup::emailSetup_GUI {} {
 		    -xscrollcommand [list $eF2.scrollx set]
     
     ttk::scrollbar $eF2.scrolly -orient v -command [list $eF2.text yview]
-    ttk::scrollbar $eF2.scrollx -orient v -command [list $eF2.text xview]
+    ttk::scrollbar $eF2.scrollx -orient h -command [list $eF2.text xview]
     
     ttk::label $eF2.subs -text [mc "Available Macros:"]
     ttk::label $eF2.subTxt -textvariable email(SubTxt)
