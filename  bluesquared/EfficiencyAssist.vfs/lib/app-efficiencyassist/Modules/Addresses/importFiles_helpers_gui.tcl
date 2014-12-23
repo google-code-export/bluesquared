@@ -352,22 +352,26 @@ proc eAssistHelper::projSetup {} {
     #***
     global log CSR job
 
-    set w(ps) .ps
-    if {[winfo exists $w(ps)]} {destroy .ps}
+    if {[winfo exists .ps]} {destroy .ps}
 
-    toplevel $w(ps)
-    wm transient $w(ps) .
-    wm title $w(ps) [mc "Project Information"]
+    toplevel .ps
+    wm transient .ps .
+    wm title .ps [mc "Project Information"]
     
     set locX [expr {[winfo screenwidth . ] / 4 + [winfo x .]}]
     set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
-    wm geometry $w(ps) +${locX}+${locY}
+    wm geometry .ps +${locX}+${locY}
 
-    set f1 [ttk::labelframe $w(ps).f1 -text [mc "Job Information"] -padding 10]
+    set f1 [ttk::labelframe .ps.f1 -text [mc "Job Information"] -padding 10]
     pack $f1 -fill both -expand yes -padx 5p -pady 5p
     
     
-    ttk::label $f1.txt1 -text [mc "CSR"]
+    ttk::label $f1.txt0 -text [mc "Customer"]
+	ttk::entry $f1.entry0a -width 12
+	ttk::combobox $f1.entry0b
+	ttk::button $f1.btn0 -width 3 -text "..." -command customer::manage
+	
+	ttk::label $f1.txt1 -text [mc "CSR"]
     ttk::combobox $f1.cbox1 -postcommand "dbCSR::getCSRID $f1.cbox1 {FirstName LastName}" -textvariable job(CSRName) -validate all -validatecommand {AutoComplete::AutoComplete %W %d %v %P [dbCSR::getCSRID "" {FirstName LastName}]}
     focus $f1.txt1
     
@@ -383,14 +387,18 @@ proc eAssistHelper::projSetup {} {
     ttk::entry $f1.entry3 -textvariable job(Number)
 		tooltip::tooltip $f1.entry3 [mc "Job Number"]
     
-    grid $f1.txt1      -column 0 -row 0 -sticky nes -padx 3p -pady 3p
-    grid $f1.cbox1     -column 1 -row 0 -sticky news -padx 3p -pady 3p
-    grid $f1.txt1a     -column 0 -row 1 -sticky nes -padx 3p -pady 3p
-    grid $f1.entry1a   -column 1 -row 1 -sticky news -padx 3p -pady 3p
-    grid $f1.txt2      -column 0 -row 2 -sticky nes -padx 3p -pady 3p
-    grid $f1.entry2    -column 1 -row 2 -sticky news -padx 3p -pady 3p
-    grid $f1.txt3      -column 0 -row 3 -sticky nes -padx 3p -pady 3p
-    grid $f1.entry3    -column 1 -row 3 -sticky news -padx 3p -pady 3p
+	grid $f1.txt0	   -column 0 -row 0 -sticky nes -padx 3p -pady 3p
+	grid $f1.entry0a   -column 1 -row 0 -sticky w -padx 3p -pady 3p
+	grid $f1.entry0b   -column 2 -row 0 -sticky ew -padx 3p -pady 3p
+	grid $f1.btn0      -column 3 -row 0 -sticky ew -padx 3p -pady 3p
+    grid $f1.txt1      -column 0 -row 1 -sticky nes -padx 3p -pady 3p
+    grid $f1.cbox1     -column 1 -columnspan 2 -row 1 -sticky news -padx 3p -pady 3p
+    grid $f1.txt1a     -column 0 -row 2 -sticky nes -padx 3p -pady 3p
+    grid $f1.entry1a   -column 1 -columnspan 2 -row 2 -sticky news -padx 3p -pady 3p
+    grid $f1.txt2      -column 0 -row 3 -sticky nes -padx 3p -pady 3p
+    grid $f1.entry2    -column 1 -columnspan 2 -row 3 -sticky news -padx 3p -pady 3p
+    grid $f1.txt3      -column 0 -row 4 -sticky nes -padx 3p -pady 3p
+    grid $f1.entry3    -column 1 -columnspan 2 -row 4 -sticky news -padx 3p -pady 3p
 	
     #set f2 [ttk::labelframe $w(ps).f2 -text [mc "Piece Information"] -padding 10]
     #pack $f2 -fill both -expand yes
@@ -406,11 +414,11 @@ proc eAssistHelper::projSetup {} {
     #grid $f2.txt2 -column 0 -row 1 -sticky nes
     #grid $f2.entry2 -column 1 -row 1 -sticky news
     
-    set btnBar [ttk::frame $w(ps).btnBar -padding 10]
+    set btnBar [ttk::frame .ps.btnBar -padding 10]
     pack $btnBar -anchor se ;#-padx 5p -pady 5p
     
-    ttk::button $btnBar.ok -text [mc "OK"] -command "destroy $w(ps)"
-    ttk::button $btnBar.import -text [mc "Import File"] -command "importFiles::fileImportGUI; destroy $w(ps)"
+    ttk::button $btnBar.ok -text [mc "OK"] -command "destroy .ps"
+    ttk::button $btnBar.import -text [mc "Import File"] -command "importFiles::fileImportGUI; destroy .ps"
     
     grid $btnBar.ok -column 0 -row 0 -sticky news
     grid $btnBar.import -column 1 -row 0 -sticky news

@@ -90,29 +90,10 @@ proc eAssistSetup::packagingTypes_GUI {} {
     ## Bindings
     # Enter
     ea::tools::bindings $f1.entry {Return KP_Enter} "ea::tools::populateListbox add $f1.entry $f1.lbox Containers Container"
-    #bind $f1.entry <Return> "eAssistSetup::addPackagingSetup CONTAINERS $f1.entry $f1.lbox"
-    # .. So both enter key's work the same way
-    #bind $f1.entry <KP_Enter> "eAssistSetup::addPackagingSetup CONTAINERS $f1.entry $f1.lbox"
     
     # Delete
     ea::tools::bindings $f1.entry {Delete BackSpace} "ea::tools::populateListbox delete $f1.entry $f1.lbox Containers Container"
-    #bind $f1.lbox <Delete> "eAssistSetup::delPackagingSetup CONTAINERS $f1.lbox"
-    #bind $f1.lbox <BackSpace> "eAssistSetup::delPackagingSetup CONTAINERS $f1.lbox"
 
-
-    
-
-    #if {[info exists packagingSetup(ContainerType)] == 1} {
-    #    foreach item $packagingSetup(ContainerType) {
-    #        $f1.lbox insert end $item
-    #    }
-    #}
-    #set cont [eAssist_db::dbSelectQuery -columnNames Container -table Containers]
-    #if {$cont ne ""} {
-    #    foreach item $cont {
-    #        $f1.lbox insert end $item
-    #    }
-    #}
     
     ##
     ## Frame 2
