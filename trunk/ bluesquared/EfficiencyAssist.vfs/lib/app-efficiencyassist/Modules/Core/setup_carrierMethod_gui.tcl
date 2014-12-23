@@ -71,7 +71,7 @@ proc eAssistSetup::carrierMethod_GUI {} {
     #
     $w(carrier) add [ttk::frame $w(carrier).ctbl] -text [mc "General"]
     $w(carrier) add [ttk::frame $w(carrier).shipvia] -text [mc "Ship Via"]
-    $w(carrier) add [ttk::frame $w(carrier).advanced] -text [mc "Advanced"] -state disabled
+    $w(carrier) add [ttk::frame $w(carrier).advanced] -text [mc "Carrier Regions"] -state disabled
     $w(carrier) add [ttk::frame $w(carrier).frtrates] -text [mc "Freight Rates"] -state disabled
     $w(carrier) add [ttk::frame $w(carrier).upsrates] -text [mc "UPS Rates"] -state disabled
     $w(carrier) add [ttk::frame $w(carrier).fedexrates] -text [mc "FedEx Rates"] -state disabled
@@ -273,7 +273,7 @@ proc eAssistSetup::carrierMethod_GUI {} {
     bind $f1S.03cbox1 <KeyRelease> [list AutoComplete::AutoCompleteComboBox $f1S.03cbox1 %K]
     
     ttk::label $f1S.txt4 -text [mc "Payment Type"]
-    ttk::combobox $f1S.04cbox2 -postcommand "$$f1S.04cbox2 configure -values [list [eAssist_db::dbSelectQuery -columnNames Payer -table FreightPayer]]"
+    ttk::combobox $f1S.04cbox2 -postcommand "$f1S.04cbox2 configure -values [list [eAssist_db::dbSelectQuery -columnNames Payer -table FreightPayer]]"
     bind $f1S.04cbox2 <FocusIn> "$f1S.04cbox2 configure -values [list [eAssist_db::dbSelectQuery -columnNames Payer -table FreightPayer]]"
     bind $f1S.04cbox2 <KeyRelease> [list AutoComplete::AutoCompleteComboBox $f1S.04cbox2 %K]
     
@@ -377,7 +377,7 @@ proc eAssistSetup::carrierMethod_GUI {} {
     # Populate the entries with the selected row so we can edit/modify the data.
     bind [$f2S.tbl bodytag] <Double-ButtonRelease-1> "
         eAssistSetup::editShipVia $f1S $f2S.tbl {}
-        ea::tools::modifyButton $f1aS.btn1 -text [mc Modify]
+        ea::tools::modifyButton $f1aS.btn1 -text [mc Update]
         ea::tools::modifyButton $f1aS.btn2 -state enabled
         ea::tools::modifyButton $f1aS.btn3 -state enabled
     "
@@ -391,9 +391,112 @@ proc eAssistSetup::carrierMethod_GUI {} {
     foreach record $recordList {
         $f2S.tbl insert end "{} $record"
     }
+    
+    ##
+    ## Tab 3 (Advanced)
+    ##
+    
+    #
+    # --- Frame 1
+    #
+    
+    set f1A [ttk::frame $w(carrier).advanced.f1 -padding 10]
+    grid $f1A -column 0 -row 0 -pady 5p -padx 5p -sticky new
+    
+    ttk::button $f1A.btn1 -text [mc "<<"] -command {puts "Go to first Record"}
+    ttk::button $f1A.btn2 -text [mc "<"] -command {puts "Go back one Record"}
+    ttk::button $f1A.btn3 -text [mc ">"] -command {puts "Go forward one Record"}
+    ttk::button $f1A.btn4 -text [mc ">>"] -command {puts "Go to last Record"}
+    
+    grid $f1A.btn1 -column 1 -row 0
+    grid $f1A.btn2 -column 2 -row 0
+    grid $f1A.btn3 -column 3 -row 0
+    grid $f1A.btn4 -column 4 -row 0
+    
+    #
+    # --- Frame 2
+    #
+    set f2A [ttk::frame $w(carrier).advanced.f2 -padding 10]
+    grid $f2A -column 0 -row 1 -pady 0p -padx 5p -sticky new
+    
+    ttk::label $f2A.txt1 -text [mc "Carrier Name"]
+    ttk::entry $f2A.entry1
+    
+    ttk::label $f2A.txt2 -text [mc "Ship Via"]
+    ttk::entry $f2A.entry2
+    
+    grid $f2A.txt1 -column 0 -row 0 -sticky nse
+    grid $f2A.entry1 -column 1 -row 0 -sticky news
+    
+    grid $f2A.txt2 -column 0 -row 1 -sticky nse
+    grid $f2A.entry2 -column 1 -row 1 -sticky news
+    
+    #
+    # --- Frame 3
+    #
+    set f3A [ttk::labelframe $w(carrier).advanced.f3 -text [mc "Countries"] -padding 10]
+    grid $f3A -column 0 -row 2 -pady 5p -padx 5p -sticky  new
+    
+    ttk::label $f3A.txt1 -text [mc "Available"]
+    listbox $f3A.lbox1
+    
+    grid $f3A.txt1 -column 0 -row 0 -sticky nsw
+    grid $f3A.lbox1 -column 0 -row 1 -sticky news
+    
+        set f3Aa [ttk::frame $f3A.f3Aa]
+        grid $f3Aa -column 1 -row 1 -sticky news
+        
+        ttk::button $f3Aa.btn1 -text [mc "Add >"]
+        ttk::button $f3Aa.btn2 -text [mc "< Remove"]
+        
+        grid $f3Aa.btn1 -column 0 -row 0 -sticky new
+        grid $f3Aa.btn2 -column 0 -row 1 -sticky new
+    
+    ttk::label $f3A.txt2 -text [mc "Assigned"]
+    listbox $f3A.lbox2
+    
+    grid $f3A.txt2 -column 2 -row 0 -sticky nsw
+    grid $f3A.lbox2 -column 2 -row 1 -sticky news
+    
+    
+    #
+    # --- Frame 4
+    #
+    set f4A [ttk::labelframe $w(carrier).advanced.f4 -text [mc "Regions"] -padding 10]
+    grid $f4A -column 0 -row 3 -pady 5p -padx 5p -sticky new
+    
+        # [Sub Frame] Setup the filter
+        set f4f [ttk::frame $f4A.filter]
+        grid $f4f -column 0 -columnspan 2 -row 0 -pady 2p -sticky news
+        
+        ttk::label $f4f.txt1 -text [mc "Country"]
+        ttk::combobox $f4f.cbox -values [list USA Canada Mexico]
+        
+        grid $f4f.txt1 -column 0 -row 0 -sticky nsw
+        grid $f4f.cbox -column 1 -row 0 -sticky news
+    
+    # Available Listbox   
+    ttk::label $f4A.txt1 -text [mc "Available"]
+    listbox $f4A.lbox1
 
+    grid $f4A.txt1 -column 0 -row 1 -sticky nsw
+    grid $f4A.lbox1 -column 0 -row 2 -sticky news
+    
+        # [Sub Frame] Buttons
+        set f4Aa [ttk::frame $f4A.f4Aa]
+        grid $f4Aa -column 1 -row 2 -sticky news
+        
+        ttk::button $f4Aa.btn1 -text [mc "Add >"]
+        ttk::button $f4Aa.btn2 -text [mc "< Remove"]
+        
+        grid $f4Aa.btn1 -column 0 -row 0 -sticky news
+        grid $f4Aa.btn2 -column 0 -row 1 -sticky news
+    
+    # Assigned Listbox
+    ttk::label $f4A.txt2 -text [mc "Assigned"]
+    listbox $f4A.lbox2
+    
+    grid $f4A.txt2 -column 2 -row 1 -sticky nsw
+    grid $f4A.lbox2 -column 2 -row 2 -sticky news
     
 } ;# eAssistSetup::carrierMethod_GUI
-
-
-#Remove buttons, and create bindings to the <Enter> key; <Delete> key, and a <Double-1> to delete
