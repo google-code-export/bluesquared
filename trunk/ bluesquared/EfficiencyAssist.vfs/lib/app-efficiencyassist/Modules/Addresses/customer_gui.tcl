@@ -229,56 +229,57 @@ proc customer::Modify {modify {id 0} {custName ""}} {
     # -----
     # Tab 1, Notebook - Preferred Ship Via's
     
-    # Frame 1 - Buttons
-    set f1a [ttk::frame $nbk.shipvia.f1a]
-    pack $f1a -expand yes -fill both
+    # Frame 1 - Available Ship Via
+    set f1a [ttk::labelframe $nbk.shipvia.f1a -text [mc "Available"] -padding 10]
+    pack $f1a -expand yes -fill both -side left -pady 5p -padx 5p
     
-    ttk::button $f1a.btn0 -text "View"
-    ttk::button $f1a.btn1 -text "Modify"
-    ttk::button $f1a.btn2 -text "Add"
-    ttk::button $f1a.btn3 -text "Delete"
+    listbox $f1a.lbox -width 30 -selectmode extended \
+            -yscrollcommand [list $f1a.scrolly set] \
+            -xscrollcommand [list $f1a.scrollx set]
     
-    grid $f1a.btn0 -column 0 -row 0
-    grid $f1a.btn1 -column 1 -row 0
-    grid $f1a.btn2 -column 2 -row 0
-    grid $f1a.btn3 -column 3 -row 0
+    ttk::scrollbar $f1a.scrolly -orient v -command [list $f1a.lbox yview]
+    ttk::scrollbar $f1a.scrollx -orient h -command [list $f1a.lbox xview]
     
-    # Frame 2 - Tablelist
-    set f2a [ttk::frame $nbk.shipvia.f2a]
-    pack $f2a -expand yes -fill both
+    ::autoscroll::autoscroll $f1a.scrolly ;# Enable the 'autoscrollbar'
+    ::autoscroll::autoscroll $f1a.scrollx
     
-    tablelist::tablelist $f2a.tbl -columns {
-                                10 "Ship Via" center
-                                40 "Ship Via Name" center} \
-                                -showlabels yes \
-                                -height 10 \
-                                -selectbackground yellow \
-                                -selectforeground black \
-                                -stripebackground lightblue \
-                                -exportselection yes \
-                                -showseparators yes \
-                                -fullseparators yes \
-                                -selectmode extended \
-                                -editselectedonly 1 \
-                                -selecttype row \
-                                -yscrollcommand [list $f2a.scrolly set] \
-                                -xscrollcommand [list $f2a.scrollx set]
+    grid $f1a.lbox -column 0 -row 0 -sticky news
+    grid $f1a.scrolly -column 1 -row 0 -sticky nse
+    grid $f1a.scrollx -column 0 -row 1 -sticky ews
     
-    ttk::scrollbar $f2a.scrolly -orient v -command [list $f2a.tbl yview]
-    ttk::scrollbar $f2a.scrollx -orient h -command [list $f2a.tbl xview]
+    # Frame 2 - Buttons
+    set f2a [ttk::frame $nbk.shipvia.f2a -padding 10]
+    pack $f2a -expand yes -fill both -side left -pady 5p -padx 5p
     
-    grid $f2a.tbl -column 0 -row 0 -sticky news
-    grid columnconfigure $f2a $f2a.tbl -weight 1
-    grid rowconfigure $f2a $f2a.tbl -weight 1
+    ttk::button $f2a.btn1 -text [mc "Add >"] -command {${log}::debug [.viewCustomer.f0.notebook.shipvia.f1a.lbox curselection]}
+    ttk::button $f2a.btn2 -text [mc "< Remove"]
     
-    grid $f2a.scrolly -column 1 -row 0 -sticky nse
-    grid $f2a.scrollx -column 0 -row 1 -sticky ews
+    grid $f2a.btn1 -column 0 -row 0 -sticky news
+    grid $f2a.btn2 -column 0 -row 1 -sticky news
     
-    ::autoscroll::autoscroll $f2a.scrolly ;# Enable the 'autoscrollbar'
-    ::autoscroll::autoscroll $f2a.scrollx
+    # Frame 3 - Assigned Ship Via
+    set f3a [ttk::labelframe $nbk.shipvia.f3a -text [mc "Assigned"] -padding 10]
+    pack $f3a -expand yes -fill both -side left -pady 5p -padx 5p
     
+    listbox $f3a.lbox -width 30 -selectmode extended \
+            -yscrollcommand [list $f3a.scrolly set] \
+            -xscrollcommand [list $f3a.scrollx set]
+    
+    ttk::scrollbar $f3a.scrolly -orient v -command [list $f3a.lbox yview]
+    ttk::scrollbar $f3a.scrollx -orient h -command [list $f3a.lbox xview]
+    
+    ::autoscroll::autoscroll $f3a.scrolly ;# Enable the 'autoscrollbar'
+    ::autoscroll::autoscroll $f3a.scrollx
+    
+    grid $f3a.lbox -column 0 -row 0 -sticky news
+    grid $f3a.scrolly -column 1 -row 0 -sticky nse
+    grid $f3a.scrollx -column 0 -row 1 -sticky ews
+    
+    # Populate the ship via listboxes
+    customer::PopulateShipVia $f1a.lbox
+    #customer::PopulateShipVia $f3a.lbox custID
     
 
-    
-    
+
 } ;# customer::Modify
+
