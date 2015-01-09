@@ -509,9 +509,13 @@ proc importFiles::initMenu {} {
     $mb.file delete 0 end
     
     # Add Module specific Menus
-    $mb.file add command -label [mc "Project Information"] -command {eAssistHelper::projSetup}
-    $mb.file add command -label [mc "Import File"] -command {importFiles::fileImportGUI}
+    $mb.file add command -label [mc "New Project"] -command {eAssistHelper::projSetup}
+    #$mb.file add command -label [mc "Import File"] -command {importFiles::fileImportGUI}
     $mb.file add command -label [mc "Export File"] -command {export::DataToExport} ;#-state disabled 
+    menu $mb.file.reports
+    $mb.file add cascade -label [mc "Reports"] -menu $mb.file.reports -state disabled
+    $mb.file.reports add command -label [mc "Import Breakdown"]
+    
     #$mb.file add command -label [mc "Export File"] -command {export::newDataToExport}
     
     # Change menu name
