@@ -196,8 +196,16 @@ proc customer::Modify {modify {tbl ""}} {
     set f0a [ttk::frame $wid.f0a -padding 10]
     pack $f0a -fill x
     
+    # Notebook container Frame
+    set f0 [ttk::frame $wid.f0]
+    pack $f0 -expand yes -fill both -pady 5p -padx 5p
+    
+    # Buttons Frame
+    set btns [ttk::frame $wid.btns -padding 10]
+    pack $btns -anchor se
+    
     ttk::label $f0a.txt1 -text [mc "Customer ID"]
-    ttk::entry $f0a.entry1 -width 10
+    ttk::entry $f0a.entry1 -width 10 ;#-validate key -validatecommand "customer::validateEntry $btns.btn0 $f2a.btn1 $f2a.btn2 %W %P"
     focus $f0a.entry1
         $f0a.entry1 insert end [lindex $custList 0]
         $f0a.entry1 configure -state [lindex $entryState 0]
@@ -220,21 +228,6 @@ proc customer::Modify {modify {tbl ""}} {
     grid $f0a.txt3 -column 0 -row 2 -sticky nse
     grid $f0a.ckbtn1 -column 1 -row 2 -sticky nsw -pady 2p
 
-    
-    #-------- Notebook container Frame
-    set f0 [ttk::frame $wid.f0]
-    pack $f0 -expand yes -fill both -pady 5p -padx 5p
-    
-    # Control Buttons
-    set btns [ttk::frame $wid.btns -padding 10]
-    pack $btns -anchor se
-    
-    ttk::button $btns.btn0 -text [mc "OK"]
-    ttk::button $btns.btn1 -text [mc "Cancel"] -command [list destroy $wid]
-    
-    grid $btns.btn0 -column 0 -row 0
-    grid $btns.btn1 -column 1 -row 0
-    
     
     ##
     ## Notebook
@@ -284,8 +277,8 @@ proc customer::Modify {modify {tbl ""}} {
     pack $f3a -expand yes -fill both -side left -pady 5p -padx 5p
     
     ## Frame 2 - Buttons
-    ttk::button $f2a.btn1 -text [mc "Add >"] -state $btnState -command "customer::transferToAssigned $f1a.lbox $f3a.lbox"
-    ttk::button $f2a.btn2 -text [mc "< Remove"] -state $btnState -command "customer::removeFromAssigned $f3a.lbox"
+    ttk::button $f2a.btn1 -text [mc "Add >"] -state $btnState -command "customer::transferToAssigned $f1a.lbox $f3a.lbox $btns.btn0" -state disable
+    ttk::button $f2a.btn2 -text [mc "< Remove"] -state $btnState -command "customer::removeFromAssigned $f3a.lbox $btns.btn0" -state disable
      
     grid $f2a.btn1 -column 0 -row 0 -sticky news
     grid $f2a.btn2 -column 0 -row 1 -sticky news
@@ -351,6 +344,17 @@ proc customer::Modify {modify {tbl ""}} {
         $ft2.lbox insert end [join $title]
     }
     
+    ##
+    ## Control Buttons    
+    ttk::button $btns.btn0 -text [mc "OK"] -command "customer::dbAddShipVia $f3a.lbox $f0a.entry1" -state disable
+    ttk::button $btns.btn1 -text [mc "Cancel"] -command [list destroy $wid]
+    
+    grid $btns.btn0 -column 0 -row 0
+    grid $btns.btn1 -column 1 -row 0
+    
+    
+    # Reconfigurations
+    $f0a.entry1 configure -validate key -validatecommand "customer::validateEntry $btns.btn0 $f2a.btn1 $f2a.btn2 %W %P"
 
 
 } ;# customer::Modify
