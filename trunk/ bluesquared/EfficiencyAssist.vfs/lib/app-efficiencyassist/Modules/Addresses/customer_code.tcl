@@ -66,7 +66,7 @@ proc customer::PopulateShipVia {lbox {custID 0}} {
     }    
 } ;# customer::PopulateShipVia
 
-proc customer::transferToAssigned {lboxFrom lboxTo} {
+proc customer::transferToAssigned {lboxFrom lboxTo okBtn} {
     #****f* transferToAssigned/customer
     # CREATION DATE
     #   01/07/2015 (Wednesday Jan 07)
@@ -83,6 +83,7 @@ proc customer::transferToAssigned {lboxFrom lboxTo} {
     #
     # FUNCTION
     #	Transfer's the selected entries from the Available Ship Via lbox, to the Assigned Ship Via lbox
+    #	Guards against duplicates, by using [lsort -unique]. Removes all data from the widget, and reinserts upon adding new ship via's.
     #   
     #   
     # CHILDREN
@@ -96,19 +97,43 @@ proc customer::transferToAssigned {lboxFrom lboxTo} {
     #   
     # SEE ALSO
     #   
-    #   
+    #    
     #***
     global log
     
-    set selectedShipVia [$lboxFrom curselection]
-
-    foreach item $selectedShipVia {
-        ${log}::debug Selected ShipVia: [$lboxFrom get $item]
-        $lboxTo insert end [$lboxFrom get $item]
+    set selectedShipVia [$lboxFrom curselection] ;# this is only the index of the selections
+    
+    set assignedShipVia [$lboxTo get 0 end]
+    
+    # Compile list for selected ship via's
+    if {[info exists selectedShipViaList]} {unset selectedShipViaList}
+    foreach index $selectedShipVia {
+        lappend selectedShipViaList [$lboxFrom get $index]
     }
+
+    # Bypass the combining of lists if the second list is empty
+    if {$assignedShipVia ne {} } {
+        #${log}::debug Concating ...
+        set selectedShipViaList [concat $selectedShipViaList $assignedShipVia]
+    }
+    
+    # Only keep the unique entries
+    set selectedShipViaList [lsort -unique $selectedShipViaList]
+
+    $lboxTo delete 0 end
+    
+    # Insert
+    foreach item $selectedShipViaList {
+        $lboxTo insert end $item
+    }
+    
+    ## Enable the OK Button
+    #$okBtn configure -state normal
+    
+    
 } ;# customer::transferToAssigned
 
-proc customer::removeFromAssigned {lbox} {
+proc customer::removeFromAssigned {lbox okBtn} {
     #****f* removeFromAssigned/customer
     # CREATION DATE
     #   01/07/2015 (Wednesday Jan 07)
@@ -124,7 +149,7 @@ proc customer::removeFromAssigned {lbox} {
     #   customer::removeFromAssigned lbox 
     #
     # FUNCTION
-    #	Removes the selected entries from the Assigned lbox
+    #	Removes the selected Ship Via's from the Assigned lbox
     #   
     #   
     # CHILDREN
@@ -149,7 +174,11 @@ proc customer::removeFromAssigned {lbox} {
         ${log}::debug Removed Selected ShipVia: [$lbox get $item]
         $lbox delete $item
     }
-    #$lbox delete [$lbox curselection]
+    
+    #set getAssigned [$lbox get 0 end]
+    #if {$getAssigned eq {}} {
+    #    $okBtn configure -state disable
+    #}
 
     
 } ;# customer::removeFromAssigned
@@ -214,7 +243,7 @@ proc customer::deleteFromlbox {lbox custID} {
     #   customer::deleteFromlbox lbox 
     #
     # FUNCTION
-    #	Deletes the currently selected item in the lbox, and refreshes the data from the DB
+    #	Deletes the currently selected customer in the lbox, and refreshes the data from the DB
     #   
     #   
     # CHILDREN
@@ -243,6 +272,121 @@ proc customer::deleteFromlbox {lbox custID} {
     foreach title [eAssist_db::dbWhereQuery -columnNames TitleName -table PubTitle -where CustID='$custID'] {
         $lbox insert end [join $title]
     }
+    
+   
+} ;# customer::deleteFromlbox
+
+proc customer::dbAddShipVia {lbox custEntry} {
+    #****f* dbAddShipVia/customer
+    # CREATION DATE
+    #   01/13/2015 (Tuesday Jan 13)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   customer::dbAddShipVia lbox 
+    #
+    # FUNCTION
+    #	Adds the selected shipvias from the listbox, and inserts/updates them in the DB
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log cust
+
+    set custID [$custEntry get]
+    set shipViaList [lbox get 0 end]
+    
+    ${log}::debug CustID: $custID
+    ${log}::debug DATA: $shipViaList
+    
+    if {$custID eq "__null__" || $custID eq {} } {
+        ${log}::debug No Customer ID. Exiting ...
+        return
+    }
+    
+    # Check if the customer exists; if they don't lets add them.
+    eAssist_db::dbInsert -columnNames "Cust_ID Status" -table Customer -data "$custID $cust(Status)"
+    
+    
+    # Add the ShipVia's
 
     
-} ;# customer::deleteFromlbox
+} ;# customer::dbAddShipVia
+
+
+
+
+##
+## NOT IN USE
+proc customer::validateEntry {okBtn addBtn remBtn wid entryValue} {
+    #****f* validateEntry/customer
+    # CREATION DATE
+    #   01/13/2015 (Tuesday Jan 13)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   customer::validateEntry okBtn wid entryValue 
+    #
+    # FUNCTION
+    #	Ensures that we have some data in the widget; if we don't the OK button stays disabled. If we do, then we enable the OK button.
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log 
+
+    ${log}::debug ENTRY: $wid
+    #set entryValue [join [concat $entryValuePre $entryValuePost] ""]
+    #${log}::debug Value: $entryValue
+    ${log}::debug VALUE: $entryValue
+
+    if {[string length $entryValue] >= 3} {
+        ${log}::debug Button State Normal - Value: $entryValue
+        $okBtn configure -state normal
+        $addBtn configure -state normal
+        $remBtn configure -state normal
+    } else {
+        ${log}::debug Button State Disable
+        $okBtn configure -state disable
+        $addBtn configure -state disable
+        $remBtn configure -state disable
+    }
+    
+    
+    return 1
+    
+} ;# customer::validateEntry
