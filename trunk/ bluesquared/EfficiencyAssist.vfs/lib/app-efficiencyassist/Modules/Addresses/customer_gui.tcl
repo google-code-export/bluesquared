@@ -162,6 +162,7 @@ proc customer::Modify {modify {tbl ""}} {
     global log cust
 
     if {[winfo exists .viewCustomer]} {destroy .viewCustomer}
+    if {[info exists ::customer::shipViaDeleteList]} {unset ::customer::shipViaDeleteList}
     
     set wid .viewCustomer
 

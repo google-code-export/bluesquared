@@ -171,9 +171,16 @@ proc customer::removeFromAssigned {lbox okBtn} {
     set selectedShipVia [lsort -decreasing [$lbox curselection]]
     
     foreach item $selectedShipVia {
+        #Add item to list, so we can remove it from the DB. This is initiated in the first startup of the customer window.
+        lappend ::customer::shipViaDeleteList [$lbox get $item]
+    
         ${log}::debug Removed Selected ShipVia: [$lbox get $item]
         $lbox delete $item
+        
+
     }
+    
+    
     
     #set getAssigned [$lbox get 0 end]
     #if {$getAssigned eq {}} {
@@ -263,17 +270,17 @@ proc customer::deleteFromlbox {lbox custID} {
 
     #${log}::debug DELETE [$lbox curselection]
     # Delete from the DB
-    eAssist_db::delete PubTitle TitleName [$lbox get [$lbox curselection]]
+    #eAssist_db::delete PubTitle TitleName [$lbox get [$lbox curselection]]
+    #
+    ## Delete all data in the listbox
+    #$lbox delete 0 end
+    #
+    ## Read data from DB to insert into the listbox
+    #foreach title [eAssist_db::dbWhereQuery -columnNames TitleName -table PubTitle -where CustID='$custID'] {
+    #    $lbox insert end [join $title]
+    #}
     
-    # Delete all data in the listbox
-    $lbox delete 0 end
-    
-    # Read data from DB to insert into the listbox
-    foreach title [eAssist_db::dbWhereQuery -columnNames TitleName -table PubTitle -where CustID='$custID'] {
-        $lbox insert end [join $title]
-    }
-    
-   
+
 } ;# customer::deleteFromlbox
 
 proc customer::dbAddShipVia {lbox custEntry} {
@@ -311,21 +318,35 @@ proc customer::dbAddShipVia {lbox custEntry} {
     global log cust
 
     set custID [$custEntry get]
-    set shipViaList [lbox get 0 end]
+    set shipViaList [$lbox get 0 end]
     
     ${log}::debug CustID: $custID
-    ${log}::debug DATA: $shipViaList
+    #${log}::debug DATA: $shipViaList
     
-    if {$custID eq "__null__" || $custID eq {} } {
-        ${log}::debug No Customer ID. Exiting ...
-        return
+    ## Check if the customer exists; if they don't lets add them.
+    #eAssist_db::dbInsert -columnNames "Cust_ID Status" -table Customer -data "$custID $cust(Status)"
+    
+    # Remove ShipVia from DB
+    if {[info exists ::customer::shipViaDeleteList]} {
+        ${log}::debug DELETE: [lsort -unique $::customer::shipViaDeleteList]
+        #eAssist_db::delete CustomerShipVia ShipViaID $::customer::shipViaDeleteList
+        # Unset var, so we don't unintentionally try to delete shipvia's that don't exist.
+        unset ::customer::shipViaDeleteList
     }
     
-    # Check if the customer exists; if they don't lets add them.
-    eAssist_db::dbInsert -columnNames "Cust_ID Status" -table Customer -data "$custID $cust(Status)"
+    # Match the ShipVia's to their db ID's
+    if {[info exists shipviaIDs]} {unset shipviaIDs}
+    foreach item [lsort -unique $shipViaList] {
+        ${log}::debug GET ID: [eAssist_db::dbWhereQuery -columnNames ShipVia_ID -table ShipVia -where "ShipViaName='$item'"]
+        lappend shipviaIDs [eAssist_db::dbWhereQuery -columnNames ShipVia_ID -table ShipVia -where "ShipViaName='$item'"]
+    }
     
-    
-    # Add the ShipVia's
+    # Insert the ShipVia's
+    foreach id $shipviaIDs {
+       ${log}::debug INSERT: $custID _ $id
+    }
+    #${log}::debug ADD: [lsort -unique $shipViaList]
+    #eAssist_db::dbInsert -columnNames "CustID ShipViaId" -table CustomerShipVia -data "$custID $shipviaID"
 
     
 } ;# customer::dbAddShipVia
