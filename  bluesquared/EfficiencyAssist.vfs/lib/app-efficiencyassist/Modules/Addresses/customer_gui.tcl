@@ -24,6 +24,139 @@
 
 namespace eval customer {}
 
+proc customer::projSetup {} {
+    #****f* projSetup/customer
+    # CREATION DATE
+    #   09/08/2014 (Monday Sep 08)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssisthelper::projSetup  
+    #
+    # FUNCTION
+    #	Launch the Project Setup gui, so we can assign the Job Number, Jot Title, Name and CSR
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log CSR job
+
+    if {[winfo exists .ps]} {destroy .ps}
+
+    toplevel .ps
+    wm transient .ps .
+    wm title .ps [mc "Project Information"]
+    
+    set locX [expr {[winfo screenwidth . ] / 4 + [winfo x .]}]
+    set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
+    wm geometry .ps +${locX}+${locY}
+
+    set f1 [ttk::labelframe .ps.f1 -text [mc "Job Information"] -padding 10]
+    pack $f1 -fill both -expand yes -padx 5p -pady 5p
+    
+    set job(CustName) ""
+    set job(CustID) ""
+    set custNameList [db eval "SELECT CustName FROM Customer WHERE Status='1'"]
+    
+    ttk::label $f1.txt0 -text [mc "Customer"]
+	ttk::entry $f1.entry0a -width 12 -textvariable job(CustID) \
+                            -validate all \
+                            -validatecommand [list AutoComplete::AutoComplete %W %d %v %P [customer::validateCustomer id $f1]]
+	
+    ttk::combobox $f1.entry0b -width 45 -textvariable job(CustName) \
+                            -values $custNameList \
+                            -validate all \
+                            -validatecommand [list AutoComplete::AutoComplete %W %d %v %P [customer::validateCustomer name $f1]]
+	
+    ttk::button $f1.btn0 -width 3 -text "..." -command customer::manage
+	
+	ttk::label $f1.txt1 -text [mc "CSR"]
+    ttk::combobox $f1.cbox1 -postcommand "dbCSR::getCSRID $f1.cbox1 {FirstName LastName}" \
+                            -textvariable job(CSRName) -validate all \
+                            -validatecommand {AutoComplete::AutoComplete %W %d %v %P [dbCSR::getCSRID "" {FirstName LastName}]}
+    focus $f1.txt1
+    
+    ttk::label $f1.txt1a -text [mc "Title"]
+    ttk::entry $f1.entry1a -textvariable job(Title) -validate all \
+                            -validatecommand {AutoComplete::AutoComplete %W %d %v %P [customer::returnTitle $job(CustID)]}
+		tooltip::tooltip $f1.entry1a [mc "Publication Title"]
+    
+    ttk::label $f1.txt2 -text [mc "Name"]
+    ttk::entry $f1.entry2 -textvariable job(Name)
+		tooltip::tooltip $f1.entry2 [mc "Job Name"] 
+    
+    ttk::label $f1.txt3 -text [mc "Number"]
+    ttk::entry $f1.entry3 -textvariable job(Number)
+		tooltip::tooltip $f1.entry3 [mc "Job Number"]
+    
+	grid $f1.txt0	   -column 0 -row 0 -sticky nes -padx 3p -pady 3p
+	grid $f1.entry0a   -column 1 -row 0 -sticky w -padx 3p -pady 3p
+	grid $f1.entry0b   -column 2 -row 0 -sticky ew -padx 3p -pady 3p
+	grid $f1.btn0      -column 3 -row 0 -sticky ew -padx 3p -pady 3p
+    grid $f1.txt1      -column 0 -row 1 -sticky nes -padx 3p -pady 3p
+    grid $f1.cbox1     -column 1 -columnspan 2 -row 1 -sticky news -padx 3p -pady 3p
+    grid $f1.txt1a     -column 0 -row 2 -sticky nes -padx 3p -pady 3p
+    grid $f1.entry1a   -column 1 -columnspan 2 -row 2 -sticky news -padx 3p -pady 3p
+    grid $f1.txt2      -column 0 -row 3 -sticky nes -padx 3p -pady 3p
+    grid $f1.entry2    -column 1 -columnspan 2 -row 3 -sticky news -padx 3p -pady 3p
+    grid $f1.txt3      -column 0 -row 4 -sticky nes -padx 3p -pady 3p
+    grid $f1.entry3    -column 1 -columnspan 2 -row 4 -sticky news -padx 3p -pady 3p
+    
+    set btnBar [ttk::frame .ps.btnBar -padding 10]
+    pack $btnBar -anchor se ;#-padx 5p -pady 5p
+    
+    ttk::button $btnBar.ok -text [mc "OK"] -command "destroy .ps"
+    ttk::button $btnBar.import -text [mc "Import File"] -command "importFiles::fileImportGUI; destroy .ps"
+    
+    grid $btnBar.ok -column 0 -row 0 -sticky news
+    grid $btnBar.import -column 1 -row 0 -sticky news
+    
+    
+    ## BINDINGS
+    bind $f1.entry0a <FocusOut> {
+        set id [%W get]
+        #${log}::debug R: %R
+        ${log}::debug id: $id
+        if {$id != ""} {
+            #$::customer::f1.entry0b insert end [db eval "SELECT CustName FROM Customer WHERE Cust_ID='$id'"
+            set job(CustName) [join [db eval "SELECT CustName FROM Customer WHERE Cust_ID='$id'"]]
+            ${log}::debug $job(CustName)
+            }
+    }
+    
+    bind $f1.entry0b <FocusOut> {
+        set custName [%W get]
+        #${log}::debug R: %R
+        #${log}::debug id: $id
+        if {$custName != ""} {
+            #$::customer::f1.entry0b insert end [db eval "SELECT CustName FROM Customer WHERE Cust_ID='$id'"
+            set job(CustID) [join [db eval "SELECT Cust_ID FROM Customer WHERE CustName='$custName'"]]
+            ${log}::debug $job(CustID)
+            }
+    }
+    
+	
+	
+    
+} ;# customer::projSetup
+
 proc customer::manage {} {
     #****f* manage/customer
     # AUTHOR
@@ -73,18 +206,18 @@ proc customer::manage {} {
     ttk::button $f1.btn0 -text [mc "View"] -command "customer::Modify view $f2.tbl"
     ttk::button $f1.btn1 -text [mc "Modify"] -command "customer::Modify edit $f2.tbl"
     ttk::button $f1.btn2 -text [mc "Add"] -command {customer::Modify add}
-    ttk::button $f1.btn3 -text [mc "Delete"] -state disabled
+    #ttk::button $f1.btn3 -text [mc "Delete"] -state disabled
     
     grid $f1.btn0 -column 0 -row 0 -sticky s
     grid $f1.btn1 -column 1 -row 0 -sticky s
     grid $f1.btn2 -column 2 -row 0 -sticky s
-    grid $f1.btn3 -column 3 -row 0 -sticky s
+    #grid $f1.btn3 -column 3 -row 0 -sticky s
     
 
     ## Frame 2
     tablelist::tablelist $f2.tbl -columns {
                                 10 "Code" center
-                                40 "Name" center} \
+                                40 "Name" left} \
                                 -showlabels yes \
                                 -height 10 \
                                 -selectbackground yellow \
@@ -100,6 +233,9 @@ proc customer::manage {} {
                                 -xscrollcommand [list $f2.scrollx set]
 
 
+    $f2.tbl columnconfigure 1 -labelalign center
+    
+    
     ttk::scrollbar $f2.scrolly -orient v -command [list $f2.tbl yview]
     ttk::scrollbar $f2.scrollx -orient h -command [list $f2.tbl xview]
 
@@ -177,7 +313,7 @@ proc customer::Modify {modify {tbl ""}} {
     
 
     switch -- $modify {
-        add     {set entryState [list normal normal]; set btnState normal
+        add     {set entryState [list normal normal]; set btnState disabled
                         set custList [list "" ""]
                         set cust(Status) 1
                 }
@@ -206,7 +342,7 @@ proc customer::Modify {modify {tbl ""}} {
     pack $btns -anchor se
     
     ttk::label $f0a.txt1 -text [mc "Customer ID"]
-    ttk::entry $f0a.entry1 -width 10 ;#-validate key -validatecommand "customer::validateEntry $btns.btn0 $f2a.btn1 $f2a.btn2 %W %P"
+    ttk::entry $f0a.entry1 -width 10 ;# See below for the validation code
     focus $f0a.entry1
         $f0a.entry1 insert end [lindex $custList 0]
         $f0a.entry1 configure -state [lindex $entryState 0]
@@ -215,6 +351,10 @@ proc customer::Modify {modify {tbl ""}} {
     ttk::entry $f0a.entry2 -width 50
         $f0a.entry2 insert end [lindex $custList 1]
         $f0a.entry2 configure -state [lindex $entryState 1]
+        
+    ttk::label $f0a.txt2a -text [mc "CSR"]
+    ttk::entry $f0a.entry2a -width 50
+        $f0a.entry2a configure -state [lindex $entryState 1]
         
     ttk::label $f0a.txt3 -text [mc "Record Active"]
     ttk::checkbutton $f0a.ckbtn1 -variable cust(Status)
@@ -225,9 +365,12 @@ proc customer::Modify {modify {tbl ""}} {
     
     grid $f0a.txt2 -column 0 -row 1 -sticky nse
     grid $f0a.entry2 -column 1 -row 1 -sticky nsw -pady 2p
+
+    grid $f0a.txt2a -column 0 -row 2 -sticky nse
+    grid $f0a.entry2a -column 1 -row 2 -sticky nsw -pady 2p
     
-    grid $f0a.txt3 -column 0 -row 2 -sticky nse
-    grid $f0a.ckbtn1 -column 1 -row 2 -sticky nsw -pady 2p
+    grid $f0a.txt3 -column 0 -row 3 -sticky nse
+    grid $f0a.ckbtn1 -column 1 -row 3 -sticky nsw -pady 2p
 
     
     ##
@@ -278,8 +421,8 @@ proc customer::Modify {modify {tbl ""}} {
     pack $f3a -expand yes -fill both -side left -pady 5p -padx 5p
     
     ## Frame 2 - Buttons
-    ttk::button $f2a.btn1 -text [mc "Add >"] -state $btnState -command "customer::transferToAssigned $f1a.lbox $f3a.lbox $btns.btn0" -state disable
-    ttk::button $f2a.btn2 -text [mc "< Remove"] -state $btnState -command "customer::removeFromAssigned $f3a.lbox $btns.btn0" -state disable
+    ttk::button $f2a.btn1 -text [mc "Add >"] -state $btnState -command "customer::transferToAssigned $f1a.lbox $f3a.lbox $btns.btn0"
+    ttk::button $f2a.btn2 -text [mc "< Remove"] -state $btnState -command "customer::removeFromAssigned $f3a.lbox $btns.btn0"
      
     grid $f2a.btn1 -column 0 -row 0 -sticky news
     grid $f2a.btn2 -column 0 -row 1 -sticky news
@@ -302,6 +445,7 @@ proc customer::Modify {modify {tbl ""}} {
     
     # Populate the ship via listboxes
     customer::PopulateShipVia $f1a.lbox
+    customer::PopulateShipVia $f3a.lbox [$f0a.entry1 get]
 
     
     # -----
@@ -346,9 +490,10 @@ proc customer::Modify {modify {tbl ""}} {
     }
     
     ##
-    ## Control Buttons    
-    ttk::button $btns.btn0 -text [mc "OK"] -command "customer::dbAddShipVia $f3a.lbox $f0a.entry1" -state disable
-    ttk::button $btns.btn1 -text [mc "Cancel"] -command [list destroy $wid]
+    ## Control Buttons
+    # After we close the customer ship via window; refresh the main customer list, so that if we added a customer or deactivated a customer, we will now see the results.
+    ttk::button $btns.btn0 -text [mc "OK"] -command "customer::dbAddShipVia $f3a.lbox $f0a.entry1 $f0a.entry2; destroy $wid; customer::manage" -state disable
+    ttk::button $btns.btn1 -text [mc "Cancel"] -command "destroy $wid"
     
     grid $btns.btn0 -column 0 -row 0
     grid $btns.btn1 -column 1 -row 0

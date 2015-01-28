@@ -63,7 +63,17 @@ proc customer::PopulateShipVia {lbox {custID 0}} {
         foreach shipvia $shipViaList {
             $lbox insert end $shipvia
         }
-    }    
+    } elseif { $custID != ""} {
+        set preferredShipVia [db eval "SELECT ShipVia.ShipViaName
+                                                FROM CustomerShipVia
+                                                     INNER JOIN
+                                                     ShipVia ON ShipVia.ShipVia_ID = CustomerShipVia.ShipViaID
+                                                     WHERE CustomerShipVia.custID = '$custID'"]
+        foreach pShipVia $preferredShipVia {
+            $lbox insert end $pShipVia
+        }
+        
+    }
 } ;# customer::PopulateShipVia
 
 proc customer::transferToAssigned {lboxFrom lboxTo okBtn} {
@@ -126,9 +136,7 @@ proc customer::transferToAssigned {lboxFrom lboxTo okBtn} {
     foreach item $selectedShipViaList {
         $lboxTo insert end $item
     }
-    
-    ## Enable the OK Button
-    #$okBtn configure -state normal
+
     
     
 } ;# customer::transferToAssigned
@@ -179,15 +187,7 @@ proc customer::removeFromAssigned {lbox okBtn} {
         
 
     }
-    
-    
-    
-    #set getAssigned [$lbox get 0 end]
-    #if {$getAssigned eq {}} {
-    #    $okBtn configure -state disable
-    #}
-
-    
+   
 } ;# customer::removeFromAssigned
 
 
@@ -217,7 +217,7 @@ proc customer::populateCustomerLbox {lbox} {
     #   
     #   
     # NOTES
-    #   
+    #   Currently we only show ACTIVE records.
     #   
     # SEE ALSO
     #   
@@ -225,10 +225,11 @@ proc customer::populateCustomerLbox {lbox} {
     #***
     global log
 
-    set getCustomerList [eAssist_db::dbSelectQuery -columnNames "Cust_ID CustName" -table Customer]
+    set getCustomerList [db eval "SELECT Cust_ID, CustName FROM Customer WHERE Status='1'"]
     
     foreach {id name} $getCustomerList {
-        $lbox insert end "$id $name"
+        $lbox insert end "$id [list $name]"
+        #${log}::debug id: $id cust: $name
     }
 
     
@@ -283,7 +284,7 @@ proc customer::deleteFromlbox {lbox custID} {
 
 } ;# customer::deleteFromlbox
 
-proc customer::dbAddShipVia {lbox custEntry} {
+proc customer::dbAddShipVia {lbox custIDwid custNamewid} {
     #****f* dbAddShipVia/customer
     # CREATION DATE
     #   01/13/2015 (Tuesday Jan 13)
@@ -317,21 +318,35 @@ proc customer::dbAddShipVia {lbox custEntry} {
     #***
     global log cust
 
-    set custID [$custEntry get]
+    set custID [$custIDwid get]
+    set custName [list [$custNamewid get]]
     set shipViaList [$lbox get 0 end]
     
     ${log}::debug CustID: $custID
+    ${log}::debug CustName: $custName
+    ${log}::debug CustStatus: $cust(Status)
     #${log}::debug DATA: $shipViaList
     
     ## Check if the customer exists; if they don't lets add them.
-    #eAssist_db::dbInsert -columnNames "Cust_ID Status" -table Customer -data "$custID $cust(Status)"
+    eAssist_db::dbInsert -columnNames "Cust_ID CustName Status" -table Customer -data "$custID $custName $cust(Status)"
     
     # Remove ShipVia from DB
     if {[info exists ::customer::shipViaDeleteList]} {
-        ${log}::debug DELETE: [lsort -unique $::customer::shipViaDeleteList]
-        #eAssist_db::delete CustomerShipVia ShipViaID $::customer::shipViaDeleteList
+        # Find out if these shipvia's exist in the DB associated with this custmer ID, if it does lets remove them from the DB if not, continue the loop.
+        foreach shipName [lsort -unique $::customer::shipViaDeleteList] {
+            #${log}::debug _DELETE_: [lsort -unique $::customer::shipViaDeleteList]
+            # Grab the db ID since all we have is the Name
+            set shipID [eAssist_db::dbWhereQuery -columnNames ShipVia_ID -table ShipVia -where "ShipViaName='$shipName'"]
+            
+            #if {$shipID != "" && $custID != ""} {}
+            # Make sure the shipID and custID exist
+            if {[eAssist_db::dbWhereQuery -columnNames ShipViaID -table CustomerShipVia -where "ShipViaID='$shipID' AND CustID='$custID'"] != ""} {
+                #eAssist_db::delete CustomerShipVia ShipViaID
+                db eval "DELETE from CustomerShipVia WHERE ShipViaID = '$shipID' AND CustID = '$custID'"
+            }
+        }
         # Unset var, so we don't unintentionally try to delete shipvia's that don't exist.
-        unset ::customer::shipViaDeleteList
+        #unset ::customer::shipViaDeleteList
     }
     
     # Match the ShipVia's to their db ID's
@@ -344,18 +359,14 @@ proc customer::dbAddShipVia {lbox custEntry} {
     # Insert the ShipVia's
     foreach id $shipviaIDs {
        ${log}::debug INSERT: $custID _ $id
+       #eAssist_db::dbInsert -columnNames "CustID ShipViaId" -table CustomerShipVia -data "$custID $id"
+       db eval "INSERT OR ABORT INTO CustomerShipVia (CustID, ShipViaID) VALUES ('$custID', '$id')"
     }
-    #${log}::debug ADD: [lsort -unique $shipViaList]
-    #eAssist_db::dbInsert -columnNames "CustID ShipViaId" -table CustomerShipVia -data "$custID $shipviaID"
+   
 
     
 } ;# customer::dbAddShipVia
 
-
-
-
-##
-## NOT IN USE
 proc customer::validateEntry {okBtn addBtn remBtn wid entryValue} {
     #****f* validateEntry/customer
     # CREATION DATE
@@ -411,3 +422,87 @@ proc customer::validateEntry {okBtn addBtn remBtn wid entryValue} {
     return 1
     
 } ;# customer::validateEntry
+
+proc customer::validateCustomer {type wid} {
+    #****f* validateCustomer/customer
+    # CREATION DATE
+    #   01/27/2015 (Tuesday Jan 27)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   customer::validateCustomer entryWid cboxWid 
+    #
+    # FUNCTION
+    #	Looks for matches and populates both customer id widget, and customer name combobox
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    set custIDList [db eval "SELECT Cust_ID FROM Customer WHERE Status='1'"]
+    set custNameList [db eval "SELECT CustName FROM Customer WHERE Status='1'"]
+    
+    
+    switch -- $type {
+        id      {return $custIDList}
+        name    {return $custNameList}
+    }
+} ;# customer::validateCustomer
+
+proc customer::returnTitle {custID} {
+    #****f* returnTitle/customer
+    # CREATION DATE
+    #   01/27/2015 (Tuesday Jan 27)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   customer::returnTitle custID 
+    #
+    # FUNCTION
+    #	Returns the list of titles associated with the customer id
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    set titleList [db eval "SElECT TitleName FROM PubTitle WHERE CustID='$custID'"]
+    ${log}::debug Title List: $titleList
+
+    return $titleList
+} ;# customer::returnTitle
