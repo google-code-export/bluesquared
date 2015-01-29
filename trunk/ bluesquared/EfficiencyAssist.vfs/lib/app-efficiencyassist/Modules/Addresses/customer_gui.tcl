@@ -73,6 +73,8 @@ proc customer::projSetup {} {
     
     set job(CustName) ""
     set job(CustID) ""
+    set job(Title) ""
+    set job(CSRName) ""
     set custNameList [db eval "SELECT CustName FROM Customer WHERE Status='1'"]
     
     ttk::label $f1.txt0 -text [mc "Customer"]
@@ -122,7 +124,7 @@ proc customer::projSetup {} {
     set btnBar [ttk::frame .ps.btnBar -padding 10]
     pack $btnBar -anchor se ;#-padx 5p -pady 5p
     
-    ttk::button $btnBar.ok -text [mc "OK"] -command "destroy .ps"
+    ttk::button $btnBar.ok -text [mc "OK"] -command "customer::dbUpdateCustomer"
     ttk::button $btnBar.import -text [mc "Import File"] -command "importFiles::fileImportGUI; destroy .ps"
     
     grid $btnBar.ok -column 0 -row 0 -sticky news
@@ -132,29 +134,29 @@ proc customer::projSetup {} {
     ## BINDINGS
     bind $f1.entry0a <FocusOut> {
         set id [%W get]
-        #${log}::debug R: %R
-        ${log}::debug id: $id
         if {$id != ""} {
             #$::customer::f1.entry0b insert end [db eval "SELECT CustName FROM Customer WHERE Cust_ID='$id'"
-            set job(CustName) [join [db eval "SELECT CustName FROM Customer WHERE Cust_ID='$id'"]]
-            ${log}::debug $job(CustName)
+            set tmpCustName [join [db eval "SELECT CustName FROM Customer WHERE Cust_ID='$id'"]]
+            if {$tmpCustName != ""} {
+                set job(CustName) $tmpCustName
+                #${log}::debug $job(CustName)
             }
+        }
     }
     
     bind $f1.entry0b <FocusOut> {
         set custName [%W get]
-        #${log}::debug R: %R
-        #${log}::debug id: $id
         if {$custName != ""} {
             #$::customer::f1.entry0b insert end [db eval "SELECT CustName FROM Customer WHERE Cust_ID='$id'"
-            set job(CustID) [join [db eval "SELECT Cust_ID FROM Customer WHERE CustName='$custName'"]]
-            ${log}::debug $job(CustID)
+            set tmpCustID [join [db eval "SELECT Cust_ID FROM Customer WHERE CustName='$custName'"]]
+            if {$tmpCustID != ""} {
+                set job(CustID) $tmpCustID
+                #${log}::debug $job(CustID)
             }
+        }
     }
     
-	
-	
-    
+
 } ;# customer::projSetup
 
 proc customer::manage {} {
@@ -233,8 +235,7 @@ proc customer::manage {} {
                                 -xscrollcommand [list $f2.scrollx set]
 
 
-    $f2.tbl columnconfigure 1 -labelalign center
-    
+    $f2.tbl columnconfigure 1 -labelalign center -stretchable 1    
     
     ttk::scrollbar $f2.scrolly -orient v -command [list $f2.tbl yview]
     ttk::scrollbar $f2.scrollx -orient h -command [list $f2.tbl xview]
@@ -352,10 +353,7 @@ proc customer::Modify {modify {tbl ""}} {
         $f0a.entry2 insert end [lindex $custList 1]
         $f0a.entry2 configure -state [lindex $entryState 1]
         
-    ttk::label $f0a.txt2a -text [mc "CSR"]
-    ttk::entry $f0a.entry2a -width 50
-        $f0a.entry2a configure -state [lindex $entryState 1]
-        
+      
     ttk::label $f0a.txt3 -text [mc "Record Active"]
     ttk::checkbutton $f0a.ckbtn1 -variable cust(Status)
         $f0a.ckbtn1 configure -state [lindex $entryState 2]
@@ -365,12 +363,9 @@ proc customer::Modify {modify {tbl ""}} {
     
     grid $f0a.txt2 -column 0 -row 1 -sticky nse
     grid $f0a.entry2 -column 1 -row 1 -sticky nsw -pady 2p
-
-    grid $f0a.txt2a -column 0 -row 2 -sticky nse
-    grid $f0a.entry2a -column 1 -row 2 -sticky nsw -pady 2p
     
-    grid $f0a.txt3 -column 0 -row 3 -sticky nse
-    grid $f0a.ckbtn1 -column 1 -row 3 -sticky nsw -pady 2p
+    grid $f0a.txt3 -column 0 -row 2 -sticky nse
+    grid $f0a.ckbtn1 -column 1 -row 2 -sticky nsw -pady 2p
 
     
     ##
@@ -461,38 +456,57 @@ proc customer::Modify {modify {tbl ""}} {
     
     
     # Frame 1
-    ttk::label $ft1.txt -text [mc "Titles are added automatically when creating a new Project"]
+    ttk::label $ft1.txt -text [mc "Titles and associated CSRs are added automatically when creating a new Project"]
     
     grid $ft1.txt -column 0 -row 0 -sticky nw
     
     # Frame 2
-    listbox $ft2.lbox -height 15 -width 30 \
-            -yscrollcommand [list $ft2.scrolly set] \
-            -xscrollcommand [list $ft2.scrollx set]
+    tablelist::tablelist $ft2.tbl -columns {
+                                                0   "..." center
+                                                0   "CSR" left
+                                                0   "Title" left} \
+                                        -showlabels yes \
+                                        -height 20 \
+                                        -width 50 \
+                                        -selectbackground yellow \
+                                        -selectforeground black \
+                                        -stripebackground lightblue \
+                                        -exportselection yes \
+                                        -showseparators yes \
+                                        -fullseparators yes \
+                                        -selectmode extended \
+                                        -editselectedonly 1 \
+                                        -selecttype row \
+                                        -yscrollcommand [list $ft2.scrolly set] \
+                                        -xscrollcommand [list $ft2.scrollx set]
+                                                
+    $ft2.tbl columnconfigure 0 -name "count" \
+                                        -showlinenumbers 1 \
+                                        -labelalign center
     
-    ttk::scrollbar $ft2.scrolly -orient v -command [list $ft2.lbox yview]
-    ttk::scrollbar $ft2.scrollx -orient h -command [list $ft2.lbox xview]
+    $ft2.tbl columnconfigure 2 -stretchable 1
+    
+    ttk::scrollbar $ft2.scrolly -orient v -command [list $ft2.tbl yview]
+    ttk::scrollbar $ft2.scrollx -orient h -command [list $ft2.tbl xview]
     
     ::autoscroll::autoscroll $ft2.scrolly ;# Enable the 'autoscrollbar'
     ::autoscroll::autoscroll $ft2.scrollx
 
     ttk::button $ft2.btn -text [mc "Delete"] -command "customer::deleteFromlbox $ft2.lbox [lindex $custList 0]"
     
-    grid $ft2.lbox -column 0 -row 0 -sticky news
+    grid $ft2.tbl -column 0 -row 0 -sticky news
     grid $ft2.scrolly -column 1 -row 0 -sticky nse
     grid $ft2.scrollx -column 0 -row 1 -sticky ews
     
     grid $ft2.btn -column 1 -row 0 -sticky ne -padx 2p
     
-    # Populate the title listbox   
-    foreach title [eAssist_db::dbWhereQuery -columnNames TitleName -table PubTitle -where CustID='[lindex $custList 0]'] {
-        $ft2.lbox insert end [join $title]
-    }
+    # Populate the title listbox
+    customer::populateTitleWid $ft2.tbl [lindex $custList 0]
     
     ##
     ## Control Buttons
     # After we close the customer ship via window; refresh the main customer list, so that if we added a customer or deactivated a customer, we will now see the results.
-    ttk::button $btns.btn0 -text [mc "OK"] -command "customer::dbAddShipVia $f3a.lbox $f0a.entry1 $f0a.entry2; destroy $wid; customer::manage" -state disable
+    ttk::button $btns.btn0 -text [mc "OK"] -command "customer::dbAddShipVia $f3a.lbox $f0a.entry1 $f0a.entry2; destroy $wid; customer::manage" -state btnState
     ttk::button $btns.btn1 -text [mc "Cancel"] -command "destroy $wid"
     
     grid $btns.btn0 -column 0 -row 0

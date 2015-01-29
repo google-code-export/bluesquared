@@ -849,7 +849,7 @@ proc eAssist_db::leftOuterJoin {args} {
     ${log}::debug cols: $cols
     ${log}::debug table: $dbTable
     ${log}::debug jtable: $jdbTable
-    ${log}::debug where: $whereStmt]
+    ${log}::debug where: $whereStmt
     
     db eval "SELECT $cols FROM $dbTable LEFT OUTER JOIN $jdbTable WHERE $whereStmt"
 
