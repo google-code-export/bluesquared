@@ -316,7 +316,7 @@ proc customer::dbAddShipVia {lbox custIDwid custNamewid} {
     #   
     #   
     #***
-    global log cust
+    global log cust tmp
 
     set custID [$custIDwid get]
     set custName [list [$custNamewid get]]
@@ -328,6 +328,7 @@ proc customer::dbAddShipVia {lbox custIDwid custNamewid} {
     #${log}::debug DATA: $shipViaList
     
     ## Check if the customer exists; if they don't lets add them.
+    set tmp(db,rowID) [eAssist_db::getRowID Customer Cust_ID='$custID']
     eAssist_db::dbInsert -columnNames "Cust_ID CustName Status" -table Customer -data "$custID $custName $cust(Status)"
     
     # Remove ShipVia from DB
@@ -349,18 +350,21 @@ proc customer::dbAddShipVia {lbox custIDwid custNamewid} {
         #unset ::customer::shipViaDeleteList
     }
     
-    # Match the ShipVia's to their db ID's
-    if {[info exists shipviaIDs]} {unset shipviaIDs}
-    foreach item [lsort -unique $shipViaList] {
-        ${log}::debug GET ID: [eAssist_db::dbWhereQuery -columnNames ShipVia_ID -table ShipVia -where "ShipViaName='$item'"]
-        lappend shipviaIDs [eAssist_db::dbWhereQuery -columnNames ShipVia_ID -table ShipVia -where "ShipViaName='$item'"]
-    }
-    
-    # Insert the ShipVia's
-    foreach id $shipviaIDs {
-       ${log}::debug INSERT: $custID _ $id
-       #eAssist_db::dbInsert -columnNames "CustID ShipViaId" -table CustomerShipVia -data "$custID $id"
-       db eval "INSERT OR ABORT INTO CustomerShipVia (CustID, ShipViaID) VALUES ('$custID', '$id')"
+    # Skip if we don't have any shipvia changes
+    if {$shipViaList != ""} {
+        # Match the ShipVia's to their db ID's
+        if {[info exists shipviaIDs]} {unset shipviaIDs}
+        foreach item [lsort -unique $shipViaList] {
+            ${log}::debug GET ID: [eAssist_db::dbWhereQuery -columnNames ShipVia_ID -table ShipVia -where "ShipViaName='$item'"]
+            lappend shipviaIDs [eAssist_db::dbWhereQuery -columnNames ShipVia_ID -table ShipVia -where "ShipViaName='$item'"]
+        }
+        
+        # Insert the ShipVia's
+        foreach id $shipviaIDs {
+           ${log}::debug INSERT: $custID _ $id
+           #eAssist_db::dbInsert -columnNames "CustID ShipViaId" -table CustomerShipVia -data "$custID $id"
+           db eval "INSERT OR ABORT INTO CustomerShipVia (CustID, ShipViaID) VALUES ('$custID', '$id')"
+        }
     }
    
 
@@ -407,12 +411,12 @@ proc customer::validateEntry {okBtn addBtn remBtn wid entryValue} {
     ${log}::debug VALUE: $entryValue
 
     if {[string length $entryValue] >= 3} {
-        ${log}::debug Button State Normal - Value: $entryValue
+        #${log}::debug Button State Normal - Value: $entryValue
         $okBtn configure -state normal
         $addBtn configure -state normal
         $remBtn configure -state normal
     } else {
-        ${log}::debug Button State Disable
+        #${log}::debug Button State Disable
         $okBtn configure -state disable
         $addBtn configure -state disable
         $remBtn configure -state disable
@@ -493,7 +497,7 @@ proc customer::returnTitle {custID} {
     #   
     #   
     # NOTES
-    #   
+    #   Hardcoded to only show entries with a status of 1 (active)!
     #   
     # SEE ALSO
     #   
@@ -501,8 +505,114 @@ proc customer::returnTitle {custID} {
     #***
     global log
 
-    set titleList [db eval "SElECT TitleName FROM PubTitle WHERE CustID='$custID'"]
-    ${log}::debug Title List: $titleList
+    set titleList [db eval "SElECT TitleName FROM PubTitle WHERE CustID='$custID' AND Status='1'"]
+    #${log}::debug Title List: $titleList
 
     return $titleList
 } ;# customer::returnTitle
+
+
+proc customer::populateTitleWid {tbl custID} {
+    #****f* populateTitleWid/customer
+    # CREATION DATE
+    #   01/28/2015 (Wednesday Jan 28)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   customer::populateTitleWid tbl custID
+    #
+    # FUNCTION
+    #	Populates the Title table with the CSR name and titles associated to the currently selected customer
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   Status is hardcoded to show only active records!
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    foreach title [db eval "SELECT TitleName FROM PubTitle WHERE CustID = '$custID'"] {
+        set getCSRname [db eval "SELECT FirstName,
+                            LastName
+                       FROM CSRs
+                            INNER JOIN
+                            PubTitle ON PubTitle.CSRID = CSRs.CSR_ID
+                      WHERE PubTitle.CustID = '$custID'
+                      AND PubTitle.TitleName = '$title'
+                      AND PubTitle.Status = '1'"]
+        
+        $tbl insert end [list "" $getCSRname $title]
+    }
+    
+    
+} ;# customer::populateTitleWid
+
+
+proc customer::dbUpdateCustomer {} {
+    #****f* dbUpdateCustomer/customer
+    # CREATION DATE
+    #   01/28/2015 (Wednesday Jan 28)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   customer::dbUpdateCustomer 
+    #
+    # FUNCTION
+    #	Inserts or Updates the Customer ID, Customer Name, Title and CSR (associated with the Title)
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   DB Tables: Customer, PubTitle
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log job tmp
+    
+    set csrList [db eval "SELECT CSR_ID, FirstName, LastName FROM CSRs"]
+    
+    foreach {id fname lname} $csrList {
+        #${log}::debug $id $fname $lname
+        if {[join [list $fname $lname] " "] eq "$job(CSRName)"} {set csrID $id}
+    }
+
+    #${log}::debug id: $job(CustID)
+    #${log}::debug custName: $job(CustName)
+    #${log}::debug title: $job(Title)
+    #${log}::debug csrID: $csrID
+    set tmp(db,rowID) [eAssist_db::getRowID Customer Cust_ID='$job(CustID)']
+    eAssist_db::dbInsert -columnNames {Cust_ID CustName Status} -table Customer -data [list $job(CustID) $job(CustName) 1]
+    
+    set tmp(db,rowID) [eAssist_db::getRowID PubTitle TitleName='$job(Title)' AND CustID='$job(CustID)']
+    eAssist_db::dbInsert -columnNames {TitleName CustID CSRID} -table PubTitle -data [list $job(Title) $job(CustID) $csrID]
+
+    
+} ;# customer::dbUpdateCustomer
