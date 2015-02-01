@@ -74,12 +74,12 @@ proc export::DataToExport {} {
 
 	set fileName [join $fileName]
 	
-	${log}::debug Actual file name: $fileName
+	#${log}::debug Actual file name: $fileName
 
     # don't open the file yet, because we may have canceled the Save As dialog...
     set myFile(data) [file join [eAssist_Global::SaveFile $fileName]]
     
-    ${log}::debug myFile(data): $myFile(data)
+    #${log}::debug myFile(data): $myFile(data)
     
     if {$myFile(data) eq {}} {
         ${log}::notice Aborting... The Save As window was closed without a file name.
@@ -95,7 +95,7 @@ proc export::DataToExport {} {
         } else {
             set fd [open $myFile(data) w]
         }
-        ${log}::debug fd: $fd
+        #${log}::debug fd: $fd
     }
 
     
@@ -118,18 +118,18 @@ proc export::DataToExport {} {
         }
     }
     chan puts $fd [::csv::join "$colNames OrderType"]
-    ${log}::debug HEADER: [::csv::join "$colNames OrderType"]
-    ${log}::debug ROWS:
+    #${log}::debug HEADER: [::csv::join "$colNames OrderType"]
+    #${log}::debug ROWS:
 
     set rowCount [$files(tab3f2).tbl size]
     for {set x 0} {$rowCount > $x} {incr x} {
         # RECORDS: Write output one row at a time.
         set record [$files(tab3f2).tbl get $x]
-        set shipViaName [lindex $record $shipViaIDX] ; ${log}::debug shipViaName: $shipViaName
-        # WARNING If you open the file with Excel you will needd to fix the 'ship via' column; because the leading zero's will be dropped.
+        set shipViaName [lindex $record $shipViaIDX] ; #${log}::debug shipViaName: $shipViaName
+        # WARNING If you open the file with Excel you will need to fix the 'ship via' column; because the leading zero's will be dropped.
         set record [lreplace $record $shipViaIDX $shipViaIDX [db eval "SELECT ShipViaCode FROM ShipVia where ShipViaName='$shipViaName'"]]
         # Version is a hardcoded value, this should be a header option, with a drop down in the spreadsheet
-        ${log}::debug [::csv::join "$record Version"]
+        #${log}::debug [::csv::join "$record Version"]
         chan puts $fd [::csv::join "$record Version"]
     }
     
