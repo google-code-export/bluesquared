@@ -232,7 +232,7 @@ proc 'eAssist_initVariables {} {
     # SEE ALSO
     #
     #***
-    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter logSettings auth options emailSetup emailEvent
+    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter logSettings auth options emailSetup emailEvent job
 
 	#-------- CORE SETTINGS
 	if {$logSettings(displayConsole) == 1} {console show}
@@ -288,9 +288,6 @@ proc 'eAssist_initVariables {} {
 		set options(ClearExistingData) 1
 	}
     
-	
-
-	
 
 	#-------- Initialize variables
 	
@@ -311,6 +308,11 @@ proc 'eAssist_initVariables {} {
 					  CSR 0 \
 					  SampleRoom 0 \
 					  Sales 0]
+	
+	array set job [list CustName "" \
+				   CustID "" \
+				   Title "" \
+				   CSRName ""]
 	
 	# Filters
 	array set filter [list run,stripASCII_CC 1 \
@@ -333,11 +335,6 @@ proc 'eAssist_initVariables {} {
         set mySettings(sourceFiles) [file dirname $mySettings(Home)]
     }
 
-    #if {![info exists settings(importOrder)]} {
-    #    # Set default for headers; wording is used internally
-    #    set settings(importOrder) [list shipVia Company Consignee delAddr delAddr2 delAddr3 City State Zip Phone Quantity Version Date Contact Email 3rdParty]
-    #}
-
     if {![info exists settings(shipvia3P)]} {
         # Set possible 3rd party shipvia codes
         set settings(shipvia3P) [list 067 154 166]
@@ -351,127 +348,7 @@ proc 'eAssist_initVariables {} {
     if {![info exists settings(BoxTareWeight)]} {
         # Box Tare Weight
         set settings(BoxTareWeight) .566
-    }
-
-    #
-    # Header
-    #
-    
-    #if {![info exists header(shipvia)]} {
-    #    set header(shipvia) [list ShipViaCode "ship via" shipvia]
-    #}
-    #
-    #if {![info exists header(company)]} {
-    #    set header(company) [list ShipToName company destination "company name"]
-    #}
-    #
-    #if {![info exists header(attention)]} {
-    #    # Variations on spelling of consignee
-    #    set header(attention) [list ShipToContact contact attention attn attn:]
-    #}
-    #
-    #if {![info exists header(address1)]} {
-    #    set header(address1) [list ShipToAddressline1 address address1 "address 1" add add1 "add 1" addr addr1 "addr 1"]
-    #}
-    #
-    #if {![info exists header(address2)]} {
-    #    set header(address2) [list ShipToAddressline2 address2 "address 2" add2 "add 2" addr2 "addr 2"]
-    #}
-    #
-    #if {![info exists header(address3)]} {
-    #    set header(address3) [list ShipToAddressline3 address3 "address 3" add3 "add 3" addr3 "addr 3"]
-    #}
-    #
-    #if {![info exists header(CityStateZip)]} {
-    #    set header(CityStateZip) [list city-state-zip city-st-zip "city state zip" "city st zip" csv state/region]
-    #}
-    #
-    #if {![info exists header(city)]} {
-    #    set header(city) [list City ShipToCity]
-    #}
-    #
-    #if {![info exists header(state)]} {
-    #    set header(state) [list ShipToState st st. state]
-    #}
-    #
-    #if {![info exists header(country)]} {
-    #    set header(country) [list country ShipToCountry]
-    #}
-    #
-    # if {![info exists header(zip)]} {
-    #    set header(zip) [list ShipToZipCode zip zipcode "zip code" postalcode "postal code" postal]
-    #}
-    #
-    #if {![info exists header(phone)]} {
-    #    set header(phone) [list phone ShipToPhone]
-    #}
-    #
-    #if {![info exists header(email)]} {
-    #    set header(email) [list email ShipToEmail]
-    #}
-    #
-    #if {![info exists header(shipdate)]} {
-    #    set header(shipdate) [list "Ship Date" shipdate]
-    #}
-    #
-    # if {![info exists header(BatchNumberReference)]} {
-    #    # This will hold the job number and a alpha at the end
-    #    # E.G 60155_A (or 60155A)
-    #    set header(BatchNumberReference) [list BatchNumberReference]
-    #}
-    #
-    #if {![info exists header(Reference1)]} {
-    #    # After we output the file, Reference1 will hold the job number
-    #    set header(Reference1) [list Reference1]
-    #}
-    #
-    #if {![info exists header(version)]} {
-    #    # This is used in the original file, and reassigned to the Reference2 column
-    #    set header(version) [list version vers]
-    #}
-    #
-    #if {![info exists header(Reference2)]} {
-    #    # After we output the file, Reference2 will hold the Version/Qty
-    #    set header(Reference2) [list Reference2]
-    #}
-    #
-    #if {![info exists header(quantity)]} {
-    #    # This is used in the original file, and reassigned to the Reference2 column
-    #    set header(quantity) [list quantity qty]
-    #}
-    #
-    #if {![info exists header(PackageQuantity)]} {
-    #    set header(PackageQuantity) [list PackageQuantity]
-    #}
-    #
-    #if {![info exists header(3rdPartyNumber)]} {
-    #    # 3P Account Number
-    #    set header(3rdPartyNumber) [list ThirdPartyAccountNumber "3rd Party" 3rdParty 3p]
-    #}
-    #
-    #if {![info exists header(3rdPartyCode)]} {
-    #    # Customer Code within Process Shipper
-    #    set header(3rdPartyCode) [list ThirdPartyID]
-    #}
-    #
-    #
-    #
-    ## - These are used internally
-    ## 8/28/2013 - Move this so we see them within Efficiency
-    #
-    #if {![info exists header(pieceweight)]} {
-    #    set header(pieceweight) [list pieceweight "pc weight" "piece weight" "pc wgt"]
-    #}
-    #
-    #if {![info exists header(fullbox)]} {
-    #    set header(fullbox) [list fullbox "full box"]
-    #}
-    #
-    #if {![info exists header(residential)]} {
-    #    # This column is used when we use address cleansing.
-    #    set header(residential) [list ResidentialDelivery]
-    #}
-    
+    }   
 	
 	# Schedule a time to check for updates
 	#eAssist_Global::at $program(checkUpdateTime) vUpdate::checkForUpdates

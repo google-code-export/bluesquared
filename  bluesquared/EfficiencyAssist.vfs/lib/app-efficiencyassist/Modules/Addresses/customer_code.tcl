@@ -268,21 +268,19 @@ proc customer::deleteFromlbox {lbox custID} {
     #   
     #***
     global log
-
-    #${log}::debug DELETE [$lbox curselection]
-    # Delete from the DB
-    #eAssist_db::delete PubTitle TitleName [$lbox get [$lbox curselection]]
-    #
-    ## Delete all data in the listbox
-    #$lbox delete 0 end
-    #
-    ## Read data from DB to insert into the listbox
-    #foreach title [eAssist_db::dbWhereQuery -columnNames TitleName -table PubTitle -where CustID='$custID'] {
-    #    $lbox insert end [join $title]
-    #}
     
+    set selData [$lbox get [$lbox curselection]]
+    set csrFname [lrange [join [lrange $selData 1 1]] 0 0]
+    set csrLname [lrange [join [lrange $selData 1 1]] 1 1]
+    set title [lrange [$lbox get [$lbox curselection]] 2 2]
+    set CSRid [db eval "SELECT CSR_ID from CSRs where FirstName='$csrFname' and LastName='$csrLname'"]
+
+    
+    set rowID [eAssist_db::getRowID PubTitle "CUSTID='$custID' AND CSRID='$CSRid' AND TitleName='$title'"]
+    eAssist_db::delete PubTitle "" $rowID
 
 } ;# customer::deleteFromlbox
+
 
 proc customer::dbAddShipVia {lbox custIDwid custNamewid} {
     #****f* dbAddShipVia/customer
@@ -546,6 +544,9 @@ proc customer::populateTitleWid {tbl custID} {
     #***
     global log
 
+    # Make sure the table is cleared
+    $tbl delete 0 end
+    
     foreach title [db eval "SELECT TitleName FROM PubTitle WHERE CustID = '$custID'"] {
         set getCSRname [db eval "SELECT FirstName,
                             LastName
@@ -608,11 +609,13 @@ proc customer::dbUpdateCustomer {} {
     #${log}::debug custName: $job(CustName)
     #${log}::debug title: $job(Title)
     #${log}::debug csrID: $csrID
+    # Insert the customer, default status of '1'; so its active.
     set tmp(db,rowID) [eAssist_db::getRowID Customer Cust_ID='$job(CustID)']
     eAssist_db::dbInsert -columnNames {Cust_ID CustName Status} -table Customer -data [list $job(CustID) $job(CustName) 1]
     
+    # Insert the title, default status of '1'; so its active.
     set tmp(db,rowID) [eAssist_db::getRowID PubTitle TitleName='$job(Title)' AND CustID='$job(CustID)']
-    eAssist_db::dbInsert -columnNames {TitleName CustID CSRID} -table PubTitle -data [list $job(Title) $job(CustID) $csrID]
+    eAssist_db::dbInsert -columnNames {TitleName CustID CSRID Status} -table PubTitle -data [list $job(Title) $job(CustID) $csrID 1]
 
     
 } ;# customer::dbUpdateCustomer
