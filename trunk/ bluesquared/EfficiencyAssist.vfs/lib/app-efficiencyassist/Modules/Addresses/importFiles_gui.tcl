@@ -509,9 +509,14 @@ proc importFiles::initMenu {} {
     $mb.file delete 0 end
     
     # Add Module specific Menus
-    $mb.file add command -label [mc "New Project"] -command {customer::projSetup}
-    #$mb.file add command -label [mc "Import File"] -command {importFiles::fileImportGUI}
-    $mb.file add command -label [mc "Export File"] -command {export::DataToExport} ;#-state disabled 
+    menu $mb.file.project
+    $mb.file add cascade -label [mc "Project"] -menu $mb.file.project
+        $mb.file.project add command -label [mc "New"] -command {customer::projSetup}
+        $mb.file.project add command -label [mc "Edit"] -command {customer::projSetup edit}
+        $mb.file.project add command -label [mc "View"] -command {customer::projSetup view}
+    $mb.file add command -label [mc "Import File"] -command {importFiles::fileImportGUI}
+    $mb.file add command -label [mc "Export File"] -command {export::DataToExport} ;#-state disabled
+    
     menu $mb.file.reports
     $mb.file add cascade -label [mc "Reports"] -menu $mb.file.reports -state disabled
     $mb.file.reports add command -label [mc "Import Breakdown"]
@@ -532,6 +537,7 @@ proc importFiles::initMenu {} {
     $mb.modMenu add command -label [mc "Filters..."] -command {eAssist_tools::FilterEditor} -state disable
     #$mb.modMenu add command -label [mc "Internal Samples"] -command {eAssistHelper::addCompanySamples} -state disable
     #$mb.modMenu add command -label [mc "Split"] -command {eAssistHelper::splitVersions}
+    $mb.modMenu add command -label [mc "Manage Customers..."] -command {customer::manage}
     
     $mb.modMenu add separator
     

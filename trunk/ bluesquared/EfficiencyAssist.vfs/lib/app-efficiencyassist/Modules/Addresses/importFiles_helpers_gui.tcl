@@ -234,7 +234,7 @@ proc eAssistHelper::insertItems {tbl} {
 					distributiontype	{
 						${log}::debug DistributionType
 						ttk::label $f2.txt$i -text [mc "$header"]
-						$wid $f2.$x$header -values $dist(distributionTypes) -textvariable txtVariable
+						$wid $f2.$x$header -values $dist(distributionTypes) -textvariable txtVariable -width 35
 						
 						$f2.$x$header delete 0 end
 						$f2.$x$header configure -state readonly
@@ -248,7 +248,7 @@ proc eAssistHelper::insertItems {tbl} {
 					shipvia		{
 						${log}::debug CarrierMethod
 						ttk::label $f2.txt$i -text [mc "$header"]
-						$wid $f2.$x$header -values $carrierSetup(ShipViaName) -textvariable txtVariable
+						$wid $f2.$x$header -values $carrierSetup(ShipViaName) -textvariable txtVariable -width 35
 						$f2.$x$header delete 0 end
 						$f2.$x$header configure -state readonly
 						
@@ -258,7 +258,7 @@ proc eAssistHelper::insertItems {tbl} {
 					packagetype			{
 						${log}::debug PackageType
 						ttk::label $f2.txt$i -text [mc "$header"]
-						$wid $f2.$x$header -values $packagingSetup(PackageType) -textvariable txtVariable
+						$wid $f2.$x$header -values $packagingSetup(PackageType) -textvariable txtVariable -width 35
 						$f2.$x$header delete 0 end
 						$f2.$x$header configure -state readonly
 						
@@ -268,7 +268,7 @@ proc eAssistHelper::insertItems {tbl} {
 					containertype		{
 						${log}::debug ContainerType
 						ttk::label $f2.txt$i -text [mc "$header"]
-						$wid $f2.$x$header -values $packagingSetup(ContainerType) -textvariable txtVariable
+						$wid $f2.$x$header -values $packagingSetup(ContainerType) -textvariable txtVariable -width 35
 						$f2.$x$header delete 0 end
 						$f2.$x$header configure -state readonly
 						
@@ -278,7 +278,7 @@ proc eAssistHelper::insertItems {tbl} {
 					shippingclass		{
 						${log}::debug ShippingClass
 						ttk::label $f2.txt$i -text [mc "$header"]
-						$wid $f2.$x$header -values $carrierSetup(ShippingClass) -textvariable txtVariable
+						$wid $f2.$x$header -values $carrierSetup(ShippingClass) -textvariable txtVariable -width 35
 						$f2.$x$header delete 0 end
 						$f2.$x$header configure -state readonly
 						
@@ -287,7 +287,7 @@ proc eAssistHelper::insertItems {tbl} {
 					}
 					default			{
 						${log}::notice Item not setup to use the ComboBox, displaying a generic text widget
-						ttk::entry $f2.$x$header -textvariable txtVariable
+						ttk::entry $f2.$x$header -textvariable txtVariable -width 35
 						
 						grid $f2.$x$header -column 0 -row $x -sticky news -pady 5p -padx 5p
 						}
@@ -297,7 +297,7 @@ proc eAssistHelper::insertItems {tbl} {
 						ttk::label $f2.txt$i -text [mc "$header"]
 						# Create the widget specified in Setup for the column; typically will be ttk::entry
 						#if {$wid eq ""} {set wid ttk::entry}
-						$wid $f2.$x$header -textvariable txtVariable
+						$wid $f2.$x$header -textvariable txtVariable -width 35
 				
 						grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
 						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
@@ -359,6 +359,8 @@ proc eAssistHelper::importProgBar {args} {
 
 	set w .pb
     if {[winfo exists w]} {destroy $w}
+	
+	if {$args eq "destroy"} {destroy $w; return}
 
     toplevel $w
     wm transient $w .
@@ -366,7 +368,7 @@ proc eAssistHelper::importProgBar {args} {
     
     set locX [expr {[winfo screenwidth . ] / 4 + [winfo x .]}]
     set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
-    wm geometry $w +${locX}+${locY}
+    wm geometry $w 150x75+${locX}+${locY}
 
     set f1 [ttk::labelframe $w.f1 -text [mc "Importing Records"] -padding 10]
     pack $f1 -fill both -expand yes -padx 5p -pady 5p

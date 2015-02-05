@@ -85,6 +85,11 @@ proc Error_Message::errorMsg {code args} {
                             set message2 [mc "Error Location: %s" $code]
                             set title [mc Warning]
                             set icon warning}
+        BM002           {set message [mc "Customer ID must be filled in."]
+                            set message2 [mc "Error Location: %s" $code]
+                            set title [mc $defaultTitle]
+                            set icon warning
+                            }       
         default         {set message [mc "Unknown Error Message"]
                             set message2 ""
                             set title $defaultTitle

@@ -295,6 +295,7 @@ proc importFiles::processFile {win} {
     set max [expr {$process(numOfRecords) + 1}]
     $::gwin(importpbar) configure -maximum $max
     ${log}::debug configuring Progress Bar with -maximum $max
+    #update
 
     foreach record $process(dataList) {
         # .. Skip over any 'blank' lines in found in the file
@@ -430,6 +431,7 @@ proc importFiles::processFile {win} {
         
         unset newRow
         set x 0
+        update
     }
     # Ensure the progress bar is at the max, by the time we get to this point
     $::gwin(importpbar) configure -value $max
@@ -454,6 +456,9 @@ proc importFiles::processFile {win} {
     
     # Enable menu items
     importFiles::enableMenuItems
+    
+    # Destroy the progress bar window
+    eAssistHelper::importProgBar destroy
     
     #${log}::debug --END-- [info level 1]
 } ;# importFiles::processFile
