@@ -146,8 +146,6 @@ proc customer::projSetup {{modify new}} {
             if {$tmpCustName != ""} {
                 set job(CustName) $tmpCustName
                 #${log}::debug $job(CustName)
-            } else {
-                ${log}::debug TempCustName is empty ($tmpCustName), new Customer?
             }
         } else {
             ${log}::debug No ID was entered!
@@ -161,11 +159,14 @@ proc customer::projSetup {{modify new}} {
         if {$custName != ""} {
             #$::customer::f1.entry0b insert end [db eval "SELECT CustName FROM Customer WHERE Cust_ID='$id'"
             set tmpCustID [join [db eval "SELECT Cust_ID FROM Customer WHERE CustName='$custName'"]]
-            if {$tmpCustID != ""} {
-                set job(CustID) $tmpCustID
-                #${log}::debug $job(CustID)
-            } else {
-                ${log}::debug TempCustID is empty ($tmpCustID), new customer?
+                if {$tmpCustID != ""} {
+                    set job(CustID) $tmpCustID
+                    #${log}::debug $job(CustID)
+                }
+            ${log}::debug TempCustID wasn't found: Using $job(CustID), new customer?
+            
+            if {$job(CustID) == "" && $tmpCustID == ""} {
+                ${log}::debug No Data was found in the ID Field - Issuing warning notice.
                 Error_Message::errorMsg BM002
                 focus .ps.f1.entry0a
             }

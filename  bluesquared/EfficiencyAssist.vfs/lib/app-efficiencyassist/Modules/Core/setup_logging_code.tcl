@@ -51,7 +51,7 @@ proc eAssistSetup::changeLogLevel {args} {
     global log logSettings
         
         logger::setlevel [string tolower [lindex $logSettings(levels) $args]]
-        ${log}::notice [mc "Logging level has been set to: ${log}::currentloglevel"]
+        ${log}::notice [mc "Logging level has been set to: [${log}::currentloglevel]"]
     
 
 } ;#eAssistSetup::changeLogLevel

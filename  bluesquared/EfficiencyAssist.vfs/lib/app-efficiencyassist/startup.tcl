@@ -158,10 +158,6 @@ proc 'eAssist_sourceReqdFiles {} {
 	#load [file join [file dirname [info script]] Libraries twapi twapi_base.dll]
 	#load [file join [file dirname [info script]] Libraries sqlite3_3801 sqlite3801.dll] Sqlite3
 	#source [file join [file dirname [info script]] Libraries debug.tcl]
-	
-	if {[info exists logSettings(displayConsole)]} {
-		eAssistSetup::toggleConsole $logSettings(displayConsole)
-	}	
 
 } ;# 'eAssist_sourceReqdFiles
 
@@ -235,7 +231,10 @@ proc 'eAssist_initVariables {} {
     global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter logSettings auth options emailSetup emailEvent job
 
 	#-------- CORE SETTINGS
-	if {$logSettings(displayConsole) == 1} {console show}
+	#if {$logSettings(displayConsole) == 1} {console show}
+	if {[info exists logSettings(displayConsole)]} {
+		eAssistSetup::toggleConsole $logSettings(displayConsole)
+	}
 	
 	# admin7954
 	set auth(adminPword) {$1$6JV2D0G7$RHuHLMxJuuQ3HWWG3wOML1}
@@ -587,3 +586,28 @@ vUpdate::saveCurrentVersion
 
 # Start the GUI
 eAssist::parentGUI
+
+
+#package require tablelist
+#
+#tablelist::tablelist .tbl \
+#-columns { 0 Col1 \
+#0 Col2 \
+#0 Col3 \
+#0 Col4 \
+#0 Col5} \
+#-editselectedonly 1 \
+#-selectmode extended \
+#-selecttype cell
+#
+#.tbl columnconfigure 0 -editable yes
+#
+#.tbl insert end "Test1 Test2 Test3 Test4 Test5"
+#.tbl insert end "Test1 Test2 Test3 Test4 Test5"
+#.tbl insert end "Test1 Test2 Test3 Test4 Test5"
+#.tbl insert end "Test1 Test2 Test3 Test4 Test5"
+#.tbl insert end "Test1 Test2 Test3 Test4 Test5"
+#
+#pack .tbl
+#
+#puts [.tbl puts [.tbl curcellselection]]

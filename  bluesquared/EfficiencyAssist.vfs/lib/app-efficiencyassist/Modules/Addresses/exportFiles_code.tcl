@@ -56,7 +56,7 @@ proc export::DataToExport {} {
                         -icon question -type yesno \
                         -detail "Select \"Yes\" to open the Project Setup window."]
                 switch -- $answer {
-                        yes {eAssistHelper::projSetup}
+                        yes {customer::projSetup}
                         no {exit}
                 }
             return
