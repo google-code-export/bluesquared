@@ -1,10 +1,16 @@
-= Version 4.0.0 Beta 7 (September 2014)
+= Version 4.0.0 Beta 7 (February 2014)
 == Batch Maker
 * [UPDATE] Selecting a cell in the 'count' column will now select the entire row; selecting any cell not in the 'count' column will select single cells.
 * [NEW] Clicking on the headers will now sort the column.
+* [NEW] There is now a progress bar that appears after selecting 'IMPORT'.
+* [UPDATE] Records are added to the spreadsheet as soon as they are processed.
+* [NEW] Customers, Titles and CSRs are now saved in the database. You can View/Modify/Add Customers. Titles and CSR associations are automatically entered.
 
 == Core
-* [UPDATE] DB integration has started, Packages/Containers are the first widgets to insert/pull data from the db.
+* [NEW] DB integration has started, Packages/Containers are the first widgets to insert/pull data from the db.
+* [NEW] Ship Via's are now able to be created.
+* [NEW] Countries and Regions can now be entered. This will eventually be used to auto-populate the Country column in BM
+* 
 
 --
 

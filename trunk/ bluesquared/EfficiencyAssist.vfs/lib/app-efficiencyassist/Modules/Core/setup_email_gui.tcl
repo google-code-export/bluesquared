@@ -192,7 +192,7 @@ proc eAssistSetup::emailSetup_GUI {} {
     grid $eF2.txt4 -column 0 -row 3 -pady 2p -padx 2p -sticky nse
     grid $eF2.entry4 -column 1 -row 3 -pady 2p -padx 2p -sticky news
     
-    grid $eF2.text -column 1 -row 4 -pady 2p -padx 2p ;#-sticky news
+    grid $eF2.text -column 1 -row 4 -pady 2p -padx 2p -sticky news
     grid $eF2.scrolly -column 1 -row 4 -sticky nse
     grid $eF2.scrollx -column 0 -row 4 -sticky sew
     
