@@ -13,5 +13,6 @@ package ifneeded eAssist_ModImportFiles 1.0 "[list source [file join $dir import
                                             [list source [file join $dir importFiles_initvariables.tcl]]
                                             [list source [file join $dir containerization_code.tcl]]
                                             [list source [file join $dir customer_gui.tcl]]
-                                            [list source [file join $dir customer_code.tcl]]"
+                                            [list source [file join $dir customer_code.tcl]]
+                                            [list source [file join $dir jobDB_code.tcl]]"
 

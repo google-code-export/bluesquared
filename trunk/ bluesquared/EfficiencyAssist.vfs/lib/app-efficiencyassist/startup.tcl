@@ -78,7 +78,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries autoscroll]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
-	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.11]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.13]
 	#lappend ::auto_path [file join [file dirname [info script]] Libraries tcom3.9]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries twapi]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
@@ -190,7 +190,7 @@ proc 'eAssist_bootStrap {} {
 	
 	set debug(onOff) on ;# Old - Still exists so we don't receive errors, on the instances where it still exists
 	set logSettings(loglevel) notice ;# Default to notice, over ridden if the user selects a different option
-	set logSettings(displayConsole) 0 ;# disable by default, same as above
+	set logSettings(displayConsole) 0 ;# disable by default, same as above. We read in the user settings file later; so if specific users want to see it, they will.
 
 	# initialize logging service
 	set log [logger::init log_svc]

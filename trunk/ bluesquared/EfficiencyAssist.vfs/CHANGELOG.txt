@@ -1,3 +1,15 @@
+= Version 4.0.0 Beta 8 (March 2014)
+== Batch Maker
+* [UPDATE] Log settings are now per user instead of globally
+
+== General
+* [UPDATE] Cursor selection in spreadsheet views behaves as expected due to an update in a supplied package. See the Development notes.
+
+== Development
+* [UPDATE] Updated Tablelist from 5.11 to 5.13
+
+--
+
 = Version 4.0.0 Beta 7 (February 2014)
 == Batch Maker
 * [UPDATE] Selecting a cell in the 'count' column will now select the entire row; selecting any cell not in the 'count' column will select single cells.

@@ -58,6 +58,7 @@ proc importFiles::initVars {args} {
     set headerParent(headerList) [eAssist_db::dbSelectQuery -columnNames InternalHeaderName -table Headers]
     set headerParent(headerList) [db eval "SELECT InternalHeaderName FROM Headers ORDER BY Header_ID"]
     set headerParent(whiteList) [eAssist_db::dbWhereQuery -columnNames InternalHeaderName -table Headers -where AlwaysDisplay=1]
+    set headerParent(ColumnCount) [db eval "SELECT Count (Header_ID) from Headers"]
     
     # Setup header array with subheaders
     foreach hdr $headerParent(headerList) {
@@ -69,7 +70,9 @@ proc importFiles::initVars {args} {
         set headerAddress($hdr) [db eval "SELECT SubHeaderName FROM Headers LEFT OUTER JOIN SubHeaders WHERE HeaderID=Header_ID AND InternalHeaderName='$hdr'"]
     }
     
+    
     set dist(distributionTypes) [db eval "SELECT DistTypeName FROM DistributionTypes"]
+    
     set carrierSetup(ShippingClass) [db eval "SELECT ShippingClass FROM ShippingClasses"]
     set carrierSetup(ShipViaName) [db eval "SELECT ShipViaName FROM ShipVia"]
     
@@ -207,20 +210,6 @@ proc importFiles::readFile {fileName lbox} {
                         eAssistHelper::autoMap $headerName $header
                         #${log}::debug MAPPING - $headerName TO $header
                     }
-                    # headerAddress($headername) = various spellings of the headername.
-                    # Now we check to see if we can auto-map the headers with the information that we are already aware of.
-                    #if {[lsearch -nocase $headerAddress($headerName) $header] != -1} {
-                    #    if {$options(AutoAssignHeader) == 1} {
-                    #        eAssistHelper::autoMap $headerName $header
-                    #    }
-                    #}
-
-                    
-                    #if {[lsearch -nocase $subheaders $header] != -1} {
-                    #    if {$options(AutoAssignHeader) == 1} {
-                    #        eAssistHelper::autoMap $headerName $header
-                    #    }
-                    #}
                 }
             }
         }
@@ -281,7 +270,10 @@ proc importFiles::processFile {win} {
       
     set process(versionList) ""
     
-    set ColumnCount [$files(tab3f2).tbl columncount]
+    # Total number of columns
+    #set ColumnCount [$files(tab3f2).tbl columncount]
+    # Using headerParent(ColumnCount)
+    
     # Index (i.e. 01, from 01_HeaderName)
     set FileHeaders [lsort [array names position]]
     #${log}::debug FileHeaders: $FileHeaders
@@ -301,7 +293,8 @@ proc importFiles::processFile {win} {
         # .. Skip over any 'blank' lines in found in the file
         if {[string is punc $record] == 1} {continue}
             
-        ## Ensure we have good data; if we don't, lets try to fix it
+        ## Ensure we have good data; if we don't, lets try to fix it.
+        ## This typically occurs when there is a hard return in the data. Excel does not fix it when the file is exported to .csv format
         if {[csv::iscomplete $record] == 0} {
                 lappend badString $record
                 ${log}::notice Bad Record - Found on line [lsearch $process(dataList) $record] - $record
@@ -315,10 +308,8 @@ proc importFiles::processFile {win} {
                 set l_line [csv::split $record]
             }
         }
-        
-        #set l_line [join [split $l_line ,] ""] ;# remove all comma's
 
-        for {set x 0} {$ColumnCount > $x} {incr x} {
+        for {set x 0} {$headerParent(ColumnCount) > $x} {incr x} {
             set ColumnName [$files(tab3f2).tbl columncget $x -name]
            
             
@@ -408,6 +399,7 @@ proc importFiles::processFile {win} {
                 
                 # Create the list of values
                 lappend newRow $listData
+                ${log}::debug INSERT into DB Column: $ColumnName - $listData
                 #${log}::debug Position: [llength $newRow]
                     
                 }
