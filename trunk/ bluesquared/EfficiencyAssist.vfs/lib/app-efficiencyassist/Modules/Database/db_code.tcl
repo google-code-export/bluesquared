@@ -170,7 +170,7 @@ proc eAssist_db::dbInsert {args} {
     
     # See if this is a new entry or if we should update an entry ...
     set dbCheck [eAssist_db::dbWhereQuery -columnNames [lrange $colNames 0 0] -table $tbl -where [lrange $colNames 0 0]='[lrange $data 0 0]']
-    ${log}::debug After dbCheck: $dbCheck
+    #${log}::debug After dbCheck: $dbCheck
     
     if {[info exists cleansedData]} {unset cleansedData}
     foreach item $data {
@@ -186,17 +186,20 @@ proc eAssist_db::dbInsert {args} {
     # If rowID exists, issue an update statement.
     if {[info exists tmp(db,rowID)] == 1} {
         if {$tmp(db,rowID) != ""} {
-            ${log}::debug ROWID Exists: $tmp(db,rowID)
-            ${log}::debug Update_COLS: $colNames
-            ${log}::debug Update_DATA: $data
+            #${log}::debug ROWID Exists: $tmp(db,rowID)
+            #${log}::debug Update_COLS: $colNames
+            #${log}::debug Update_DATA: $data
             set y [llength $colNames]
                 for {set x 0} {$x < $y} {incr x} {
-                    ${log}::debug Col/Val [lrange $colNames $x $x]=[lrange $data $x $x]
-                    lappend updateStatement [join [lrange $colNames $x $x]]=[join [lrange $data $x $x]]
+                    # bypass values that could contain only curly braces (typically checkboxes)
+                    if {[join [lrange $data $x $x]] ne ""} {
+                        ${log}::debug Col/Val [join [lrange $colNames $x $x]]=[join [lrange $data $x $x]]
+                        lappend updateStatement [join [lrange $colNames $x $x]]=[join [lrange $data $x $x]]
+                    }
                 }
             ${log}::debug updateStatement: [join $updateStatement ,]
             set updateStatement [join $updateStatement ,]
-            ${log}::debug db eval "UPDATE $tbl SET $updateStatement WHERE rowid=$tmp(db,rowID)"
+            #${log}::debug db eval "UPDATE $tbl SET $updateStatement WHERE rowid=$tmp(db,rowID)"
             db eval "UPDATE $tbl SET $updateStatement WHERE rowid=$tmp(db,rowID)"
                 
             set tmp(db,rowID) ""

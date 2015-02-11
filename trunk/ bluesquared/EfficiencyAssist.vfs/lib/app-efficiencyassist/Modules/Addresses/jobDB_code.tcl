@@ -18,7 +18,7 @@
 
 namespace eval job::db {}
 
-proc job::db::createDB {custID jobTitle jobName jobNumber} {
+proc job::db::createDB {custID csrName jobTitle jobName jobNumber} {
     #****f* createDB/job::db
     # CREATION DATE
     #   02/08/2015 (Sunday Feb 08)
@@ -50,46 +50,60 @@ proc job::db::createDB {custID jobTitle jobName jobNumber} {
     #   
     #   
     #***
-    global log job mySettings
+    global log job mySettings program env
 
     ${log}::notice Creating a new database for: $custID $jobTitle $jobName $jobNumber
-    set job(db,Name) [join "$jobTitle $jobName $jobNumber" _]
+    set job(db,Name) [join "$jobNumber $jobTitle $jobName" _]
     
     # Create the database
     sqlite3 $job(db,Name) [file join $mySettings(Home) $job(db,Name)] -create 1
-    #ATTACH DATABASE 'DatabaseName' As 'Alias-Name';
     
     # Create the tables
+    set job(db,currentSchemaVers) 1
     $job(db,Name) eval {        
-        CREATE TABLE Notes (
+        CREATE TABLE IF NOT EXISTS Notes (
             Notes_ID  INTEGER PRIMARY KEY AUTOINCREMENT,
             UserNotes TEXT
         );
         
-        CREATE TABLE JobInformation (
+        CREATE TABLE IF NOT EXISTS JobInformation (
             Job_ID      INTEGER PRIMARY KEY AUTOINCREMENT,
             CustID      TEXT,
-            CSRID       TEXT,
+            CSRName     TEXT,
             JobTitle    TEXT,
             JobName     TEXT,
             CreatedDate DATE,
             CreatedBy   TEXT
         );
         
-        CREATE TABLE JobHeaders (
-            header_ID   INTEGER PRIMARY KEY AUTOINCREMENT,
-            HeaderNames TEXT
+        CREATE TABLE IF NOT EXISTS SysInfo (
+            SysInfo_ID  INTEGER PRIMARY KEY AUTOINCREMENT,
+            ProgramVers TEXT,
+            SchemaVers  TEXT
         );
     }
     
-    # Populate the table from our main db.
-    set hdr [db eval {SELECT InternalHeaderName FROM Headers}]
-    foreach name $hdr {
-        $job(db,Name) eval "INSERT INTO JobHeaders (HeaderNames) VALUES ('$name')"
+
+    ## Grab the table fields from our main db.
+    set hdr [db eval {SELECT InternalHeaderName FROM Headers ORDER BY DisplayOrder}]
+    set cTable [list {addr_ID INTEGER PRIMARY KEY AUTOINCREMENT}]
+    
+    # Dynamically build the Addresses table
+    foreach header $hdr {
+        lappend cTable "'$header' TEXT"
     }
+    set cTable [join $cTable ,]
+    
+    $job(db,Name) eval "CREATE TABLE IF NOT EXISTS Addresses ( $cTable )"
+
+    # Insert data into JobInformation table
+    $job(db,Name) eval "INSERT INTO JobInformation (CustID, CSRName, JobTitle, JobName, CreatedDate, CreatedBy) VALUES ('$custID', '$csrName', '$jobTitle', '$jobName', DATETIME('NOW'), '$env(USERNAME)')"
+    
+    # Insert data into Sysinfo table
+    $job(db,Name) eval "INSERT INTO SysInfo (ProgramVers, SchemaVers) VALUES ('$program(Version).$program(PatchLevel)', '$job(db,currentSchemaVers)')"
     
 } ;# job::db::createDB
-#job::db::createDB SAGMED TEST001 Febraury TEST555
+#job::db::createDB SAGMED {Meredith Hunter} TEST001 Febraury 303603
 
 
 proc job::db::load {dbName} {
