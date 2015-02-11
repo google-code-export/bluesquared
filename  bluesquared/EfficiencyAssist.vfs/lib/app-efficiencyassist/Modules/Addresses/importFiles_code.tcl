@@ -281,13 +281,22 @@ proc importFiles::processFile {win} {
     
     # launch progress bar window
     eAssistHelper::importProgBar
-    ${log}::debug Launching Progress Bar
+    #${log}::debug Launching Progress Bar
     
     # configure value of progress bar (number of total records)
     set max [expr {$process(numOfRecords) + 1}]
     $::gwin(importpbar) configure -maximum $max
     ${log}::debug configuring Progress Bar with -maximum $max
     #update
+    
+    # Put the table headers in order ...
+    if {[info exists newCol]} {unset newCol}
+    set cols [db eval "SELECT InternalHeaderName from Headers ORDER BY DisplayOrder"]
+    foreach col $cols {
+        lappend newCol '$col'
+    }
+    set newCol [join $newCol ,]
+    ${log}::debug Columns: $newCol
 
     foreach record $process(dataList) {
         # .. Skip over any 'blank' lines in found in the file
@@ -341,6 +350,7 @@ proc importFiles::processFile {win} {
                     lappend newRow "Version 1"
                 } else {
                     lappend newRow ""
+                    lappend newRowDB ''
                 }
                 
                 if {[lsearch -nocase $headerParent(whiteList) $ColumnName] == -1} {
@@ -399,6 +409,7 @@ proc importFiles::processFile {win} {
                 
                 # Create the list of values
                 lappend newRow $listData
+                lappend newRowDB '$listData'
                 ${log}::debug INSERT into DB Column: $ColumnName - $listData
                 #${log}::debug Position: [llength $newRow]
                     
@@ -409,6 +420,10 @@ proc importFiles::processFile {win} {
         $files(tab3f2).tbl insert end $newRow
         #${log}::debug Raw Record: $record
         #${log}::debug Record: $newRow
+        # insert data into the db
+
+        #${log}::debug INSERT INTO Addresses ($newCol) VALUES ([join $newRowDB ,])
+        $job(db,Name) eval "INSERT INTO Addresses ($newCol) VALUES ([join $newRowDB ,])"
         
         if {[info exists maxCharColumn] == 1} {
             foreach column $maxCharColumn {
@@ -422,6 +437,7 @@ proc importFiles::processFile {win} {
         ${log}::debug Updating Progress Bar - [$::gwin(importpbar) cget -value]
         
         unset newRow
+        unset newRowDB
         set x 0
         update
     }

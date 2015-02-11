@@ -63,7 +63,7 @@ proc ea::db::updateHeaderWidTbl {widTable dbTable cols} {
         foreach value $region {
             # the quoting works for the tablelist widget; unknown for listboxes
             $widTable insert end "{} $value"
-            #${log}::debug insert end "{} $value"
+            ${log}::debug insert end "{} $value"
             
         }
     }
@@ -125,24 +125,21 @@ proc ea::db::writeHeaderToDB {widPath widTable dbTable} {
                 }
                 
             } else {
-                ${log}::debug $item - [$item get]
-                lappend valuesToInsert [$item get]
+                ${log}::debug $item - [join [$item get]]
+                lappend valuesToInsert [join [$item get]]
             }
             #$item delete 0 end
         }
     }
-    
-    #foreach item [lsort [array names tmp_headerOpts]] {
-    #    ${log}::debug $item _ $tmp_headerOpts($item)
-    #    lappend valuesToInsert $tmp_headerOpts($item)
-    #}
+
 
     ${log}::debug Final valuesToInsert: $valuesToInsert
-    eAssist_db::dbInsert -columnNames "InternalHeaderName OutputHeaderName HeaderMaxLength DefaultWidth Highlight Widget Required AlwaysDisplay ResizeColumn" -table $dbTable -data $valuesToInsert
+    eAssist_db::dbInsert -columnNames "InternalHeaderName OutputHeaderName HeaderMaxLength DefaultWidth Highlight Widget DisplayOrder Required AlwaysDisplay ResizeColumn" -table $dbTable -data $valuesToInsert
     
 
     # Read from DB to populate the widgets
-    ea::db::updateHeaderWidTbl $widTable Headers "Header_ID InternalHeaderName OutputHeaderName HeaderMaxLength DefaultWidth Highlight Widget Required AlwaysDisplay ResizeColumn"
+    ea::db::updateHeaderWidTbl $widTable Headers "Header_ID InternalHeaderName OutputHeaderName HeaderMaxLength DefaultWidth Highlight Widget DisplayOrder Required AlwaysDisplay ResizeColumn"
+    
 } ;# ea::db::writeHeaderToDB
 
 
@@ -190,8 +187,11 @@ proc ea::db::populateHeaderEditWindow {widTable widPath dbTable} {
     
     #${log}::debug db_ID: $tmp(db,ID)
     #${log}::debug data: $data
+    #${log}::debug data: $dataEdited
     
     set tmp(db,rowID) [eAssist_db::dbWhereQuery -columnNames rowid -table $dbTable -where Header_ID='$tmp(db,ID)']
+    
+    ${log}::debug DB DATA: [eAssist_db::dbWhereQuery -columnNames "InternalHeaderName Widget" -table $dbTable -where Header_ID='$tmp(db,ID)']
     
     set children [lsort [winfo children $widPath]]
     foreach child $children {
@@ -199,11 +199,14 @@ proc ea::db::populateHeaderEditWindow {widTable widPath dbTable} {
             lappend childlist $child
         }
     }
+    ${log}::debug Avail Widgets: $childlist
     
     set checkbtnArray [lsort [array names tmp_headerOpts]]
 
     set x 0
     foreach item $childlist {
+        ${log}::debug Current Data: [lrange $dataEdited $x $x]
+        
         if {[string match -nocase *ckbtn* $item] == 1} {
             foreach checkbtn $checkbtnArray {
                 if {[string match *$checkbtn $item]} {
@@ -356,9 +359,9 @@ proc ea::db::addSubHeaders {widListbox widEntry widCombobox} {
     #***
     global log
 
-    ${log}::debug GET MasterHeader: [$widCombobox get]
-    ${log}::debug GET ChildHeader: [$widEntry get]
-    ${log}::debug INSERT INTO $widListbox
+    #${log}::debug GET MasterHeader: [$widCombobox get]
+    #${log}::debug GET ChildHeader: [$widEntry get]
+    #${log}::debug INSERT INTO $widListbox
     
     set masterHeader [$widCombobox get]
     set childHeader [$widEntry get]

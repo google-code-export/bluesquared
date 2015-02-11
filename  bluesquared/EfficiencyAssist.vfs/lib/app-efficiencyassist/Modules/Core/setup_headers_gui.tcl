@@ -93,6 +93,7 @@ proc eAssistSetup::addressHeaders_GUI {} {
 													0	"Column Width" center
                                                     0	"Highlight"
 													0	"Widget"
+													0	"Display Order" center
 													0	"Required" center
 													0	"Always Display" center
 													0	"Resize" center
@@ -141,14 +142,19 @@ proc eAssistSetup::addressHeaders_GUI {} {
                                             
 		$w(hdr_frame1a).listbox columnconfigure 8 -name "Required" \
 											-labelalign center
-		
-	    $w(hdr_frame1a).listbox columnconfigure 9 -name "AlwaysDisplay" \
-                                            -labelalign center
-		
-	    $w(hdr_frame1a).listbox columnconfigure 10 -name "ResizeColumn" \
-                                            -labelalign center
 
-    ea::db::updateHeaderWidTbl $w(hdr_frame1a).listbox Headers "Header_ID InternalHeaderName OutputHeaderName HeaderMaxLength DefaultWidth Highlight Widget Required AlwaysDisplay ResizeColumn"
+		$w(hdr_frame1a).listbox columnconfigure 9 -name "DisplayOrder" \
+                                            -labelalign center
+		
+	    $w(hdr_frame1a).listbox columnconfigure 10 -name "AlwaysDisplay" \
+                                            -labelalign center
+		
+	    $w(hdr_frame1a).listbox columnconfigure 11 -name "ResizeColumn" \
+                                            -labelalign center
+		
+
+
+    ea::db::updateHeaderWidTbl $w(hdr_frame1a).listbox Headers "Header_ID InternalHeaderName OutputHeaderName HeaderMaxLength DefaultWidth Highlight Widget DisplayOrder Required AlwaysDisplay ResizeColumn"
     
     
     ttk::scrollbar $w(hdr_frame1a).scrolly -orient v -command [list $w(hdr_frame1a).listbox yview]
@@ -307,6 +313,9 @@ proc eAssistSetup::Headers {{mode add} widTable} {
 	ttk::label $f1.txt6 -text [mc "Widgets"]
 	ttk::combobox $f1.06_cbox -values [list ttk::entry ttk::combobox] -state readonly -width 15
 	
+	ttk::label $f1.txt6a -text [mc "Display Order"]
+	ttk::entry $f1.06a_entry -validate all -validatecommand {eAssist_Global::validate %W %d %S -integer only}
+	
 	ttk::checkbutton $f1.07_ckbtn -text [mc "Required"] -variable tmp_headerOpts(07_ckbtn)
 	ttk::checkbutton $f1.08_ckbtn -text [mc "Always Display?"] -variable tmp_headerOpts(08_ckbtn)
 	ttk::checkbutton $f1.09_ckbtn -text [mc "Resize to string width"] -variable tmp_headerOpts(09_ckbtn)
@@ -331,9 +340,12 @@ proc eAssistSetup::Headers {{mode add} widTable} {
 	grid $f1.txt6 -column 0 -row 5 -padx 2p -pady 2p -sticky e
 	grid $f1.06_cbox -column 1 -row 5 -padx 2p -pady 2p -sticky w
 	
-	grid $f1.07_ckbtn -column 1 -row 6 -sticky w
-	grid $f1.08_ckbtn -column 1 -row 7 -sticky w
-	grid $f1.09_ckbtn -column 1 -row 8 -sticky w
+	grid $f1.txt6a -column 0 -row 6 -padx 2p -pady 2p -sticky e
+	grid $f1.06a_entry -column 1 -row 6 -padx 2p -pady 2p -sticky w
+	
+	grid $f1.07_ckbtn -column 1 -row 7 -sticky w
+	grid $f1.08_ckbtn -column 1 -row 8 -sticky w
+	grid $f1.09_ckbtn -column 1 -row 9 -sticky w
 	
 	## ---------
 	## Buttons
