@@ -93,8 +93,6 @@ proc customer::projSetup {{modify new}} {
                             -validate all \
                             -validatecommand [list AutoComplete::AutoComplete %W %d %v %P [customer::validateCustomer name $f1]]
 	
-    #ttk::button $f1.btn0 -width 3 -text "..." -command customer::manage
-	
     ttk::label $f1.txt1a -text [mc "Title"]
     ttk::entry $f1.entry1a -textvariable job(Title) -validate all \
                             -validatecommand {AutoComplete::AutoComplete %W %d %v %P [customer::returnTitle $job(CustID)]}
@@ -117,16 +115,37 @@ proc customer::projSetup {{modify new}} {
 	grid $f1.txt0	   -column 0 -row 0 -sticky nes -padx 3p -pady 3p
 	grid $f1.entry0a   -column 1 -row 0 -sticky w -padx 3p -pady 3p
 	grid $f1.entry0b   -column 2 -row 0 -sticky ew -padx 3p -pady 3p
-	#grid $f1.btn0      -column 3 -row 0 -sticky ew -padx 3p -pady 3p
     grid $f1.txt1a     -column 0 -row 1 -sticky nes -padx 3p -pady 3p
     grid $f1.entry1a   -column 1 -columnspan 2 -row 1 -sticky news -padx 3p -pady 3p
-    grid $f1.txt1      -column 0 -row 2 -sticky nes -padx 3p -pady 3p
-    grid $f1.cbox1     -column 1 -columnspan 2 -row 2 -sticky news -padx 3p -pady 3p
-    grid $f1.txt2      -column 0 -row 3 -sticky nes -padx 3p -pady 3p
-    grid $f1.entry2    -column 1 -columnspan 2 -row 3 -sticky news -padx 3p -pady 3p
-    grid $f1.txt3      -column 0 -row 4 -sticky nes -padx 3p -pady 3p
-    grid $f1.entry3    -column 1 -columnspan 2 -row 4 -sticky news -padx 3p -pady 3p
+    grid $f1.txt1      -column 0 -row 3 -sticky nes -padx 3p -pady 3p
+    grid $f1.cbox1     -column 1 -columnspan 2 -row 3 -sticky news -padx 3p -pady 3p
+    grid $f1.txt2      -column 0 -row 4 -sticky nes -padx 3p -pady 3p
+    grid $f1.entry2    -column 1 -columnspan 2 -row 4 -sticky news -padx 3p -pady 3p
+    grid $f1.txt3      -column 0 -row 5 -sticky nes -padx 3p -pady 3p
+    grid $f1.entry3    -column 1 -columnspan 2 -row 5 -sticky news -padx 3p -pady 3p
     
+    ## Frame 2 - Misc Information
+    ##
+    set f2 [ttk::labelframe .ps.f2 -text [mc "Misc. Information"] -padding 10]
+    pack $f2 -fill both -expand yes -padx 5p -pady 5p
+    
+    ttk::label $f2.txt1 -text [mc "Save Location"]
+    ttk::entry $f2.entry1 -textvariable job(SaveFileLocation)
+        tooltip::tooltip $f2.entry1 [mc "Location where you want to save this job."]
+    ttk::button $f2.btn1 -text [mc "..."] -width 3 -command {${log}::debug Save file location...}
+    
+    ttk::label $f2.txt2 -text [mc "Ship Date"]
+    ttk::entry $f2.entry2
+        tooltip::tooltip $f2.entry2 [mc "Enter the date that you want defaulted into all shipments - must be in MM/DD/YYYY format"]
+    
+    grid $f2.txt1     -column 0 -row 0 -sticky nes -pady 3p -pady 3p
+    grid $f2.entry1   -column 1 -row 0 -sticky ew -padx 3p -pady 3p
+    grid $f2.btn1     -column 3 -row 0 -sticky ew -padx 2p -pady 3p
+    grid $f2.txt2     -column 0 -row 1 -sticky nes -padx 3p -pady 3p
+    grid $f2.entry2   -column 1 -columnspan 2 -row 1 -sticky news -padx 3p -pady 3p
+    
+    ## Button Frame
+    ##
     set btnBar [ttk::frame .ps.btnBar -padding 10]
     pack $btnBar -anchor se ;#-padx 5p -pady 5p
     
