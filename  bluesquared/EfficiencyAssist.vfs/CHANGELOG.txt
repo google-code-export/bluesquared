@@ -1,9 +1,15 @@
 = Version 4.0.0 Beta 8 (March 2014)
 == Batch Maker
+* [NEW] Addresses are immediately inserted into the database upon importing files.
+* [NEW] If a version is not listed in an imported file, EA will automatically insert 'Version 1' (which is the default in EFI Monarch Planner)
+* [NEW] The display order of the columns are now configurable in SETUP.
 * [UPDATE] Log settings are now per user instead of globally
+* [UPDATE] Importing a file is now much faster than before.
+* [UPDATE] Some data cleansing happens upon importing a file. Quotes, Single Quotes, Slashes and Comma's are now automatically stripped out, and replaced with a space.
+* [UPDATE] Total Copies function now utilizes the sum() SQL command.
 
 == General
-* [UPDATE] Cursor selection in spreadsheet views behaves as expected due to an update in a supplied package. See the Development notes.
+* [UPDATE] Cursor selection in spreadsheet views now behaves as expected due to an update in a supplied package. See the Development notes.
 
 == Development
 * [UPDATE] Updated Tablelist from 5.11 to 5.13
@@ -12,11 +18,12 @@
 
 = Version 4.0.0 Beta 7 (February 2014)
 == Batch Maker
-* [UPDATE] Selecting a cell in the 'count' column will now select the entire row; selecting any cell not in the 'count' column will select single cells.
 * [NEW] Clicking on the headers will now sort the column.
 * [NEW] There is now a progress bar that appears after selecting 'IMPORT'.
-* [UPDATE] Records are added to the spreadsheet as soon as they are processed.
 * [NEW] Customers, Titles and CSRs are now saved in the database. You can View/Modify/Add Customers. Titles and CSR associations are automatically entered.
+* [UPDATE] Selecting a cell in the 'count' column will now select the entire row; selecting any cell not in the 'count' column will select single cells.
+* [UPDATE] Records are added to the spreadsheet as soon as they are processed.
+
 
 == Core
 * [NEW] DB integration has started, Packages/Containers are the first widgets to insert/pull data from the db.

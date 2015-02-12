@@ -55,8 +55,8 @@ proc importFiles::initVars {args} {
     #***
     global log headerParent headerAddress dist carrierSetup packagingSetup
 
-    set headerParent(headerList) [eAssist_db::dbSelectQuery -columnNames InternalHeaderName -table Headers]
-    set headerParent(headerList) [db eval "SELECT InternalHeaderName FROM Headers ORDER BY Header_ID"]
+    #set headerParent(headerList) [eAssist_db::dbSelectQuery -columnNames InternalHeaderName -table Headers]
+    set headerParent(headerList) [db eval "SELECT InternalHeaderName FROM Headers ORDER BY DisplayOrder"]
     set headerParent(whiteList) [eAssist_db::dbWhereQuery -columnNames InternalHeaderName -table Headers -where AlwaysDisplay=1]
     set headerParent(ColumnCount) [db eval "SELECT Count (Header_ID) from Headers"]
     
@@ -80,7 +80,6 @@ proc importFiles::initVars {args} {
     set packagingSetup(PackageType) [db eval "SELECT Package FROM Packages"]
 
 } ;# importFiles::initVars
-
 
 
 proc importFiles::readFile {fileName lbox} {
@@ -263,16 +262,8 @@ proc importFiles::processFile {win} {
         # Reset the entire interface
         eAssistHelper::resetImportInterface 2
     }
-
-    
-    # Ensure the 'count/OrderNumber' column is whitelisted
-    if {[lsearch $headerParent(whiteList) OrderNumber] == -1} {lappend headerParent(whiteList) OrderNumber}
-      
+ 
     set process(versionList) ""
-    
-    # Total number of columns
-    #set ColumnCount [$files(tab3f2).tbl columncount]
-    # Using headerParent(ColumnCount)
     
     # Index (i.e. 01, from 01_HeaderName)
     set FileHeaders [lsort [array names position]]
@@ -291,13 +282,17 @@ proc importFiles::processFile {win} {
     
     # Put the table headers in order ...
     if {[info exists newCol]} {unset newCol}
-    set cols [db eval "SELECT InternalHeaderName from Headers ORDER BY DisplayOrder"]
-    foreach col $cols {
+    foreach col $headerParent(headerList) {
         lappend newCol '$col'
     }
-    set newCol [join $newCol ,]
-    ${log}::debug Columns: $newCol
+    set job(db,ColOrder) [join $newCol ,]
 
+    # CREATE TEST DB
+    job::db::createDB SAGMED {Meredith Hunter} TEST001 Febraury 303603
+    
+    # This must be a balanced list
+    set replaceBadChars [list ' "" , " " / " " \\ " " \" " "]
+    
     foreach record $process(dataList) {
         # .. Skip over any 'blank' lines in found in the file
         if {[string is punc $record] == 1} {continue}
@@ -323,8 +318,8 @@ proc importFiles::processFile {win} {
            
             
             # Figure out if the listData contains more chars than allowed; at the same time set the highlight configuration if it does exceed the limits
-            set headerStringLength [join [eAssist_db::dbWhereQuery -columnNames HeaderMaxLength -table Headers -where InternalHeaderName='$ColumnName']]
-            set bgColor [join [eAssist_db::dbWhereQuery -columnNames Highlight -table Headers -where InternalHeaderName='$ColumnName']]
+            #set headerStringLength [join [eAssist_db::dbWhereQuery -columnNames HeaderMaxLength -table Headers -where InternalHeaderName='$ColumnName']]
+            #set bgColor [join [eAssist_db::dbWhereQuery -columnNames Highlight -table Headers -where InternalHeaderName='$ColumnName']]
 
             set tmpHeader [lindex $FileHeaders [lsearch -nocase $FileHeaders *$ColumnName]]
 
@@ -346,10 +341,9 @@ proc importFiles::processFile {win} {
 
                 # Create a default version if, a version isn't found in the file. Planner defaults to 'Version 1'.
                 if {[$files(tab3f2).tbl columncget $x -name] eq "Version"} {
-                    #${log}::debug Found Version Column!
-                    lappend newRow "Version 1"
+                    ${log}::debug Found Version Column!
+                    lappend newRowDB "'Version 1'"
                 } else {
-                    lappend newRow ""
                     lappend newRowDB ''
                 }
                 
@@ -375,68 +369,38 @@ proc importFiles::processFile {win} {
                 # Dynamically build the list of versions
                 # the switch args, must equal the internal header name
                 switch -nocase $ColumnName {
-                    company     {set listData [join [split $listData ,] ""] ;# remove all comma's}
-                    attention   {set listData [join [split $listData ,] ""] ;# remove all comma's}
-                    address1    {set listData [join [split $listData ,] ""] ;# remove all comma's}
-                    address2    {set listData [join [split $listData ,] ""] ;# remove all comma's}
-                    address3    {set listData [join [split $listData ,] ""] ;# remove all comma's}
-                    city        {set listData [join [split $listData ,] ""] ;# remove all comma's}
-                    state       {set listData [join [split $listData ,]] ;# remove all comma's}
-                    zip         {set listData [join [split $listData ,]] ;# remove all comma's}
+                    company     {set listData [string map $replaceBadChars $listData]}
+                    attention   {set listData [string map $replaceBadChars $listData]}
+                    address1    {set listData [string map $replaceBadChars $listData]}
+                    address2    {set listData [string map $replaceBadChars $listData]}
+                    address3    {set listData [string map $replaceBadChars $listData]}
+                    city        {set listData [string map $replaceBadChars $listData]}
+                    state       {set listData [string map $replaceBadChars $listData]}
+                    zip         {set listData [string map $replaceBadChars $listData]}
                     version    {
                                 # There is another instance of this above, to handle the case where the file may not have a version colum at all.
-                                if {$listData eq ""} {set listData "Version 1"} else {set listData [join [split $listData ,] ""] ;# remove all comma's}
+                                if {$listData eq ""} {set listData "Version 1"} else {set listData [string map $replaceBadChars $listData]}
                                 if {[lsearch $process(versionList) $listData] == -1} {
                                         lappend process(versionList) $listData
                                     }
                         }
-                    default     {}
-                }
-                
-                if {[string length $listData] > $headerStringLength} {
-                    #${log}::debug List: $listData - Length: [string length $listData]
-                    lappend maxCharColumn $x
-                    
-                    #OLD set bgColor [lindex $headerParams($ColumnName) 3]
-                    
-                    if {$bgColor != ""} {
-                        set backGround $bgColor
-                    } else {
-                        set backGround yellow ;# default
-                    }
-                }
-                
-                
+                    default     {set listData [string map $replaceBadChars $listData]}
+                }               
+                set listData [string trim $listData]
                 # Create the list of values
-                lappend newRow $listData
                 lappend newRowDB '$listData'
-                ${log}::debug INSERT into DB Column: $ColumnName - $listData
-                #${log}::debug Position: [llength $newRow]
-                    
                 }
-            #${log}::debug NewRow: $newRow
-
         }
-        $files(tab3f2).tbl insert end $newRow
-        #${log}::debug Raw Record: $record
-        #${log}::debug Record: $newRow
+
         # insert data into the db
+        ${log}::debug INSERT INTO Addresses ($job(db,ColOrder)) VALUES ([join $newRowDB ,])
+        $job(db,Name) eval "INSERT INTO Addresses ($job(db,ColOrder)) VALUES ([join $newRowDB ,])"
 
-        #${log}::debug INSERT INTO Addresses ($newCol) VALUES ([join $newRowDB ,])
-        $job(db,Name) eval "INSERT INTO Addresses ($newCol) VALUES ([join $newRowDB ,])"
-        
-        if {[info exists maxCharColumn] == 1} {
-            foreach column $maxCharColumn {
-                $files(tab3f2).tbl cellconfigure end,$column -bg $backGround
-            }
-        unset maxCharColumn
-        }
         
         # Update Progress Bar ...
         $::gwin(importpbar) step 1
         ${log}::debug Updating Progress Bar - [$::gwin(importpbar) cget -value]
-        
-        unset newRow
+
         unset newRowDB
         set x 0
         update
@@ -454,12 +418,14 @@ proc importFiles::processFile {win} {
     IFMenus::createToggleMenu $files(tab3f2).tbl
     
     # Get total copies
-    set job(TotalCopies) [eAssistHelper::calcSamples $files(tab3f2).tbl [$files(tab3f2).tbl columncget Quantity -name]]
+    ## TEMP
+    #set job(TotalCopies) [eAssistHelper::calcSamples $files(tab3f2).tbl [$files(tab3f2).tbl columncget Quantity -name]]
+    set job(TotalCopies) [$job(db,Name) eval "SELECT COUNT(Quantity) FROM Addresses"]
     
     ## Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
     if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
         $files(tab3f2).tbl insertcolumns 0 0 "..."
-        $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -showlinenumbers 1 -labelalign center
+        $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center
     }
     
     # Enable menu items
@@ -468,8 +434,80 @@ proc importFiles::processFile {win} {
     # Destroy the progress bar window
     eAssistHelper::importProgBar destroy
     
+    # Insert the data into the tablelist widget ...
+    set totalRows [$job(db,Name) eval "SELECT COUNT(*) FROM Addresses"]
+    
+    for {set x 1} {$x <= $totalRows} {incr x} {
+        $files(tab3f2).tbl insert end [$job(db,Name) eval "select * FROM Addresses where ROWID=$x"]
+    }
+    
+    importFiles::highlightAllRecords $files(tab3f2).tbl
     #${log}::debug --END-- [info level 1]
 } ;# importFiles::processFile
+
+
+proc importFiles::highlightAllRecords {tbl} {
+    #****f* highlightAllRecords/importFiles
+    # CREATION DATE
+    #   02/11/2015 (Wednesday Feb 11)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   importFiles::highlightAllRecords tbl 
+    #
+    # FUNCTION
+    #	Cycles through the tablelist widget, and highlights all records that exceed our max string length. See Setup/Headers
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    ## Master loop - increments through the Columns
+    # Retrieve total number of columns
+    #set columnCount [expr {[$tbl columncount] - 1}] ;# when using this we start at 0, so we need to reduce this count by 1.
+    set columnCount [$tbl columncount]
+    for {set x 0} {$columnCount > $x} {incr x} {
+        #puts $x
+        set colName [$tbl columncget $x -name]
+        set maxLength [db eval "SELECT HeaderMaxLength FROM Headers where InternalHeaderName='$colName'"]
+        set backGround [join [db eval "SELECT Highlight FROM Headers where InternalHeaderName='$colName'"]]
+        if {$backGround eq ""} {set backGround yellow} ;# Default to yellow if nothing was customized.
+        
+        if {$maxLength eq ""} {continue} ;# Skip if we haven't set a value
+        
+        # Retrieve column data
+        set colData [$tbl getcolumns $x]
+        set i_row 0
+        foreach item $colData {
+            if {[string length $item] > $maxLength} {
+                $tbl cellconfigure $i_row,$x -bg $backGround
+                #puts "$tbl cellconfigure $i_row,$x -bg $backGround"
+                #puts "Name: $colName _ $maxLength _ DATA: $item index: $i_row,$x"
+            }
+            incr i_row
+        }
+    }
+
+    
+} ;# importFiles::highlightAllRecords $files(tab3f2).tbl
 
 
 proc importFiles::startCmd {tbl row col text} {
@@ -499,7 +537,7 @@ proc importFiles::startCmd {tbl row col text} {
     #
     #***
     global log dist carrierSetup job process packagingSetup
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     set w [$tbl editwinpath]
     
     set colName [$tbl columncget $col -name]
@@ -511,7 +549,7 @@ proc importFiles::startCmd {tbl row col text} {
             version              {
                                 $w configure -values $process(versionList)
                                 set process(startTblText) $text
-                                ${log}::debug StartCmd: $process(startTblText)
+                                #${log}::debug StartCmd: $process(startTblText)
             }
             ShipVia             {
                                 $w configure -values $carrierSetup(ShipViaName) -state readonly
@@ -548,7 +586,7 @@ proc importFiles::startCmd {tbl row col text} {
 
     #if {$idx != -1} {}
     if {[string length $text] > $stringLength} {
-        ${log}::debug length [string length $text]
+        #${log}::debug length [string length $text]
             
         if {$bgColor != ""} {
             set backGround $bgColor
@@ -561,11 +599,16 @@ proc importFiles::startCmd {tbl row col text} {
     }
     # Update the internal list with the current text so that we can run calculations on it.
     $tbl cellconfigure $row,$col -background $backGround
+    #set rowData [$tbl get $row $row]
+    #set colHeaders [$job(db,Name) eval "SELECT job(db,ColOrder) FROM Addresses ]
+    
+    #${log}::debug START CMD: ROW DATA: $rowData
+
 
         
     return $text
     
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;#importFiles::startCmd
 
 
@@ -595,7 +638,7 @@ proc importFiles::endCmd {tbl row col text} {
     #
     #***
     global log headerParams headerParent files process job
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
     set colName [$tbl columncget $col -name]
     set updateCount 0
@@ -605,8 +648,8 @@ proc importFiles::endCmd {tbl row col text} {
                     if {$text == ""} {
                         set newItem [lsearch $process(versionList) $process(startTblText)]
                         set process(versionList) [lreplace $process(versionList) $newItem $newItem]
-                        ${log}::debug Text is: $text
-                        ${log}::debug $process(startTblText) should be removed from the list: $process(versionList)
+                        #${log}::debug Text is: $text
+                        #${log}::debug $process(startTblText) should be removed from the list: $process(versionList)
                     }
                     
                     if {[lsearch $process(versionList) $text] == -1} {
@@ -630,13 +673,17 @@ proc importFiles::endCmd {tbl row col text} {
     }
     
     $tbl cellconfigure $row,$col -text $text
+    # Update the DB
+    ${log}::debug ROWID: [$tbl getcell $row,0]
+    $job(db,Name) eval "UPDATE Addresses SET $colName='$text' WHERE addr_ID=[$tbl getcell $row,0]"
+    
+    # insert updated data into the DB
+    ${log}::debug END CMD: db UPDATE: COLUMN $col ROW: $row TEXT: $text
     
     set stringLength [eAssist_db::dbWhereQuery -columnNames HeaderMaxLength -table Headers -where InternalHeaderName='$colName']
     set bgColor [join [eAssist_db::dbWhereQuery -columnNames Highlight -table Headers -where InternalHeaderName='$colName']]
 
-    if {[string length $text] > $stringLength} {
-        ${log}::debug length [string length $text]
-            
+    if {[string length $text] > $stringLength} {            
         if {$bgColor != ""} {
             set backGround $bgColor
         } else {
@@ -644,18 +691,16 @@ proc importFiles::endCmd {tbl row col text} {
             set backGround yellow
         }
     } else {
-        set backGround SystemWindow
+        set backGround ""
     }
     
     # Update the internal list with the current text so that we can run calculations on it.
     $tbl cellconfigure $row,$col -background $backGround
 
-    if {$updateCount == 1} {
-        set job(TotalCopies) [eAssistHelper::calcSamples $tbl $col]
-    }
+    set job(TotalCopies) [$job(db,Name) eval "SELECT COUNT(Quantity) FROM Addresses"]
     
 	return $text
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# importFiles::endCmd
 
 
@@ -704,7 +749,7 @@ proc importFiles::insertColumns {tbl} {
         
         
         ## Query Headers table for values, then issue the columnconfigure command.
-        # Setting the color to red if it is a required column.
+        # Setting the label text color to red if it is a required column.
         set reqCol [lindex $headerConfig 1]
         
         if {$reqCol == 1} {
