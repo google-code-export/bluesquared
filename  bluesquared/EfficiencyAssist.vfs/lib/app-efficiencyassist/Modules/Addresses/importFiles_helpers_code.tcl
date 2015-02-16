@@ -320,7 +320,7 @@ proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
     #
     # FUNCTION
     #	Insert values set through the GUI into selected cells.
-	#	Type can be; -menu or -window.
+	#	Type can be; -menu or -window, -hotkey.
 	#	Orient - V (Vertical) or H (Horizontal)
     #
     # SYNOPSIS
@@ -337,7 +337,7 @@ proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
     # SEE ALSO
     #
     #***
-    global log files txtVariable w copy
+    global log files txtVariable w copy job
 	# 'Inserting {{Brent Olsen} {Janet Esfeld} {Noni Wiggin}} into .container.frame0.nbk.f3.nb.f1.f2.tbl - 0,0'
 	
 	
@@ -348,7 +348,8 @@ proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
 	
 	if {$type eq "-window"} {
 		foreach val $cells {
-			${log}::debug Inserting $txtVar into $tbl - $val - $cells
+			#${log}::debug Window Inserting $txtVar into $tbl - $val - $cells
+			#${log}::debug Window MULTIPLE CELLS: $txtVar - cells: $cells
 			#${log}::debug Selected Cells: [$tbl curcellselection]
 			
 			#if {[llength $txtVar] != 1} {}
@@ -356,27 +357,32 @@ proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
 				# Pasting multiple cells
 				#foreach item $txtVar cell [$tbl curcellselection] {} ;# pasting into highlighted cells only
 				foreach cell $cells {
-					${log}::debug Inserting $txtVar - $cell
-					$tbl cellconfigure $cell -text $txtVar
+					#${log}::debug Column Name: [$tbl columncget [lindex [split $cell ,] end] -name]
+					#${log}::debug Window Multiple Inserting $txtVar - $cell
+					#$tbl cellconfigure $cell -text $txtVar
+					#set colName [$tbl columncget [lindex [split $cell ,] end] -name]
+					job::db::write $job(db,Name) Addresses $txtVar $tbl $cell
 				}
 			} else {
 				# Pasting a single cell
-				${log}::debug Inserting $txtVar - $cells
+				#${log}::debug Window SINGLE CELL: $txtVar - $cells
 				#$tbl cellconfigure $val -text $txtVar
-				$tbl cellconfigure $cells -text $txtVar
+				#$tbl cellconfigure $cells -text $txtVar
+				job::db::write $job(db,Name) Addresses $txtVar $tbl $cells
 			}
 		}
 	} elseif {$type eq "-menu"} {
 		if {$copy(cellsCopied) >= 2} {
 			# Pasting multiple cells
-			${log}::debug Values: $txtVar - cells: $cells
+			#${log}::debug Menu MULTIPLE CELLS: $txtVar - cells: $cells
 			#foreach item $txtVar cell [$tbl curcellselection] {} ;# pasting into highlighted cells only
 			set incrCells [lindex [split $cells ,] 0]
 			set incrCol [lindex [split $cells ,] 1]
 			
 			foreach item $txtVar cell $cells {
 				#${log}::debug Inserting $item - $incrCells,$incrCol
-				$tbl cellconfigure $incrCells,$incrCol -text $item
+				#$tbl cellconfigure $incrCells,$incrCol -text $item
+				job::db::write $job(db,Name) Addresses $item $tbl $incrCells,$incrCol
 				
 				if {$copy(orient) eq "Vertical"} {
 					set incrCells [incr incrCells]
@@ -391,34 +397,37 @@ proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
 			}
 		} elseif {[llength $cells] > 1} {
 			# We may copy one cell, but want to paste it multiple times
-			${log}::debug MULTIPLE CELLS were selected, we only have $txtVar to paste!
+			#${log}::debug MULTIPLE CELLS were selected, we only have $txtVar to paste!
 			foreach cell $cells {
-				${log}::debug $tbl cellconfigure $cell -text $txtVar
-				$tbl cellconfigure $cell -text $txtVar
+				#${log}::debug $tbl cellconfigure $cell -text $txtVar
+				#$tbl cellconfigure $cell -text $txtVar
+				job::db::write $job(db,Name) Addresses $txtVar $tbl $cell
 			}
 			
 		} else {
 			# Pasting a single cell
-			${log}::debug Inserting $txtVar - $cells
-			$tbl cellconfigure $cells -text $txtVar
+			#${log}::debug Menu SINGLE CELL: $txtVar - $cells
+			#$tbl cellconfigure $cells -text $txtVar
+			job::db::write $job(db,Name) Addresses $txtVar $tbl $cells
 		}
 	} elseif {$type eq "-hotkey"} {
 			if {$copy(orient) eq "Vertical"} {
-				set txtVar [split $txtVar \n]
+				set txtVar [join [split $txtVar \n]]
 			} else {
-				set txtVar [split $txtVar \t]
+				set txtVar [join [split $txtVar \t]]
 		}
 		
 		if {$copy(cellsCopied) >= 2} {
 			# Pasting multiple cells
-			#${log}::debug Values: $txtVar - cells: $cells
+			#${log}::debug Hotkey MULTIPLE CELLS: $txtVar - cells: $cells
 			#foreach item $txtVar cell [$tbl curcellselection] {} ;# pasting into highlighted cells only
 			set incrCells [lindex [split $cells ,] 0]
 			set incrCol [lindex [split $cells ,] 1]
 			
 			foreach item $txtVar cell $cells {
 				#${log}::debug Inserting $item - $incrCells,$incrCol
-				$tbl cellconfigure $incrCells,$incrCol -text $item
+				#$tbl cellconfigure $incrCells,$incrCol -text $item
+				job::db::write $job(db,Name) Addresses $item $tbl $incrCells,$incrCol
 				
 				if {$copy(orient) eq "Vertical"} {
 					set incrCells [incr incrCells]
@@ -433,15 +442,13 @@ proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
 			}
 		} else {
 			# Pasting a single cell
-			#${log}::debug Inserting $txtVar - $cells
-			$tbl cellconfigure $cells -text $txtVar
+			#${log}::debug Hotkey SINGLE CELL: $txtVar - $cells
+			#$tbl cellconfigure $cells -text $txtVar
+			job::db::write $job(db,Name) Addresses $txtVar $tbl $cells
 		}
 		
 	}
-	
 
-
-	
 } ;# eAssistHelper::insValuesToTableCells
 
 
@@ -496,23 +503,83 @@ proc eAssistHelper::multiCells {} {
 } ;# eAssistHelper::multiCells
 
 
-proc eAssistHelper::fillCountry {} {
-    #****f* fillCountry/eAssistHelper
+#proc eAssistHelper::fillCountry {} {
+#    #****f* fillCountry/eAssistHelper
+#    # CREATION DATE
+#    #   10/30/2014 (Thursday Oct 30)
+#    #
+#    # AUTHOR
+#    #	Casey Ackels
+#    #
+#    # COPYRIGHT
+#    #	(c) 2014 Casey Ackels
+#    #   
+#    #
+#    # SYNOPSIS
+#    #   eAssistHelper::fillCountry  
+#    #
+#    # FUNCTION
+#    #	Fills the country column with the correct country
+#    #   
+#    #   
+#    # CHILDREN
+#    #	N/A
+#    #   
+#    # PARENTS
+#    #   
+#    #   
+#    # NOTES
+#    #   
+#    #   
+#    # SEE ALSO
+#    #   
+#    #   
+#    #***
+#    global log
+#
+#    set rowCount [$files(tab3f2).tbl size]
+#	set colCount [expr {[$files(tab3f2).tbl columncount] - 1}]
+#	
+#	# Find the country column
+#	for {set x 0} {$colCount >= $x} {incr x} {
+#		set colName [string tolower [$files(tab3f2).tbl columncget $x -name]]
+#		switch -nocase $colName {
+#			state		{set colStateIdx $x}
+#			zip			{set colZipIdx $x}
+#			country		{set colCountryIdx $x}
+#		}
+#	}
+#	
+#	for {set x 0} {$rowCount > $x} {incr x} {
+#		# row,col
+#		#${log}::debug Zip Codes: [$files(tab3f2).tbl cellcget $x,$colZipIdx -text]
+#		#set zip3 [string range [$files(tab3f2).tbl cellcget $x,$colZipIdx -text] 0 2]
+#		
+#		# Ensure the state value matches the Zip
+#		
+#	}
+#    
+#} ;# eAssistHelper::fillCountry
+
+
+proc eAssistHelper::checkProjSetup {} {
+    #****f* checkProjSetup/eAssistHelper
     # CREATION DATE
-    #   10/30/2014 (Thursday Oct 30)
+    #   02/13/2015 (Friday Feb 13)
     #
     # AUTHOR
     #	Casey Ackels
     #
     # COPYRIGHT
-    #	(c) 2014 Casey Ackels
+    #	(c) 2015 Casey Ackels
     #   
     #
     # SYNOPSIS
-    #   eAssistHelper::fillCountry  
+    #   eAssistHelper::checkProjSetup  
     #
     # FUNCTION
-    #	Fills the country column with the correct country
+    #	Check's to make sure we have created a project, if we haven't. Warn the user, and allow them to launch Project Setup
+	#	Returns 1, and launches the message. When using, check to see if we return 1, stop processing whatever proc called this one.
     #   
     #   
     # CHILDREN
@@ -528,28 +595,21 @@ proc eAssistHelper::fillCountry {} {
     #   
     #   
     #***
-    global log
+    global log job
+	
+	foreach topic {Title Name Number} {
+		if {$job($topic) eq ""} {incr i}
+	}
 
-    set rowCount [$files(tab3f2).tbl size]
-	set colCount [expr {[$files(tab3f2).tbl columncount] - 1}]
-	
-	# Find the country column
-	for {set x 0} {$colCount >= $x} {incr x} {
-		set colName [string tolower [$files(tab3f2).tbl columncget $x -name]]
-		switch -nocase $colName {
-			state		{set colStateIdx $x}
-			zip			{set colZipIdx $x}
-			country		{set colCountryIdx $x}
-		}
+	if {[info exists i]} {
+		${log}::debug The Project has not yet been set up yet, would you like to do it now?
+		set answer [tk_messageBox -message [mc "Oops, we're missing information about the job."] \
+						-icon question -type yesno \
+						-detail [mc "Would you like to go to the Project Setup window?"]]
+				switch -- $answer {
+						yes {customer::projSetup}
+						no {}
+				}
+		return 1
 	}
-	
-	for {set x 0} {$rowCount > $x} {incr x} {
-		# row,col
-		#${log}::debug Zip Codes: [$files(tab3f2).tbl cellcget $x,$colZipIdx -text]
-		#set zip3 [string range [$files(tab3f2).tbl cellcget $x,$colZipIdx -text] 0 2]
-		
-		# Ensure the state value matches the Zip
-		
-	}
-    
-} ;# eAssistHelper::fillCountry
+} ;# eAssistHelper::checkProjSetup

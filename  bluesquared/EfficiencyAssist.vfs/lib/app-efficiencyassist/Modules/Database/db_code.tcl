@@ -857,3 +857,43 @@ proc eAssist_db::leftOuterJoin {args} {
     db eval "SELECT $cols FROM $dbTable LEFT OUTER JOIN $jdbTable WHERE $whereStmt"
 
 } ;# eAssist_db::leftOuterJoin
+
+proc ea::db::countQuantity {db dbTbl} {
+    #****f* countQuantity/ea::db
+    # CREATION DATE
+    #   02/15/2015 (Sunday Feb 15)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::db::countQuantity  
+    #
+    # FUNCTION
+    #	Counts the Quantity column, and trims off the .0 which is returned by sum(*)
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    set qty [string trim [$db eval "SELECT SUM(Quantity) FROM $dbTbl"] .0]
+
+    return $qty
+    
+} ;# ea::db::countQuantity

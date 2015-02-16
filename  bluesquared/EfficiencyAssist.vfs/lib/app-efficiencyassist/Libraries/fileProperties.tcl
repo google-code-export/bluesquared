@@ -66,7 +66,7 @@ proc eAssist_Global::folderAccessibility {path} {
         set fileRead 1
 
     } else {
-        console show
+        #console show
         ${log}::critical -FAIL- $path is not readable ...
     }
     
@@ -75,7 +75,7 @@ proc eAssist_Global::folderAccessibility {path} {
         ${log}::notice -PASS- $path folder is writable ...
         set fileWrite 2
     } else {
-        console show
+        #console show
         ${log}::critical -FAIL- $path is not writable ...
     }
     

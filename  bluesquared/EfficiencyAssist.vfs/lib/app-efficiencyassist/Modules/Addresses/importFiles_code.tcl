@@ -286,9 +286,6 @@ proc importFiles::processFile {win} {
         lappend newCol '$col'
     }
     set job(db,ColOrder) [join $newCol ,]
-
-    # CREATE TEST DB
-    job::db::createDB SAGMED {Meredith Hunter} TEST001 Febraury 303603
     
     # This must be a balanced list
     set replaceBadChars [list ' "" , " " / " " \\ " " \" " "]
@@ -412,16 +409,7 @@ proc importFiles::processFile {win} {
     if {[info exists process(versionList)]} {
         set process(origVersionList) $process(versionList)
     }
-    
-    # Initialize popup menus
-    IFMenus::tblPopup $files(tab3f2).tbl browse .tblMenu
-    IFMenus::createToggleMenu $files(tab3f2).tbl
-    
-    # Get total copies
-    ## TEMP
-    #set job(TotalCopies) [eAssistHelper::calcSamples $files(tab3f2).tbl [$files(tab3f2).tbl columncget Quantity -name]]
-    set job(TotalCopies) [$job(db,Name) eval "SELECT COUNT(Quantity) FROM Addresses"]
-    
+
     ## Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
     if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
         $files(tab3f2).tbl insertcolumns 0 0 "..."
@@ -431,17 +419,26 @@ proc importFiles::processFile {win} {
     # Enable menu items
     importFiles::enableMenuItems
     
+    # Insert the data into the tablelist widget ...
+    set totalRows [$job(db,Name) eval "SELECT COUNT(*) FROM Addresses"]
+    #${log}::debug TotalRows: $totalRows
+    
+    for {set x 1} {$x <= $totalRows} {incr x} {
+        #${log}::debug Inserting record $x
+        $files(tab3f2).tbl insert end [$job(db,Name) eval "SELECT * FROM Addresses where ROWID=$x"]
+    }
+    
+    # Get total copies
+    set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
+    
+    importFiles::highlightAllRecords $files(tab3f2).tbl
+    
     # Destroy the progress bar window
     eAssistHelper::importProgBar destroy
     
-    # Insert the data into the tablelist widget ...
-    set totalRows [$job(db,Name) eval "SELECT COUNT(*) FROM Addresses"]
-    
-    for {set x 1} {$x <= $totalRows} {incr x} {
-        $files(tab3f2).tbl insert end [$job(db,Name) eval "select * FROM Addresses where ROWID=$x"]
-    }
-    
-    importFiles::highlightAllRecords $files(tab3f2).tbl
+    # Initialize popup menus
+    IFMenus::tblPopup $files(tab3f2).tbl browse .tblMenu
+    IFMenus::createToggleMenu $files(tab3f2).tbl
     #${log}::debug --END-- [info level 1]
 } ;# importFiles::processFile
 
@@ -595,17 +592,11 @@ proc importFiles::startCmd {tbl row col text} {
             set backGround yellow
         }
     } else {
-        set backGround SystemWindow
+        set backGround ""
     }
     # Update the internal list with the current text so that we can run calculations on it.
     $tbl cellconfigure $row,$col -background $backGround
-    #set rowData [$tbl get $row $row]
-    #set colHeaders [$job(db,Name) eval "SELECT job(db,ColOrder) FROM Addresses ]
     
-    #${log}::debug START CMD: ROW DATA: $rowData
-
-
-        
     return $text
     
     #${log}::debug --END-- [info level 1]
@@ -641,7 +632,7 @@ proc importFiles::endCmd {tbl row col text} {
     #${log}::debug --START-- [info level 1]
     
     set colName [$tbl columncget $col -name]
-    set updateCount 0
+    #set updateCount 0
     
     switch -nocase $colName {
         version  {# Add $text to list of versions if that version doesn't exist (i.e. user created a new version)
@@ -668,22 +659,19 @@ proc importFiles::endCmd {tbl row col text} {
                         $tbl rejectinput
                         return
                     }
-                    set updateCount 1                    
+                    #set updateCount 1                    
         }
     }
     
-    $tbl cellconfigure $row,$col -text $text
-    # Update the DB
-    ${log}::debug ROWID: [$tbl getcell $row,0]
-    $job(db,Name) eval "UPDATE Addresses SET $colName='$text' WHERE addr_ID=[$tbl getcell $row,0]"
-    
-    # insert updated data into the DB
-    ${log}::debug END CMD: db UPDATE: COLUMN $col ROW: $row TEXT: $text
+    #$tbl cellconfigure $row,$col -text $text
+    # Update the widget and DB
+    job::db::write $job(db,Name) Addresses $text $tbl $row,$col $colName
+
     
     set stringLength [eAssist_db::dbWhereQuery -columnNames HeaderMaxLength -table Headers -where InternalHeaderName='$colName']
     set bgColor [join [eAssist_db::dbWhereQuery -columnNames Highlight -table Headers -where InternalHeaderName='$colName']]
 
-    if {[string length $text] > $stringLength} {            
+    if {[string length $text] > $stringLength} { 
         if {$bgColor != ""} {
             set backGround $bgColor
         } else {
@@ -691,13 +679,13 @@ proc importFiles::endCmd {tbl row col text} {
             set backGround yellow
         }
     } else {
+        # Resets the bg to the correct striping if the length is equal or less than max value.
         set backGround ""
     }
-    
-    # Update the internal list with the current text so that we can run calculations on it.
+
     $tbl cellconfigure $row,$col -background $backGround
 
-    set job(TotalCopies) [$job(db,Name) eval "SELECT COUNT(Quantity) FROM Addresses"]
+    set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
     
 	return $text
     #${log}::debug --END-- [info level 1]
@@ -812,75 +800,75 @@ proc importFiles::enableMenuItems {} {
 } ;# importFiles::enableMenuItems
 
 
-proc importFiles::detectCountry {l_line state idxZip} {
-    #****f* detectCountry/importFiles
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2011-2014 Casey Ackels
-    #
-    # FUNCTION
-    #	Detect if the state exists in the US, if it doesn't look at the zip code. Ultimately, either inserting the country ISO code or highlighting the Country field
-    #
-    # SYNOPSIS
-    #
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	
-    #
-    # NOTES
-    #   $l_line = the entire row of data being read in.
-    #
-    # SEE ALSO
-    #
-    #***
-    global log L_states L_countryCodes
-    ${log}::debug --START-- [info level 1]
-    
-    set domestic yes
-    set zip [string trim [lindex $l_line $idxZip]]
-    
-    ${log}::debug State-Zip: $state - $zip
-    ${log}::debug US State? [lsearch -nocase $L_states(US) $state]
-    
-    if {[lsearch -nocase $L_states(US) $state] == -1} {
-        ${log}::debug State not found - $state
-        set domestic no
-    }
-    
-    if {$domestic eq "no"} {
-        # Check for common abbreviations for canada, mexico and japan
-        if {[lsearch -nocase $L_countryCodes $state] == -1} {
-            ${log}::debug State/Country not found - $state - lets look at zip codes.
-        } else {
-            ${log}::debug State was found: $state
-            set domestic yes
-        }
-        
-        # Check the zip code
-        # USA Zip Codes [zip+4], each state starts with a 0-9.
-        for {set x 0} {$x < 10} {incr x} {
-            if {[string first $x $zip 0] == 0} {
-                ${log}::debug Zip code exists in the USA: $zip
-                set domestic yes
-                break
-            }
-        }
-    }
-    
-    # If it still isn't domestic, lets try to find the country
-    if {$domestic eq "no"} {
-        # Canadian format A1A 1A1
-        # Look at length - must be 6 chars
-        ${log}::debug length [llength $zip]
-        ${log}::debug alphanum? [string is alnum [string range $zip 0 2]]
-        ${log}::debug Non-US Zip code: $zip
-    }
-    
-	
-    ${log}::debug --END-- [info level 1]
-} ;# importFiles::detectCountry
+#proc importFiles::detectCountry {l_line state idxZip} {
+#    #****f* detectCountry/importFiles
+#    # AUTHOR
+#    #	Casey Ackels
+#    #
+#    # COPYRIGHT
+#    #	(c) 2011-2014 Casey Ackels
+#    #
+#    # FUNCTION
+#    #	Detect if the state exists in the US, if it doesn't look at the zip code. Ultimately, either inserting the country ISO code or highlighting the Country field
+#    #
+#    # SYNOPSIS
+#    #
+#    #
+#    # CHILDREN
+#    #	N/A
+#    #
+#    # PARENTS
+#    #	
+#    #
+#    # NOTES
+#    #   $l_line = the entire row of data being read in.
+#    #
+#    # SEE ALSO
+#    #
+#    #***
+#    global log L_states L_countryCodes
+#    ${log}::debug --START-- [info level 1]
+#    
+#    set domestic yes
+#    set zip [string trim [lindex $l_line $idxZip]]
+#    
+#    ${log}::debug State-Zip: $state - $zip
+#    ${log}::debug US State? [lsearch -nocase $L_states(US) $state]
+#    
+#    if {[lsearch -nocase $L_states(US) $state] == -1} {
+#        ${log}::debug State not found - $state
+#        set domestic no
+#    }
+#    
+#    if {$domestic eq "no"} {
+#        # Check for common abbreviations for canada, mexico and japan
+#        if {[lsearch -nocase $L_countryCodes $state] == -1} {
+#            ${log}::debug State/Country not found - $state - lets look at zip codes.
+#        } else {
+#            ${log}::debug State was found: $state
+#            set domestic yes
+#        }
+#        
+#        # Check the zip code
+#        # USA Zip Codes [zip+4], each state starts with a 0-9.
+#        for {set x 0} {$x < 10} {incr x} {
+#            if {[string first $x $zip 0] == 0} {
+#                ${log}::debug Zip code exists in the USA: $zip
+#                set domestic yes
+#                break
+#            }
+#        }
+#    }
+#    
+#    # If it still isn't domestic, lets try to find the country
+#    if {$domestic eq "no"} {
+#        # Canadian format A1A 1A1
+#        # Look at length - must be 6 chars
+#        ${log}::debug length [llength $zip]
+#        ${log}::debug alphanum? [string is alnum [string range $zip 0 2]]
+#        ${log}::debug Non-US Zip code: $zip
+#    }
+#    
+#	
+#    ${log}::debug --END-- [info level 1]
+#} ;# importFiles::detectCountry
