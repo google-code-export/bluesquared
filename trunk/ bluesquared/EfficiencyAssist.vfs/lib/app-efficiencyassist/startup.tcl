@@ -310,8 +310,11 @@ proc 'eAssist_initVariables {} {
 	
 	array set job [list CustName "" \
 				   CustID "" \
+				   CSRName "" \
 				   Title "" \
-				   CSRName ""]
+				   Name "" \
+				   Number "" \
+				   SaveFileLocation ""]
 	
 	# Filters
 	array set filter [list run,stripASCII_CC 1 \
@@ -586,28 +589,3 @@ vUpdate::saveCurrentVersion
 
 # Start the GUI
 eAssist::parentGUI
-
-
-#package require tablelist
-#
-#tablelist::tablelist .tbl \
-#-columns { 0 Col1 \
-#0 Col2 \
-#0 Col3 \
-#0 Col4 \
-#0 Col5} \
-#-editselectedonly 1 \
-#-selectmode extended \
-#-selecttype cell
-#
-#.tbl columnconfigure 0 -editable yes
-#
-#.tbl insert end "Test1 Test2 Test3 Test4 Test5"
-#.tbl insert end "Test1 Test2 Test3 Test4 Test5"
-#.tbl insert end "Test1 Test2 Test3 Test4 Test5"
-#.tbl insert end "Test1 Test2 Test3 Test4 Test5"
-#.tbl insert end "Test1 Test2 Test3 Test4 Test5"
-#
-#pack .tbl
-#
-#puts [.tbl puts [.tbl curcellselection]]

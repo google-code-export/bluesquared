@@ -229,7 +229,8 @@ proc eAssist_Global::OpenFile {title initDir type args} {
     #   e.g. set file [eAssist_Global::OpenFile [mc "Pick File"] [pwd] file *.exe]
     #
     # SYNOPSIS
-    #	eAssist_Global::OpenFile <title> <initDir> <file|dir> <args(fileExtension)>
+    #	eAssist_Global::OpenFile <title> <initDir> <file|dir> ?fileExtension? ?File Type?
+	#	eAssist_Global::OpenFile [mc "Select Directory"] $mySettings(Home) dir 
     #
     # CHILDREN
     #	
@@ -244,25 +245,39 @@ proc eAssist_Global::OpenFile {title initDir type args} {
     #
     #***
 	global log
+	
+	# Set the defaults first, if the programmer specified values, the defaults will be overwritten
+	set ext .db
+	set ftype {
+		{Efficiency Assist Project} {.db}
+	}
+	
+	foreach {item value} $args {
+		switch -- $item {
+			-ext		{set ext $value}
+			-filetype	{set ftype [list $value]}
+		}
+	}
 
     if {$type eq "file"} {
         set filename [tk_getOpenFile \
                       -parent . \
                       -title $title \
                       -initialdir $initDir \
-                      -defaultextension $args]
+                      -defaultextension $ext \
+					  -filetypes $ftype]
     } else {
         set filename [tk_chooseDirectory \
                 -parent . \
                 -title $title \
                 -initialdir $initDir -title $title]
         }
-
+	
     # If we do not select a file name, and cancel out of the dialog, do not produce an error.
     if {$filename eq ""} {return}
 
-	${log}::debug filename: $filename
-    return $filename
+	${log}::debug filename: "$filename"
+    return "$filename"
 
 } ;# eAssist_Global::OpenFile
 
@@ -696,6 +711,51 @@ proc ea::tools::populateListbox {modify entryWid lBoxWid dbTable dbCol} {
 
     ${log}::debug --END-- [info level 1]
 } ;# ea::tools::populateListbox
+
+
+proc ea::tools::formatFileName {} {
+    #****f* formatFileName/ea::tools
+    # CREATION DATE
+    #   02/13/2015 (Friday Feb 13)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::tools::formatFileName  
+    #
+    # FUNCTION
+    #	Returns the formatted file name
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log mySettings job
+
+    set fileName $mySettings(job,fileName)
+    foreach item {Title Name Number} {
+        set item2 [string tolower $item]
+        #puts [string map [list %$item2 $job($item)] $mySettings(job,fileName)]
+        set fileName [string map [list %$item2 $job($item)] $fileName]
+    }
+
+	return $fileName
+} ;# ea::tools::formatFileName
 
 
 proc eAssist_Global::launchFilters {} {

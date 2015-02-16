@@ -73,10 +73,16 @@ proc customer::projSetup {{modify new}} {
     
     # Two items for the btnState, one for each button. OK / Import File
     switch -- $modify {
-        new     { set btnOKState normal; set btnIMPState normal }
-        edit    { set btnOKState normal; set btnIMPState disable  }
-        view    { set btnOKState normal; set btnIMPState disable  }
-        default {${log}::debug Switch Arg not availabe: $modify for [info level 0]}       
+        new     { set btnOKState normal; set btnIMPState normal
+                    ${log}::debug NEW PROJECT - Clear all job text variables.
+                    ${log}::debug NEW PROJECT - Clear out tablelist widget
+                }
+        edit    { set btnOKState normal; set btnIMPState disable
+                    ${log}::debug EDIT PROJECT - Disable 'IMPORT FILE' button
+                }
+        view    { set btnOKState normal; set btnIMPState disable
+                    ${log}::debug VIEW PROJECT - OK Button should be the only non-disable/readonly widget}
+        default {${log}::debug PROJECT - Switch Arg not availabe: $modify for [info level 0]}       
     }
     
 
@@ -130,19 +136,19 @@ proc customer::projSetup {{modify new}} {
     pack $f2 -fill both -expand yes -padx 5p -pady 5p
     
     ttk::label $f2.txt1 -text [mc "Save Location"]
-    ttk::entry $f2.entry1 -textvariable job(SaveFileLocation)
+    ttk::entry $f2.entry1 -textvariable job(SaveFileLocation) -width 45
         tooltip::tooltip $f2.entry1 [mc "Location where you want to save this job."]
-    ttk::button $f2.btn1 -text [mc "..."] -width 3 -command {${log}::debug Save file location...}
+    ttk::button $f2.btn1 -text [mc "..."] -width 3 -command {customer::getFileSaveLocation}
     
     ttk::label $f2.txt2 -text [mc "Ship Date"]
-    ttk::entry $f2.entry2
+    ttk::entry $f2.entry2 -textvariable job(ShipDate)
         tooltip::tooltip $f2.entry2 [mc "Enter the date that you want defaulted into all shipments - must be in MM/DD/YYYY format"]
     
     grid $f2.txt1     -column 0 -row 0 -sticky nes -pady 3p -pady 3p
     grid $f2.entry1   -column 1 -row 0 -sticky ew -padx 3p -pady 3p
-    grid $f2.btn1     -column 3 -row 0 -sticky ew -padx 2p -pady 3p
+    grid $f2.btn1     -column 2 -row 0 -sticky ew -padx 2p -pady 3p
     grid $f2.txt2     -column 0 -row 1 -sticky nes -padx 3p -pady 3p
-    grid $f2.entry2   -column 1 -columnspan 2 -row 1 -sticky news -padx 3p -pady 3p
+    grid $f2.entry2   -column 1 -columnspan 2 -row 1 -sticky ew -padx 3p -pady 3p
     
     ## Button Frame
     ##
@@ -150,7 +156,9 @@ proc customer::projSetup {{modify new}} {
     pack $btnBar -anchor se ;#-padx 5p -pady 5p
     
     ttk::button $btnBar.ok -text [mc "OK"] -command "customer::dbUpdateCustomer; destroy .ps" -state $btnOKState
-    ttk::button $btnBar.import -text [mc "Import File"] -command "customer::dbUpdateCustomer; importFiles::fileImportGUI; destroy .ps" -state $btnIMPState
+    #ttk::button $btnBar.import -text [mc "Import File"] -command "customer::dbUpdateCustomer; importFiles::fileImportGUI; destroy .ps" -state $btnIMPState
+    ttk::button $btnBar.import -text [mc "Import File"] -command {customer::dbUpdateCustomer; job::db::createDB $job(CustID) $job(CSRName) $job(Title) $job(Name) $job(Number) $job(SaveFileLocation) ;\
+                                                            importFiles::fileImportGUI; destroy .ps}
     
     grid $btnBar.ok -column 0 -row 0 -sticky news
     grid $btnBar.import -column 1 -row 0 -sticky news
@@ -182,7 +190,7 @@ proc customer::projSetup {{modify new}} {
                     set job(CustID) $tmpCustID
                     #${log}::debug $job(CustID)
                 }
-            ${log}::debug TempCustID wasn't found: Using $job(CustID), new customer?
+            #${log}::debug TempCustID wasn't found: Using $job(CustID), new customer?
             
             if {$job(CustID) == "" && $tmpCustID == ""} {
                 ${log}::debug No Data was found in the ID Field - Issuing warning notice.

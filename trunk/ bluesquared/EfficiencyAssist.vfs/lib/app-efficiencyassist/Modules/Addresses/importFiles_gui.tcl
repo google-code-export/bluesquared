@@ -69,7 +69,7 @@ proc importFiles::eAssistGUI {} {
     #wm geometry . 900x610 ;# Width x Height
     
     # Setup the Filter array
-    eAssist_Global::launchFilters
+   # eAssist_Global::launchFilters
     
     # Init vars - these overwrite the old flat file values, with values from the db
     importFiles::initVars
@@ -263,9 +263,9 @@ proc importFiles::initMenu {} {
     # Add Module specific Menus
     menu $mb.file.project
     $mb.file add cascade -label [mc "Project"] -menu $mb.file.project
-        $mb.file.project add command -label [mc "New"] -command {customer::projSetup}
-        $mb.file.project add command -label [mc "Edit"] -command {customer::projSetup edit}
-        $mb.file.project add command -label [mc "View"] -command {customer::projSetup view}
+        $mb.file.project add command -label [mc "New..."] -command {customer::projSetup}
+        $mb.file.project add command -label [mc "Edit..."] -command {customer::projSetup edit}
+        $mb.file.project add command -label [mc "Open..."] -command {${log}::debug OPEN EXISTING PROJECT; job::db::open}
     $mb.file add command -label [mc "Import File"] -command {importFiles::fileImportGUI}
     $mb.file add command -label [mc "Export File"] -command {export::DataToExport} ;#-state disabled
     

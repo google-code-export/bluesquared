@@ -619,3 +619,57 @@ proc customer::dbUpdateCustomer {} {
 
     
 } ;# customer::dbUpdateCustomer
+
+
+proc customer::getFileSaveLocation {} {
+    #****f* getFileSaveLocation/customer
+    # CREATION DATE
+    #   02/13/2015 (Friday Feb 13)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   customer::getFileSaveLocation  
+    #
+    # FUNCTION
+    #	Wrapper for [eAssist_Global::OpenFile]; this will return our preferred save location for the selected title.
+    #   When this is first launched we find out if we already have a file path entered; if we do we use it as the starting location; if not we default to user preferences.
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log job mySettings
+    
+    if {$job(SaveFileLocation) ne ""} {
+        ${log}::debug SaveFileLocation exists, using: $job(SaveFileLocation)
+        set defaultLocation $job(SaveFileLocation)
+    } else {
+        ${log}::debug SaveFileLocation doesn't exist, using: $mySettings(sourceFiles)
+        set defaultLocation $mySettings(sourceFiles)
+    }
+
+    set job(SaveFileLocation) [eAssist_Global::OpenFile [mc "Select Directory"] $defaultLocation dir]
+    
+    if {[eAssist_Global::folderAccessibility $job(SaveFileLocation)] != 3} {
+        ${log}::debug WARNING! Cannot write to $job(SaveFileLocation)
+        set job(SaveFileLocation) ""
+    }
+
+    
+} ;# customer::getFileSaveLocation

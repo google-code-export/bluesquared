@@ -18,7 +18,7 @@
 
 namespace eval job::db {}
 
-proc job::db::createDB {custID csrName jobTitle jobName jobNumber} {
+proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocation} {
     #****f* createDB/job::db
     # CREATION DATE
     #   02/08/2015 (Sunday Feb 08)
@@ -31,7 +31,7 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber} {
     #   
     #
     # SYNOPSIS
-    #   job::createDB custID jobTitle jobName JobNumber
+    #   job::createDB custID csrName jobTitle jobName jobNumber saveFileLocation
     #
     # FUNCTION
     #	Initialize a new Job database
@@ -53,10 +53,11 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber} {
     global log job mySettings program env
 
     ${log}::notice Creating a new database for: $custID $jobTitle $jobName $jobNumber
-    set job(db,Name) [join "$jobNumber $jobTitle $jobName" _]
+
+    set job(db,Name) [join [ea::tools::formatFileName] _]
     
     # Create the database
-    sqlite3 $job(db,Name) [file join $mySettings(Home) $job(db,Name)] -create 1
+    sqlite3 $job(db,Name) [file join $saveFileLocation $job(db,Name).db] -create 1
     
     # Create the tables
     set job(db,currentSchemaVers) 1
@@ -106,8 +107,8 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber} {
 #job::db::createDB SAGMED {Meredith Hunter} TEST001 Febraury 303603
 
 
-proc job::db::load {dbName} {
-    #****f* load/job::db
+proc job::db::open {} {
+    #****f* open/job::db
     # CREATION DATE
     #   02/08/2015 (Sunday Feb 08)
     #
@@ -119,10 +120,10 @@ proc job::db::load {dbName} {
     #   
     #
     # SYNOPSIS
-    #   job::db::load dbName 
+    #   job::db::load 
     #
     # FUNCTION
-    #	Loads the selected database
+    #	Launches the browse dialog; loads the selected database based on the file that we've opened.
     #   
     #   
     # CHILDREN
@@ -138,11 +139,77 @@ proc job::db::load {dbName} {
     #   
     #   
     #***
-    global log
+    global log job mySettings
 
+    if {[info exists job(db,Name)] == 1} {${log}::debug Previous job is open, we should close the DB}
+        
+    set job(db,Name) [eAssist_Global::OpenFile [mc "Open Project"] $mySettings(sourceFiles) file .db]
     
-    #set myDB [file join $program(Home) <jobName>.edb]
-    #sqlite3 db $myDB
+    # Just in case the user cancels out of the open dialog.
+    if {$job(db,Name) eq ""} {
+        return
+    }
+    
+    ${log}::debug job(db,Name): $job(db,Name)
+    
+    # Reset the inteface ...
+    eAssistHelper::resetImportInterface
 
+    # Open the db
+    sqlite3 $job(db,Name) [file join $saveFileLocation $job(db,Name)]
     
-} ;# job::db::load
+} ;# job::db::open
+
+proc job::db::write {db dbTbl dbTxt wid widCells {dbCol ""}} {
+    #****f* write/job::db
+    # CREATION DATE
+    #   02/13/2015 (Friday Feb 13)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   job::db::write db dbTbl dbCol dbTxt wid widCells
+    #   job::db::write <dbName> <dbTable> ?colName? <text> <widTbl> <row,col>
+    #
+    # FUNCTION
+    #	Writes data to the widget cell and database.
+    #	If the column name isn't already known, use two quotes; and this proc will figure it out, since we are receiving the row,cell value.
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log job
+
+    if {$dbCol eq ""} {
+        # retrieves the column name if we didn't pass it to the proc.
+        set dbCol [$wid columncget [lindex [split $widCells ,] end] -name]
+    }
+    
+    ${log}::debug Updating COLUMN: $dbCol
+    ${log}::debug Updating Cells (should only ever have one): $widCells
+    ${log}::debug Updating VALUES to: $dbTxt
+    
+    # Update the tabelist widget
+    $wid cellconfigure $widCells -text $dbTxt
+    
+    # Update the DB
+    set dbPK [$wid getcell [lindex [split $widCells ,] 0],0]
+    $db eval "UPDATE $dbTbl SET $dbCol='$dbTxt' WHERE addr_ID='$dbPK'"
+    
+} ;# job::db::write
