@@ -390,7 +390,7 @@ proc importFiles::processFile {win} {
         }
 
         # insert data into the db
-        ${log}::debug INSERT INTO Addresses ($job(db,ColOrder)) VALUES ([join $newRowDB ,])
+        #${log}::debug INSERT INTO Addresses ($job(db,ColOrder)) VALUES ([join $newRowDB ,])
         $job(db,Name) eval "INSERT INTO Addresses ($job(db,ColOrder)) VALUES ([join $newRowDB ,])"
 
         

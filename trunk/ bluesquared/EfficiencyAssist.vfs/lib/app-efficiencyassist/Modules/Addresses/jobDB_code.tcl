@@ -72,6 +72,7 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
             CustID      TEXT,
             CSRName     TEXT,
             JobTitle    TEXT,
+            JobNumber   TEXT,
             JobName     TEXT,
             CreatedDate DATE,
             CreatedBy   TEXT
@@ -87,7 +88,7 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
 
     ## Grab the table fields from our main db.
     set hdr [db eval {SELECT InternalHeaderName FROM Headers ORDER BY DisplayOrder}]
-    set cTable [list {addr_ID INTEGER PRIMARY KEY AUTOINCREMENT}]
+    set cTable [list {OrderNumber INTEGER PRIMARY KEY AUTOINCREMENT}]
     
     # Dynamically build the Addresses table
     foreach header $hdr {
@@ -98,7 +99,7 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
     $job(db,Name) eval "CREATE TABLE IF NOT EXISTS Addresses ( $cTable )"
 
     # Insert data into JobInformation table
-    $job(db,Name) eval "INSERT INTO JobInformation (CustID, CSRName, JobTitle, JobName, CreatedDate, CreatedBy) VALUES ('$custID', '$csrName', '$jobTitle', '$jobName', DATETIME('NOW'), '$env(USERNAME)')"
+    $job(db,Name) eval "INSERT INTO JobInformation (CustID, CSRName, JobNumber, JobTitle, JobName, CreatedDate, CreatedBy) VALUES ('$custID', '$csrName', '$jobNumber', '$jobTitle', '$jobName', DATETIME('NOW'), '$env(USERNAME)')"
     
     # Insert data into Sysinfo table
     $job(db,Name) eval "INSERT INTO SysInfo (ProgramVers, SchemaVers) VALUES ('$program(Version).$program(PatchLevel)', '$job(db,currentSchemaVers)')"
@@ -139,26 +140,76 @@ proc job::db::open {} {
     #   
     #   
     #***
-    global log job mySettings
+    global log job mySettings files headerParent
 
-    if {[info exists job(db,Name)] == 1} {${log}::debug Previous job is open, we should close the DB}
+    if {[info exists job(db,Name)] == 1} {
+        ${log}::debug Previous job is open. Closing current job: $job(Title) $job(Name)
+        $job(db,Name) close
         
-    set job(db,Name) [eAssist_Global::OpenFile [mc "Open Project"] $mySettings(sourceFiles) file .db]
+        unset job
+        }
+        
+    set job(db,Name) [eAssist_Global::OpenFile [mc "Open Project"] $mySettings(sourceFiles) file -ext .db -filetype {{Efficiency Assist Project} {.db}}]
     
     # Just in case the user cancels out of the open dialog.
     if {$job(db,Name) eq ""} {
         return
     }
     
-    ${log}::debug job(db,Name): $job(db,Name)
-    
     # Reset the inteface ...
     eAssistHelper::resetImportInterface
 
     # Open the db
-    sqlite3 $job(db,Name) [file join $saveFileLocation $job(db,Name)]
+    sqlite3 $job(db,Name) $job(db,Name)
     
+    set job(SaveFileLocation) [file dirname $job(db,Name)]
+    set job(CustID) [join [$job(db,Name) eval {SELECT CustID FROM JobInformation}]]
+    set job(CSRName) [join [$job(db,Name) eval {SELECT CSRName FROM JobInformation}]]
+    set job(Number) [join [$job(db,Name) eval {SELECT JobNumber FROM JobInformation}]]
+    set job(Title) [join [$job(db,Name) eval {SELECT JobTitle FROM JobInformation}]]
+    set job(Name) [join [$job(db,Name) eval {SELECT JobName FROM JobInformation}]]
+    
+    set job(CustName) [join [db eval "SELECT CustName From Customer where Cust_ID='$job(CustID)'"]]
+    
+    #${log}::debug New Job was Opened
+    #${log}::debug DB: $job(db,Name)
+    #${log}::debug Save Location: $job(SaveFileLocation)
+    #${log}::debug CustID: $job(CustID)
+    #${log}::debug CustName: $job(CustName)
+    #${log}::debug CSRName: $job(CSRName)
+    #${log}::debug JobNumber: $job(Number)
+    #${log}::debug JobTitle: $job(Title)
+    #${log}::debug JobName: $job(Name)
+
+    set newHdr {$OrderNumber}
+    foreach header $headerParent(headerList) {
+        lappend newHdr $$header
+    }
+    
+    ## Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
+    if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
+        $files(tab3f2).tbl insertcolumns 0 0 "..."
+        $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center
+    }
+    
+    # Insert the data into the tablelist
+    $job(db,Name) eval {SELECT * from Addresses} {
+        $files(tab3f2).tbl insert end [subst $newHdr]
+    }
+    
+    set headerWhiteList "$headerParent(whiteList) OrderNumber"
+    
+    for {set x 0} {$headerParent(ColumnCount) > $x} {incr x} {
+        set ColumnName [$files(tab3f2).tbl columncget $x -name]
+        if {[lsearch -nocase $headerWhiteList $ColumnName] == -1} {
+            $files(tab3f2).tbl columnconfigure $x -hide yes
+        }
+    }
+
+    # Apply the highlights
+    importFiles::highlightAllRecords $files(tab3f2).tbl
 } ;# job::db::open
+
 
 proc job::db::write {db dbTbl dbTxt wid widCells {dbCol ""}} {
     #****f* write/job::db
@@ -201,9 +252,9 @@ proc job::db::write {db dbTbl dbTxt wid widCells {dbCol ""}} {
         set dbCol [$wid columncget [lindex [split $widCells ,] end] -name]
     }
     
-    ${log}::debug Updating COLUMN: $dbCol
-    ${log}::debug Updating Cells (should only ever have one): $widCells
-    ${log}::debug Updating VALUES to: $dbTxt
+    #${log}::debug Updating COLUMN: $dbCol
+    #${log}::debug Updating Cells (should only ever have one): $widCells
+    #${log}::debug Updating VALUES to: $dbTxt
     
     # Update the tabelist widget
     $wid cellconfigure $widCells -text $dbTxt
