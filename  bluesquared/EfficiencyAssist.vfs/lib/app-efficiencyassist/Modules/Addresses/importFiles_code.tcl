@@ -436,9 +436,9 @@ proc importFiles::processFile {win} {
     # Destroy the progress bar window
     eAssistHelper::importProgBar destroy
     
-    # Initialize popup menus
-    IFMenus::tblPopup $files(tab3f2).tbl browse .tblMenu
-    IFMenus::createToggleMenu $files(tab3f2).tbl
+    ## Initialize popup menus
+    #IFMenus::tblPopup $files(tab3f2).tbl browse .tblMenu
+    #IFMenus::createToggleMenu $files(tab3f2).tbl
     #${log}::debug --END-- [info level 1]
 } ;# importFiles::processFile
 

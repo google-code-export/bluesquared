@@ -75,7 +75,15 @@ proc customer::projSetup {{modify new}} {
     switch -- $modify {
         new     { set btnOKState normal; set btnIMPState normal
                     ${log}::debug NEW PROJECT - Clear all job text variables.
-                    ${log}::debug NEW PROJECT - Clear out tablelist widget
+                    if {[info exists job(db,Name)]} {
+                        close $job(db,Name) ;# Close the db connection
+                        foreach name [array names job] {
+                            set job($name) ""
+                        }
+                        ${log}::debug NEW PROJECT - Clear out tablelist widget
+                        # Reset the inteface ...
+                        eAssistHelper::resetImportInterface
+                    }
                 }
         edit    { set btnOKState normal; set btnIMPState disable
                     ${log}::debug EDIT PROJECT - Disable 'IMPORT FILE' button
@@ -158,7 +166,7 @@ proc customer::projSetup {{modify new}} {
     ttk::button $btnBar.ok -text [mc "OK"] -command "customer::dbUpdateCustomer; destroy .ps" -state $btnOKState
     #ttk::button $btnBar.import -text [mc "Import File"] -command "customer::dbUpdateCustomer; importFiles::fileImportGUI; destroy .ps" -state $btnIMPState
     ttk::button $btnBar.import -text [mc "Import File"] -command {customer::dbUpdateCustomer; job::db::createDB $job(CustID) $job(CSRName) $job(Title) $job(Name) $job(Number) $job(SaveFileLocation) ;\
-                                                            importFiles::fileImportGUI; destroy .ps}
+                                                            importFiles::fileImportGUI; destroy .ps} -state $btnIMPState
     
     grid $btnBar.ok -column 0 -row 0 -sticky news
     grid $btnBar.import -column 1 -row 0 -sticky news

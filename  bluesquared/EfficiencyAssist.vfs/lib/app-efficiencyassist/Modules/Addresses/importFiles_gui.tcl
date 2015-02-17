@@ -250,7 +250,9 @@ proc importFiles::eAssistGUI {} {
     
 #ttk::style map TEntry -fieldbackground [list focus yellow]
    
-
+    # Initialize popup menus
+    IFMenus::tblPopup $files(tab3f2).tbl browse .tblMenu
+    IFMenus::createToggleMenu $files(tab3f2).tbl
 
 } ;# importFiles::eAssistGUI
 
@@ -300,8 +302,8 @@ proc importFiles::initMenu {} {
     $mb.file add command -label [mc "Export File"] -command {export::DataToExport} ;#-state disabled
     
     menu $mb.file.reports
-    $mb.file add cascade -label [mc "Reports"] -menu $mb.file.reports -state disabled
-    $mb.file.reports add command -label [mc "Import Breakdown"]
+    $mb.file add cascade -label [mc "Reports"] -menu $mb.file.reports
+    $mb.file.reports add command -label [mc "General"] -command {job::reports::Viewer}
     
     #$mb.file add command -label [mc "Export File"] -command {export::newDataToExport}
     
