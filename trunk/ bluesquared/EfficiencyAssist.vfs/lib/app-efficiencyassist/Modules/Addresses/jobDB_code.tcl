@@ -208,6 +208,13 @@ proc job::db::open {} {
 
     # Apply the highlights
     importFiles::highlightAllRecords $files(tab3f2).tbl
+    
+    # Get total copies
+    set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
+    
+    ## Initialize popup menus
+    #IFMenus::tblPopup $files(tab3f2).tbl browse .tblMenu
+    #IFMenus::createToggleMenu $files(tab3f2).tbl
 } ;# job::db::open
 
 
@@ -261,6 +268,6 @@ proc job::db::write {db dbTbl dbTxt wid widCells {dbCol ""}} {
     
     # Update the DB
     set dbPK [$wid getcell [lindex [split $widCells ,] 0],0]
-    $db eval "UPDATE $dbTbl SET $dbCol='$dbTxt' WHERE addr_ID='$dbPK'"
+    $db eval "UPDATE $dbTbl SET $dbCol='$dbTxt' WHERE OrderNumber='$dbPK'"
     
 } ;# job::db::write

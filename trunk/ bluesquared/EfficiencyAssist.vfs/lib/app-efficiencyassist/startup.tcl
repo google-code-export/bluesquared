@@ -336,6 +336,11 @@ proc 'eAssist_initVariables {} {
         # Default for finding the source import files
         set mySettings(sourceFiles) [file dirname $mySettings(Home)]
     }
+	
+	if {![info exists mySettings(job,fileName)]} {
+		# Default for the file name
+		set mySettings(job,fileName) "%number %title %name"
+	}
 
     if {![info exists settings(shipvia3P)]} {
         # Set possible 3rd party shipvia codes

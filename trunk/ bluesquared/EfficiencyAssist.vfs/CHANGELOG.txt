@@ -3,7 +3,8 @@
 * [NEW] Addresses are immediately inserted into the database upon importing files.
 * [NEW] If a version is not listed in an imported file, EA will automatically insert 'Version 1' (which is the default in EFI Monarch Planner)
 * [NEW] The display order of the columns are now configurable in SETUP.
-* [UPDATE] Log settings are now per user instead of globally
+* [NEW] Customer, CSR, Job Name/Title and Number are now displayed in the header area of BM.
+* [UPDATE] Log settings are now per user instead of global.
 * [UPDATE] Importing a file is now much faster than before.
 * [UPDATE] Some data cleansing happens upon importing a file. Quotes, Single Quotes, Slashes and Comma's are now automatically stripped out, and replaced with a space.
 * [UPDATE] Total Copies function now utilizes the sum() SQL command.

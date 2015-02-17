@@ -51,7 +51,7 @@ proc IFMenus::tblPopup {tbl mode mName} {
     #
     #***
     global log files w
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     # This is initialized in importFiles_code.tcl [importFiles::processFile]
     # This is bound to the Mouse button in importFiles_gui.tcl [importFiles::eAssistGUI]
     
@@ -126,7 +126,7 @@ proc IFMenus::tblPopup {tbl mode mName} {
         
         # Items that should always be displayed
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# IFMenus::tblPopup
 
 
@@ -156,7 +156,7 @@ proc IFMenus::clearRowContents {tbl} {
     #
     #***
     global log
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
     set cRow [$tbl curselection]
     
@@ -166,7 +166,7 @@ proc IFMenus::clearRowContents {tbl} {
     ## Insert new row
     catch [$tbl insert $cRow ""] err
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# IFMenus::clearRowContents
 
 
