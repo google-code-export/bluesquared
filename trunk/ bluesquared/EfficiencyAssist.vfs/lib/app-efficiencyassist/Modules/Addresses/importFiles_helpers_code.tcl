@@ -407,100 +407,95 @@ proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
 		} else {
 			# Pasting a single cell
 			#${log}::debug Menu SINGLE CELL: $txtVar - $cells
-			#$tbl cellconfigure $cells -text $txtVar
 			job::db::write $job(db,Name) Addresses $txtVar $tbl $cells
 		}
 	} elseif {$type eq "-hotkey"} {
-			if {$copy(orient) eq "Vertical"} {
-				set txtVar [join [split $txtVar \n]]
-			} else {
-				set txtVar [join [split $txtVar \t]]
-		}
-		
-		if {$copy(cellsCopied) >= 2} {
-			# Pasting multiple cells
-			#${log}::debug Hotkey MULTIPLE CELLS: $txtVar - cells: $cells
-			#foreach item $txtVar cell [$tbl curcellselection] {} ;# pasting into highlighted cells only
-			set incrCells [lindex [split $cells ,] 0]
-			set incrCol [lindex [split $cells ,] 1]
-			
-			foreach item $txtVar cell $cells {
-				#${log}::debug Inserting $item - $incrCells,$incrCol
-				#$tbl cellconfigure $incrCells,$incrCol -text $item
-				job::db::write $job(db,Name) Addresses $item $tbl $incrCells,$incrCol
-				
-				if {$copy(orient) eq "Vertical"} {
-					set incrCells [incr incrCells]
-				} else {
-					set incrCol [incr incrCol]
-				}
-				
-				if {[info exists err]} {
-					${log}::debug Error, ran out of cells: $cells
-					unset err
-				}			
+			switch -- $copy(orient) {
+				"Vertical"		{set txtVar [split [clipboard get] \n]}
+				"Horizontal"	{set txtVar [split [clipboard get] \t]}
 			}
-		} else {
-			# Pasting a single cell
-			#${log}::debug Hotkey SINGLE CELL: $txtVar - $cells
-			#$tbl cellconfigure $cells -text $txtVar
-			job::db::write $job(db,Name) Addresses $txtVar $tbl $cells
-		}
-		
+
+			set incrRow [lindex [split $cells ,] 0]
+			set incrCol [lindex [split $cells ,] 1]
+			set origCol $incrCol
+			if {$copy(orient) != "HorzVert"} {
+				foreach val $txtVar {
+					#${log}::debug single cell: $incrRow,$incrCol $val
+					#$tbl cellconfigure $incrRow,$incrCol -text $val
+					job::db::write $job(db,Name) Addresses $item $tbl $incrRow,$incrCol
+					
+					if {$copy(orient) eq "Vertical"} {
+						incr incrRow
+					} else {
+						incr incrCol
+					}
+				}
+			} else {
+				foreach horzVal [split [clipboard get] \n] {
+					foreach vertVal [split $horzVal \t] {
+						#${log}::debug Multiple Cells: $vertVal row: $incrRow, col: $incrCol
+						#$tbl cellconfigure $incrRow,$incrCol -text $vertVal
+						job::db::write $job(db,Name) Addresses $item $tbl $incrRow,$incrCol
+						incr incrCol
+					}
+					set incrCol $origCol ;# reset since we need to move down a row; but go back to the starting column
+					incr incrRow
+				}
+			}
 	}
 
 } ;# eAssistHelper::insValuesToTableCells
 
 
-proc eAssistHelper::multiCells {} {
-    #****f* multiCells/eAssistHelper
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2011-2014 Casey Ackels
-    #
-    # FUNCTION
-    #	Check to see if we are selected on multiple columns; returns 1 if we are, 0 if aren't
-    #
-    # SYNOPSIS
-    #
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	
-    #
-    # NOTES
-    #
-    # SEE ALSO
-    #
-    #***
-    global log files
-    ${log}::debug --START-- [info level 1]
-	set curCol 1
-	
-    set cells [$files(tab3f2).tbl curcellselection]
-	
-	#if {[info exists curCol]} {unset curCol}
-	foreach val $cells {
-		# Initialize that variable
-		if {![info exists curCol]} {set curCol [$files(tab3f2).tbl columncget [lrange [split $val ,] end end] -name]}
-		
-		# This should get over written during our cycles
-		set curCol1 [$files(tab3f2).tbl columncget [lrange [split $val ,] end end] -name]
-		
-		# if we arent the same lets save the column name
-		if {[string match $curCol1 $curCol] ne 1} {lappend curCol [$files(tab3f2).tbl columncget [lrange [split $val ,] end end] -name]}
-
-	}
-	
-	if {[llength $curCol] eq 2} {return 1} else {return 0}
-	#${log}::debug We are selected on [llength $curCol] columns
-	
-    ${log}::debug --END-- [info level 1]
-} ;# eAssistHelper::multiCells
+#proc eAssistHelper::multiCells {} {
+#    #****f* multiCells/eAssistHelper
+#    # AUTHOR
+#    #	Casey Ackels
+#    #
+#    # COPYRIGHT
+#    #	(c) 2011-2014 Casey Ackels
+#    #
+#    # FUNCTION
+#    #	Check to see if we are selected on multiple columns; returns 1 if we are, 0 if aren't
+#    #
+#    # SYNOPSIS
+#    #
+#    #
+#    # CHILDREN
+#    #	N/A
+#    #
+#    # PARENTS
+#    #	
+#    #
+#    # NOTES
+#    #
+#    # SEE ALSO
+#    #
+#    #***
+#    global log files
+#    ${log}::debug --START-- [info level 1]
+#	set curCol 1
+#	
+#    set cells [$files(tab3f2).tbl curcellselection]
+#	
+#	#if {[info exists curCol]} {unset curCol}
+#	foreach val $cells {
+#		# Initialize that variable
+#		if {![info exists curCol]} {set curCol [$files(tab3f2).tbl columncget [lrange [split $val ,] end end] -name]}
+#		
+#		# This should get over written during our cycles
+#		set curCol1 [$files(tab3f2).tbl columncget [lrange [split $val ,] end end] -name]
+#		
+#		# if we arent the same lets save the column name
+#		if {[string match $curCol1 $curCol] ne 1} {lappend curCol [$files(tab3f2).tbl columncget [lrange [split $val ,] end end] -name]}
+#
+#	}
+#	
+#	if {[llength $curCol] eq 2} {return 1} else {return 0}
+#	#${log}::debug We are selected on [llength $curCol] columns
+#	
+#    ${log}::debug --END-- [info level 1]
+#} ;# eAssistHelper::multiCells
 
 
 #proc eAssistHelper::fillCountry {} {
