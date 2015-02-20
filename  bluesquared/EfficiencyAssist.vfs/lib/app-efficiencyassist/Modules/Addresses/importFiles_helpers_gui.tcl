@@ -156,8 +156,8 @@ proc eAssistHelper::insertItems {tbl} {
     # SEE ALSO
     #
     #***
-    global log files headerParams dist carrierSetup packagingSetup txtVariable
-    ${log}::debug --START-- [info level 1]
+    global log files headerParams dist carrierSetup packagingSetup txtVariable 
+    #${log}::debug --START-- [info level 1]
     
     set w(di) .di
     if {[winfo exists $w(di)]} {destroy .di}
@@ -171,8 +171,6 @@ proc eAssistHelper::insertItems {tbl} {
     set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
     set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
     wm geometry $w(di) +${locX}+${locY}
-
-    focus $w(di)
 	
 	set f1 [ttk::frame $w(di).f1]
 	pack $f1 -expand yes -fill both -pady 5p -padx 5p
@@ -232,7 +230,7 @@ proc eAssistHelper::insertItems {tbl} {
 			if {$wid eq "ttk::combobox"} {
 				switch -glob -- [string tolower $header] {
 					distributiontype	{
-						${log}::debug DistributionType
+						#${log}::debug DistributionType
 						ttk::label $f2.txt$i -text [mc "$header"]
 						$wid $f2.$x$header -values $dist(distributionTypes) -textvariable txtVariable -width 35
 						
@@ -241,12 +239,11 @@ proc eAssistHelper::insertItems {tbl} {
 						
 						grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
 						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
-						
 						#$btnBar.ok configure -command "eAssistHelper::insValuesToTableCells [list $tbl] $txtVariable $origCells; destroy .di"
 						
 					}
 					shipvia		{
-						${log}::debug CarrierMethod
+						#${log}::debug CarrierMethod
 						ttk::label $f2.txt$i -text [mc "$header"]
 						$wid $f2.$x$header -values $carrierSetup(ShipViaName) -textvariable txtVariable -width 35
 						$f2.$x$header delete 0 end
@@ -256,7 +253,7 @@ proc eAssistHelper::insertItems {tbl} {
 						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
 					}
 					packagetype			{
-						${log}::debug PackageType
+						#${log}::debug PackageType
 						ttk::label $f2.txt$i -text [mc "$header"]
 						$wid $f2.$x$header -values $packagingSetup(PackageType) -textvariable txtVariable -width 35
 						$f2.$x$header delete 0 end
@@ -266,7 +263,7 @@ proc eAssistHelper::insertItems {tbl} {
 						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
 					}
 					containertype		{
-						${log}::debug ContainerType
+						#${log}::debug ContainerType
 						ttk::label $f2.txt$i -text [mc "$header"]
 						$wid $f2.$x$header -values $packagingSetup(ContainerType) -textvariable txtVariable -width 35
 						$f2.$x$header delete 0 end
@@ -276,7 +273,7 @@ proc eAssistHelper::insertItems {tbl} {
 						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
 					}
 					shippingclass		{
-						${log}::debug ShippingClass
+						#${log}::debug ShippingClass
 						ttk::label $f2.txt$i -text [mc "$header"]
 						$wid $f2.$x$header -values $carrierSetup(ShippingClass) -textvariable txtVariable -width 35
 						$f2.$x$header delete 0 end
@@ -293,7 +290,7 @@ proc eAssistHelper::insertItems {tbl} {
 						}
 				}
 			} else {
-						${log}::debug General
+						#${log}::debug General
 						ttk::label $f2.txt$i -text [mc "$header"]
 						# Create the widget specified in Setup for the column; typically will be ttk::entry
 						#if {$wid eq ""} {set wid ttk::entry}
@@ -302,6 +299,7 @@ proc eAssistHelper::insertItems {tbl} {
 						grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
 						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
 			}
+			focus $f2.$x$header
 		}
 	
 	} else {
@@ -314,11 +312,8 @@ proc eAssistHelper::insertItems {tbl} {
 		$btnBar.ok configure -command {destroy .di}
 	}
 
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::insertItems
-
-
-
 
 
 proc eAssistHelper::importProgBar {args} {
