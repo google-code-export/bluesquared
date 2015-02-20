@@ -849,10 +849,10 @@ proc eAssist_db::leftOuterJoin {args} {
             -where  {set whereStmt [join $value]}
         }
     }
-    ${log}::debug cols: $cols
-    ${log}::debug table: $dbTable
-    ${log}::debug jtable: $jdbTable
-    ${log}::debug where: $whereStmt
+    #${log}::debug cols: $cols
+    #${log}::debug table: $dbTable
+    #${log}::debug jtable: $jdbTable
+    #${log}::debug where: $whereStmt
     
     db eval "SELECT $cols FROM $dbTable LEFT OUTER JOIN $jdbTable WHERE $whereStmt"
 
@@ -892,8 +892,49 @@ proc ea::db::countQuantity {db dbTbl} {
     #***
     global log
 
-    set qty [string trim [$db eval "SELECT SUM(Quantity) FROM $dbTbl"] .0]
-
+    #set qty [string trim [$db eval "SELECT SUM(Quantity) FROM $dbTbl"] .0]
+    set qty [$db eval "SELECT SUM(Quantity) FROM $dbTbl"]
     return $qty
     
 } ;# ea::db::countQuantity
+
+
+proc ea::db::getUniqueValues {db dbCol dbTbl} {
+    #****f* getUniqueValues/ea::db
+    # CREATION DATE
+    #   02/18/2015 (Wednesday Feb 18)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::db::getUniqueValues db dbCol dbTbl 
+    #
+    # FUNCTION
+    #	Retrieves the versions from the specified db and db table
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    set values [$db eval "SELECT distinct($dbCol) FROM $dbTbl"]
+
+    return $values
+
+} ;# ea::db::getUniqueValues

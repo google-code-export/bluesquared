@@ -50,7 +50,7 @@ proc job::reports::Viewer {} {
     #   
     #   
     #***
-    global log
+    global log job
 
     if {[winfo exists .rv]} {destroy .rv}
 
@@ -66,6 +66,8 @@ proc job::reports::Viewer {} {
     pack $f1 -fill both -expand yes -padx 5p -pady 5p
     
     set disttypes ""
+    #ttk::entry $f1.entry1 -textvariable disttypes
+    #ttk::combobox $f1.cbox1 -values {Version}
     
     text $f1.txt \
                 -xscrollcommand [list $f1.scrollx set] \
@@ -75,13 +77,16 @@ proc job::reports::Viewer {} {
     ttk::scrollbar $f1.scrollx -orient h -command [list $f1.txt xview]
     ttk::scrollbar $f1.scrolly -orient v -command [list $f1.txt yview]
     
-    ttk::entry $f1.entry1 -textvariable disttypes
-    ttk::button $f1.btn1 -text "OK" -command {job::reports::DistributionType .rv.f1.txt [.rv.f1.entry1 get]}
     
-    grid $f1.entry1 -column 0 -row 0 -sticky nsw
-    grid $f1.btn1 -column 1 -row 0 -sticky ew
+    #ttk::button $f1.btn1 -text "OK" -command {job::reports::DistributionType .rv.f1.txt [.rv.f1.cbox1 get]}
+    
+    #grid $f1.cbox1 -column 0 -row 0 -sticky nsw
+    #grid $f1.entry1 -column 0 -row 0 -sticky nsw
+    #grid $f1.btn1 -column 1 -row 0 -sticky ew
     
     grid $f1.txt -column 0 -row 1 -sticky news
+    grid columnconfigure $f1 0 -weight 2
+    grid rowconfigure $f1 1 -weight 2
     
     grid $f1.scrolly -column 1 -row 1 -sticky nse
     grid $f1.scrollx -column 0 -row 2 -sticky ews
@@ -92,11 +97,11 @@ proc job::reports::Viewer {} {
     $f1.txt delete 0.0 end
     
     
-    
+    job::reports::byVersion $f1.txt
 } ;# job::reports::Viewer
 
-#proc job::reports::DistributionType {txt args} {}
-    #****f* DistributionType/job::reports
+proc job::reports::byVersion {txt args} {
+    #****f* byVersion/job::reports
     # CREATION DATE
     #   02/16/2015 (Monday Feb 16)
     #
@@ -108,7 +113,7 @@ proc job::reports::Viewer {} {
     #   
     #
     # SYNOPSIS
-    #   job::reports::UPSIMPORT -basic|-detailed -disttype ?value1 ... valueN?
+    #   job::reports::byVersion <textWidget Path> ?args?
     #
     # FUNCTION
     #	Produces a report on the UPS Imports. Switches determine how verbose the report is.
@@ -128,60 +133,84 @@ proc job::reports::Viewer {} {
     #   
     #   
     #***
-proc job::reports::DistributionType {txt args} {
     global log job
-    #set args [join $args]
+    ##
+    ## Job Overview
+    ##
+    $txt insert end "Job Number: $job(Number)\n"
+    $txt insert end "Job Title/Name: $job(Title) / $job(Name)\n\n"
+    
+    set numOfVersions [$job(db,Name) eval "SELECT count(distinct(Version)) FROM Addresses"]
+    $txt insert end "Number of Versions: $numOfVersions\n"
 
-    foreach dist $args {
-        #${log}::debug *** $dist BASIC REPORT ***
-        $txt insert end "*** $dist BASIC REPORT ***\n\n"
-        
-        set numOfVersions [$job(db,Name) eval "SELECT count(distinct(Version)) FROM Addresses WHERE DistributionType='$dist'"]
-        #${log}::debug Number of Versions: $numOfVersions
-        $txt insert end "Number of Versions: $numOfVersions\n"
-        
-        set versionNames [$job(db,Name) eval "SELECT distinct(Version) FROM Addresses WHERE DistributionType='$dist'"]
-        #${log}::debug Version Names: [join $versionNames]
-        $txt insert end "Version Names: [join $versionNames ,]\n"
-        
-        set numOfShipments [$job(db,Name) eval "SELECT count(*) FROM Addresses WHERE DistributionType='$dist'"]
-        #${log}::debug Number of Shipments: $numOfShipments
-        $txt insert end "Number of Shipments: $numOfShipments\n"
+    set numOfShipments [$job(db,Name) eval "SELECT count(*) FROM Addresses"]
+    $txt insert end "Number of Shipments: $numOfShipments\n"
     
-        set totalQtyOfShipments [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses WHERE DistributionType='$dist'"]
-        #${log}::debug Total Quantity: $totalQtyOfShipments
-        $txt insert end "Total Quantity: $totalQtyOfShipments\n"
+    set totalQtyOfShipments [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses"]
+    $txt insert end "Total Quantity: $totalQtyOfShipments\n"
+
+    $txt insert end "----\n\n"
     
-        #${log}::debug -----
-        $txt insert end "----\n\n"
-        #${log}::debug *** $dist DETAILED REPORT ***
-        $txt insert end "*** $dist DETAILED REPORT ***\n"
+    ##
+    ## Detailed Information
+    ##
+    # Get unique versions
+    set versionNames [$job(db,Name) eval "SELECT distinct(Version) FROM Addresses"]
+    foreach vers $versionNames {
+    # Output Version Name
+        set versNumOfShipments [$job(db,Name) eval "SELECT count(*) FROM Addresses WHERE Version='$vers'"]
+        set versQuantity [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses WHERE Version='$vers'"]
+        $txt insert end "VERSION: $vers - Shipments: $versNumOfShipments - Quantity: $versQuantity\n"
         
-        foreach vers $versionNames {
-            if {[info exists qty]} {unset qty}
-            $job(db,Name) eval "SELECT Quantity FROM Addresses WHERE DistributionType='$dist' AND Version='$vers'" {
-                #${log}::debug $Quantity $Version
-                lappend qty $Quantity
-            }
-            set versQty [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses WHERE DistributionType='$dist' AND Version='$vers'"]
+        # Get unique distribution types, for current version
+        set DistTypes [$job(db,Name) eval "SELECT distinct(DistributionType) FROM addresses WHERE Version='$vers' ORDER BY DistributionType"]
+        foreach dist $DistTypes {
+            # DistType associated with current version
+            # Output Summary for Distribution Type
+            # Output Carrier, Company and Quantity
+            # Get total count for current distribution type
+
             
-            #${log}::debug __ VERSION: [join $vers] __ QUANTITY: $versQty __ SHIPMENTS: [llength $qty]
-            $txt insert end "\n\nVERSION: [join $vers] - QUANTITY: $versQty - SHIPMENTS: [llength $qty]\n\n"
-            #${log}::debug [extractFromList $qty]
-            #${log}::debug SINGLE: [lindex [extractFromList $qty] 0]
-            #${log}::debug GROUPS: [lrange [extractFromList $qty] 1 end]
+            set distTypeNumOfShipments [$job(db,Name) eval "SELECT count(*) from Addresses WHERE Version='$vers' AND DistributionType='$dist'"]
+            set distTypeQty [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses WHERE Version='$vers' AND DistributionType='$dist'"]
             
-            foreach single [lindex [Shipping_Code::extractFromList $qty] 0] {
-                #${log}::debug Singles: 1 Shipment of $single
-                $txt insert end "1 Shipment of $single\n"
-            }
+            $txt insert end "\t<$dist> $distTypeNumOfShipments Shipments - $distTypeQty\n\n"
             
-            foreach groups [lrange [Shipping_Code::extractFromList $qty] 1 end] {
-                #${log}::debug Groups: [llength $groups] shipments of [lindex $groups 0]
-                $txt insert end "[llength $groups] Shipments of [lindex $groups 0]\n"
+            # If the distribution type matches, UPS IMPORT, lets provide a grouped breakdown instead of the individual shipment
+            if {$dist eq "07. UPS Import"} {
+                if {[info exists qty]} {unset qty}
+                $job(db,Name) eval "SELECT Quantity FROM Addresses WHERE Version='$vers' AND DistributionType='$dist'" {
+                    #${log}::debug $Quantity $Version
+                    lappend qty $Quantity
+                }
+            
+                foreach single [lindex [Shipping_Code::extractFromList $qty] 0] {
+                    #${log}::debug Singles: 1 Shipment of $single
+                    $txt insert end "\t  1 Shipment of $single\n"
+                }
+            
+                foreach groups [lrange [Shipping_Code::extractFromList $qty] 1 end] {
+                    #${log}::debug Groups: [llength $groups] shipments of [lindex $groups 0]
+                    $txt insert end "\t  [llength $groups] Shipments of [lindex $groups 0]\n"
+                }
+            } else {
+            
+                # Output detailed shipment information
+                $job(db,Name) eval "SELECT ShipVia, Company, Quantity FROM Addresses WHERE Version='$vers' AND DistributionType='$dist' ORDER BY Quantity" {
+                    # Error capturing: Set a default value if nothing was put into the db
+                    if {$ShipVia eq ""} {set ShipVia [mc "CARRIER NOT ASSIGNED"]}
+                    if {$Company eq ""} {set Company [mc "COMPANY NOT ASSIGNED"]}
+                    if {$Quantity eq ""} {set Quantity [mc "QUANTITY NOT ASSIGNED"]}
+                    
+                    $txt insert end "\t  $ShipVia, $Company - $Quantity\n"
+                }
+
             }
+            # End of the Distribution Type
+            $txt insert end "---- EOD\n"
         }
-        #${log}::debug **-----------------
-        $txt insert end "**-----------------\n\n\n"
-    }  
-} ;# job::reports::DistributionType "07. UPS Import"
+        # End of the Version
+        $txt insert end "\n******** EOV\n"
+    }
+
+} ;# job::reports::byVersion

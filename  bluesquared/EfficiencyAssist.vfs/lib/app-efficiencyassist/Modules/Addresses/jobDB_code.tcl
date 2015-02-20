@@ -140,7 +140,7 @@ proc job::db::open {} {
     #   
     #   
     #***
-    global log job mySettings files headerParent
+    global log job mySettings files headerParent process
 
     if {[info exists job(db,Name)] == 1} {
         ${log}::debug Previous job is open. Closing current job: $job(Title) $job(Name)
@@ -170,21 +170,13 @@ proc job::db::open {} {
     set job(Name) [join [$job(db,Name) eval {SELECT JobName FROM JobInformation}]]
     
     set job(CustName) [join [db eval "SELECT CustName From Customer where Cust_ID='$job(CustID)'"]]
-    
-    #${log}::debug New Job was Opened
-    #${log}::debug DB: $job(db,Name)
-    #${log}::debug Save Location: $job(SaveFileLocation)
-    #${log}::debug CustID: $job(CustID)
-    #${log}::debug CustName: $job(CustName)
-    #${log}::debug CSRName: $job(CSRName)
-    #${log}::debug JobNumber: $job(Number)
-    #${log}::debug JobTitle: $job(Title)
-    #${log}::debug JobName: $job(Name)
 
     set newHdr {$OrderNumber}
     foreach header $headerParent(headerList) {
         lappend newHdr $$header
     }
+    
+    set headerParent(dbHeaderList) $newHdr
     
     ## Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
     if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
@@ -212,9 +204,12 @@ proc job::db::open {} {
     # Get total copies
     set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
     
+    # Init variables
+    
+    set process(versionList) [ea::db::getUniqueValues $job(db,Name) Version Addresses]
     ## Initialize popup menus
     #IFMenus::tblPopup $files(tab3f2).tbl browse .tblMenu
-    #IFMenus::createToggleMenu $files(tab3f2).tbl
+    IFMenus::createToggleMenu $files(tab3f2).tbl
 } ;# job::db::open
 
 
