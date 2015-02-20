@@ -196,19 +196,7 @@ proc IFMenus::pasteRow {tbl} {
     #
     #***
     global log headerParent job
-    #${log}::debug --START-- [info level 1]
-    
-    #set cRow [$tbl curselection]
-    
-    ## Delete Row
-    #catch [$tbl delete $cRow] err
-    
-    ## Insert (paste) new row
-    #catch [$tbl insert end [clipboard get]] err
-    
-    
-    #${log}::debug DB INSERT: [lrange [clipboard get] 1 end]
-    #${log}::debug INSERT [join $headerParent(headerList) ,] _ [join [lrange [clipboard get] 1 end] ,]
+
     if {[clipboard get] eq ""} {return}
     
     # Setup the headers
@@ -236,9 +224,9 @@ proc IFMenus::pasteRow {tbl} {
     
     # Update total copies
     set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
-	
-    #${log}::debug --END-- [info level 1]
+
 } ;# IFMenus::pasteRow
+
 
 proc IFMenus::deleteRow {tbl dbCol dbTbl} {
     #****f* deleteRow/IFMenus
@@ -317,13 +305,13 @@ proc IFMenus::copyRow {tbl} {
     #
     #***
     global log
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
     clipboard clear
     clipboard append [$tbl get [$tbl curselection]]
-    ${log}::debug Copy Row: [$tbl get [$tbl curselection]]
+    #${log}::debug Copy Row: [$tbl get [$tbl curselection]]
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# IFMenus::copyRow
 
 
@@ -376,16 +364,14 @@ proc IFMenus::copyCell {tbl} {
     foreach item $Cells {
         lappend tmp [lindex [split $item ,] 0]
     }
-    #${log}::debug tmp: $tmp
-    #${log}::debug Rows: [llength [lsort -unique $tmp]]
+
     set numOfRows [llength [lsort -unique $tmp]]
     
     if {[info exist colTmp]} {unset colTmp}
     foreach item $Cells {
         lappend colTmp [lindex [split $item ,] 1]
     }
-    #${log}::debug colTmp: $colTmp
-    #${log}::debug Columns: [llength [lsort -unique $colTmp]]
+
     set numOfCols [llength [lsort -unique $colTmp]]
     
     # Single Row
@@ -396,23 +382,9 @@ proc IFMenus::copyCell {tbl} {
     if {$numOfRows >= 2 && $numOfCols >= 2} {set val HorzVert}
     
     set copy(orient) $val
-    ${log}::debug $copy(orient) Copy!
+    #${log}::debug $copy(orient) Copy!
     
-    #set colIdx [lrange [split $Cells ,] 0 0]
-    #${log}::debug colIdx: $colIdx
-    #
-    #foreach cell $tmp {
-    #    if {[string match $cell $colIdx] != 1} {
-    #        set tmp_direction Vertical
-    #    } else {
-    #        set tmp_direction Horizontal
-    #    }
-    #}
-    #
-    #set copy(orient) $tmp_direction
     set copy(cellsCopied) [llength $tmp]
-    #
-    #${log}::debug copyCell: $copy(orient) - No. Cells Copied: $copy(cellsCopied)
     
     #${log}::debug --END-- [info level 1]
 } ;# IFMenus::copyCell
@@ -580,7 +552,7 @@ proc IFMenus::toggleMenus {tbl YesNo hidePath showPath colName} {
     #
     #***
     global log files
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     # Removes the column name from one cascade menu and add it to the other.
     
     
@@ -593,8 +565,7 @@ proc IFMenus::toggleMenus {tbl YesNo hidePath showPath colName} {
         $hidePath delete $colName
         $showPath add command -label $colName -command "IFMenus::toggleMenus $tbl no $hidePath $showPath $colName"
     }
-    
-    
+
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# IFMenus::toggleMenus

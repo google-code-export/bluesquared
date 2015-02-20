@@ -265,4 +265,7 @@ proc job::db::write {db dbTbl dbTxt wid widCells {dbCol ""}} {
     set dbPK [$wid getcell [lindex [split $widCells ,] 0],0]
     $db eval "UPDATE $dbTbl SET $dbCol='$dbTxt' WHERE OrderNumber='$dbPK'"
     
+    # Get total copies
+    set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
+    
 } ;# job::db::write
