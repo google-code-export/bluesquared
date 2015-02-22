@@ -48,6 +48,8 @@ proc vUpdate::saveCurrentVersion {} {
     #***
     global log cVersion program
     
+    if {![info exists program(dbVersion)]} {set program(dbVersion) ""}
+    
     set firstRun 0
     ${log}::debug Entering SaveCurrentVersion
     
@@ -64,16 +66,20 @@ proc vUpdate::saveCurrentVersion {} {
         set cVersion(oldVersion) $program(Version)
         set cVersion(oldPatchLevel) $program(PatchLevel)
         set cVersion(oldbeta) $program(beta)
+        set cVersion(olddbVersion) $program(dbVersion)
     }
     
     set program(Version) 4
     set program(PatchLevel) 0.0 ;# Leading decimal is not needed
     set program(beta) "Beta 8"
-    set program(Dev) 1
+    set program(Dev) 0
     set program(fullVersion) "$program(Version).$program(PatchLevel) $program(beta)"
+    set program(dbVersion) "$program(Version).$program(PatchLevel)-1"
     
     set program(Name) "Efficiency Assist"
     set program(FullName) "$program(Name) - $program(fullVersion)"
+    
+
     
     tk appname $program(Name)
 
@@ -149,7 +155,7 @@ proc vUpdate::whatVersion {} {
     }
     
     if {$cVersion(oldVersion) ne $program(Version)} {
-        ${log}::debug New Major Version detected, was $cVersion(oldVersion, now $program(Version)!
+        ${log}::debug New Major Version detected, was $cVersion(oldVersion), now $program(Version)!
         ${log}::debug Major Update, launching 'New Update' dialog ...
         set vers [mc "major"]
         set newVersionExpln [mc "Definition of major: This has numerous new features that are big or small. All of the updates that the previous minor releases had. This may contain more bugs."]
@@ -206,7 +212,7 @@ proc vUpdate::checkDBVers {version} {
     set getCompatVersion [eAssist_db::dbWhereQuery -columnNames ProgramVers -table Schema -where ProgramVers='$version']
     
     if {$getCompatVersion eq ""} {
-        ${log}::critical DB schema is not compatible with this version. Please update the database, before running $program(name)!
+        ${log}::critical DB schema is not compatible with this version. Please update the database, before running $program(Name)!
         } else {
             ${log}::info DB Schema is compatible with this version of $program(Name)
         }

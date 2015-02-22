@@ -69,7 +69,7 @@ proc eAssist::parentGUI {} {
     wm geometry . 640x610+${locX}+${locY}
     
     wm protocol . WM_DELETE_WINDOW {eAssistSetup::SaveGlobalSettings; destroy .}
-    wm protocol . WM_SAVE_YOURSELF eAssistSetup::SaveGlobalSettings
+    wm protocol . WM_SAVE_YOURSELF {eAssistSetup::SaveGlobalSettings}
 
     
     wm title . $program(FullName)
@@ -79,14 +79,11 @@ proc eAssist::parentGUI {} {
     set mb [menu .mb]
     . configure -menu $mb
 
+    ### *** Main menu's are listed here. The sub-menu's are listed elsewhere.
     ## File
     menu $mb.file -tearoff 0 -relief raised -bd 2
 
     $mb add cascade -label [mc "File"] -menu $mb.file
-    #$mb.file add command -label [mc "Import File"] -command {importFiles::fileImportGUI}
-    #$mb.file add command -label [mc "Preferences..."] -command {eAssistPref::launchPreferences}
-    #$mb.file add command -label [mc "Export File"] -command {export::DataToExport} -state disabled
-    #$mb.file add command -label [mc "Exit"] -command {exit}
 
     ## Module Menu - This is a dynamic menu for the active module.
     menu $mb.modMenu -tearoff 0 -relief raised -bd 2
@@ -108,13 +105,6 @@ proc eAssist::parentGUI {} {
     $mb.help add command -label [mc "About..."] -command { BlueSquared_About::aboutWindow 1}
     $mb.help add command -label [mc "Release Notes..."] -command { BlueSquared_About::aboutWindow 2}
 
-
-    ## Create Separator Frame
-    #set frame0 [ttk::frame .frame0]
-    #ttk::separator $frame0.separator -orient horizontal
-    #
-    #grid $frame0.separator - -sticky ew -ipadx 4i
-    #pack $frame0 -anchor n -fill x
 
     # Create the container frame
     ttk::frame .container
@@ -141,29 +131,6 @@ proc eAssist::parentGUI {} {
 
     
     eAssist_GUI::editPopup
-    
-    ##
-    ## If this is the first startup for the machine on this version, we should launch the "New Feature Dialog"
-    ##
-    #if {$settings(newSettingsTxt) eq no} {
-    #    ### Check version and patchLevel to see if we are greater than those numbers, if so display the new version dialog.
-    #    #Error_Message::newVersion buttontxt buttoncmd VersionTxt
-    #    set mySettings(FullVersion) $program(Version).$program(PatchLevel)
-    #    Error_Message::newVersion [mc "View Settings"] "eassist_Preferences::prefGUI" This version changes how your files are opened and saved.\nPlease ensure that the files will save to an appropriate location.\nWould you like to go there now?
-    #    #Error_Message::errorMsg saveSettings1
-    #}
-    
-    #if {$settings(newSettingsTxt) eq yes} {
-    #    if {[info exists mySettings(FullVersion)]} {
-    #        #if {$settings(FullVersion) ne $program(Version).$program(PatchLevel)} {}
-    #        if {[string match $mySettings(FullVersion) $program(Version).$program(PatchLevel)] ne 1} {
-    #            Error_Message::newVersion "" "" EA Version $program(Version).$program(PatchLevel)
-    #            set mySettings(FullVersion) $program(Version).$program(PatchLevel)
-    #            #eassist_Preferences::saveConfig
-    #        }
-    #    }
-    #}
-    
 
 } ;# End of parentGUI
 
@@ -196,11 +163,8 @@ proc eAssist::buttonBarGUI {args} {
     #
     #***
     global log btn program settings mb options
-    ${log}::debug Entering buttonBarGUI
+    #${log}::debug Entering buttonBarGUI
     
-    # save the geometry of the module that we are leaving
-    #set options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]
-    #${log}::debug Geometry: $options(geom,[lindex $settings(currentModule) 0])
 
     set module [lrange [join $args] 0 0]
     set idx [lrange [join $args] 1 1]
@@ -220,7 +184,7 @@ proc eAssist::buttonBarGUI {args} {
     $mb.modMenu delete 0 end
     $mb.file delete 0 end
         
-    ${log}::debug Entering - $module
+    #${log}::debug Entering - $module
     switch -- $module {
         BoxLabels   {
             ${log}::debug Entering $module mode
@@ -235,10 +199,10 @@ proc eAssist::buttonBarGUI {args} {
             # .. launch the mode
             Shipping_Gui::shippingGUI
             
+            eAssist_Global::getGeom $module 450x475
             # .. save the settings
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences
-            eAssist_Global::getGeom $module 450x475
         }
         BatchMaker   {
             ${log}::debug Entering $module mode
@@ -255,11 +219,10 @@ proc eAssist::buttonBarGUI {args} {
             # .. launch the mode
             importFiles::eAssistGUI
             
+            eAssist_Global::getGeom $module 900x610+240+124
             # .. save the settings
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences
-            #$mb.file entryconfigure 1 -state normal
-            eAssist_Global::getGeom $module 900x610+240+124
             }
         Setup       {
             ${log}::debug Entering $module mode
@@ -273,19 +236,16 @@ proc eAssist::buttonBarGUI {args} {
 
             # .. launch the mode
             eAssistSetup::eAssistSetup
-            
+
+            eAssist_Global::getGeom $module 845x573+247+156
             # .. save the settings
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences
-            #$mb.file entryconfigure 1 -state disable
-            eAssist_Global::getGeom $module 845x573+247+156
-            ${log}::debug Height [winfo height .]
-            ${log}::debug Width [winfo width .]
         }
         default     {}
     }
     
-    $mb.file add command -label [mc "Exit"] -command {exit}
+    $mb.file add command -label [mc "Exit"] -command {eAssistSetup::SaveGlobalSettings ; exit}
     
     # Check the versions
     vUpdate::whatVersion

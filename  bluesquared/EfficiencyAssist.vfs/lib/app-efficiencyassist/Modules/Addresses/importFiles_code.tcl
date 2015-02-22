@@ -288,7 +288,8 @@ proc importFiles::processFile {win} {
     set job(db,ColOrder) [join $newCol ,]
     
     # This must be a balanced list
-    set replaceBadChars [list ' "" , " " / " " \\ " " \" " "]
+    # Only replace known 'bad' values. Commas, Apostrophe, and Quotes. Further filtering will be done by the user.
+    set replaceBadChars [list ' "" , " " \" " "]
     
     foreach record $process(dataList) {
         # .. Skip over any 'blank' lines in found in the file

@@ -102,6 +102,7 @@ proc eAssistSetup::selectionChanged {tbl} {
     set G_currentSetupFrame [$tbl get $rowList]
      
      switch -- $G_currentSetupFrame {
+        Admin           {eAssistSetup::admin_GUI ; set GS(gui,lastFrame) admin_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         Paths           {eAssistSetup::selectFilePaths_GUI ; set GS(gui,lastFrame) selectFilePaths_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         Labels          {eAssistSetup::boxLabels_GUI ; set GS(gui,lastFrame) boxLabels_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         Delimiters      {}
