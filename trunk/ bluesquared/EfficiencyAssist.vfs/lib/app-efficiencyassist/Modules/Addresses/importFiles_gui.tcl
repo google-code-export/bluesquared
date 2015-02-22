@@ -289,6 +289,14 @@ proc importFiles::initMenu {} {
         destroy $mb.modMenu.quick
     }
 
+    if {[winfo exists $mb.file.project]} {
+        destroy $mb.file.project
+    }
+    
+    if {[winfo exists $mb.file.reports]} {
+        destroy $mb.file.reports
+    }
+    
     $mb.modMenu delete 0 end
     $mb.file delete 0 end
     

@@ -163,7 +163,7 @@ proc 'eAssist_sourceReqdFiles {} {
 
 
 proc 'eAssist_bootStrap {} {
-	global program log
+	global program log env
 	
 	set program(Home) [pwd]
 	
@@ -199,6 +199,17 @@ proc 'eAssist_bootStrap {} {
 	
 	# load the DB
 	eAssist_db::loadDB
+	
+	# Check to see if the windows user is in the db, add if they aren't already there.
+	set userName [db eval "SELECT UserLogin FROM Users WHERE UserLogin='$env(USERNAME)'"]
+	
+	if {$userName == ""} {
+		${log}::debug $env(USERNAME) is not in the Database. Adding ...
+		db eval "INSERT INTO Users (UserLogin) VALUES ('$env(USERNAME)')"
+	} else {
+		${log}::debug User $userName is in the database.
+	}
+	set program(userName) [db eval "SELECT UserLogin FROM Users WHERE UserLogin='$env(USERNAME)'"]
 
 } ;#'eAssist_bootStrap
 
@@ -574,7 +585,7 @@ proc 'eAssist_loadSettings {} {
 	# Office 2003 = 11
 	# Office 2007 = 12
 }
-# Load required packages
+# Load required packages and DB
 'eAssist_bootStrap
 
 # Load required files / packages

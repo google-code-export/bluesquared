@@ -57,7 +57,6 @@ proc eAssistSetup::SaveGlobalSettings {} {
     #${log}::debug Folder: [eAssist_Global::folderAccessibility $program(Home)]
     #${log}::debug File: [eAssist_Global::fileAccessibility $program(Home) $mySettings(ConfigFile)]
     # Make sure we set the current modules' geometry before saving
-    set options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]
     
     lib::savePreferences
 
@@ -128,7 +127,7 @@ proc lib::savePreferences {} {
     #
     #***
     global log pref settings program mySettings GS options logSettings
-    ${log}::debug --START-- saveConfig
+    #${log}::debug --START-- saveConfig
     #global settings header internal customer3P mySettings env international company shipVia3P
     
     if {['eAssist_checkPrefFile] eq "f1"} {
@@ -137,7 +136,10 @@ proc lib::savePreferences {} {
         ${log}::critical -WARNING- Can't write to [file join $mySettings(Home) $mySettings(File)]. Settings will not be saved if changes occur.
         return
     }
-
+    
+    # Update the geometry settings, just in case the user resized the window before saving.
+    set options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]
+    #${log}::debug options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]
     
     # Write out individual variables
     chan puts $fd "program(Version) $program(Version)"
@@ -169,5 +171,5 @@ proc lib::savePreferences {} {
     
     chan close $fd
 
-    ${log}::debug --END-- saveConfig
+    #${log}::debug --END-- saveConfig
 } ;# lib::savePreferences 
