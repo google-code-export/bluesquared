@@ -49,7 +49,7 @@ proc importFiles::fileImportGUI {} {
     # SEE ALSO
     #
     #***
-    global log w options mySettings headerParent process
+    global log w options mySettings headerParent process job
     #${log}::debug Height: [winfo height .] - [winfo x .]
     #${log}::debug Width: [winfo width .] - [winfo y .]
     if {[eAssistHelper::checkProjSetup] == 1} {return}
@@ -87,7 +87,7 @@ proc importFiles::fileImportGUI {} {
     grid $f0.txt1 -column 0 -row 0 -pady 5p -sticky e ;#-padx 2p
     grid $f0.entry1 -column 1 -row 0 -pady 5p -sticky ew ;#-padx 2p
     
-    ttk::button $f0.btn1 -text [mc "Open File"] -command {importFiles::readFile [eAssist_Global::OpenFile "Open File" $mySettings(sourceFiles) file -ext csv -filetype {{Comma Separated Values} {.csv}}] $w(wi).lbox1.listbox}
+    ttk::button $f0.btn1 -text [mc "Open File"] -command {importFiles::readFile [eAssist_Global::OpenFile "Open File" $job(SaveFileLocation) file -ext csv -filetype {{Comma Separated Values} {.csv}}] $w(wi).lbox1.listbox}
     ttk::button $f0.btn2 -text [mc "Import"] -command {lib::savePreferences; importFiles::processFile $w(wi)} -state disabled
     #ttk::button $frame1a.btn3 -text [mc "Reset"] -command {{$log}::debug Reset Interface} -state disabled
     

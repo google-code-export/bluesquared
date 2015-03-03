@@ -46,7 +46,7 @@ proc vUpdate::saveCurrentVersion {} {
     #
     #
     #***
-    global log cVersion program
+    global log cVersion program job
     
     if {![info exists program(dbVersion)]} {set program(dbVersion) ""}
     
@@ -74,7 +74,9 @@ proc vUpdate::saveCurrentVersion {} {
     set program(beta) "Beta 8"
     set program(Dev) 0
     set program(fullVersion) "$program(Version).$program(PatchLevel) $program(beta)"
+    
     set program(dbVersion) "$program(Version).$program(PatchLevel)-1"
+    set job(db,currentSchemaVers) 2
     
     set program(Name) "Efficiency Assist"
     set program(FullName) "$program(Name) - $program(fullVersion)"

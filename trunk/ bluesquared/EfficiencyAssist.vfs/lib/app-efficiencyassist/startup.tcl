@@ -89,6 +89,9 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries base64]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries smtp]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries Cawt_1.0.7]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries struct]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries report]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries cmdline]
 
 
 	##
@@ -125,6 +128,9 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require base64
 	package require twapi
 	package require cawt
+	package require cmdline
+	package require struct
+	package require report
 	
 	
 	# Logger; MD5 are [package require]'d below.
@@ -561,6 +567,8 @@ proc 'eAssist_loadSettings {} {
 	
 	# Set options in the Options DB
 	option add *tearOff 0
+	
+	job::reports::initReportTables
 	
 #	# check for updates
 #    set fd "" ;# Make sure we are cleared out before reusing.

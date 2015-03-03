@@ -374,7 +374,7 @@ proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
 	} elseif {$type eq "-menu"} {
 		if {$copy(cellsCopied) >= 2} {
 			# Pasting multiple cells
-			#${log}::debug Menu MULTIPLE CELLS: $txtVar - cells: $cells
+			${log}::debug Menu MULTIPLE CELLS: $txtVar - cells: $cells
 			#foreach item $txtVar cell [$tbl curcellselection] {} ;# pasting into highlighted cells only
 			set incrCells [lindex [split $cells ,] 0]
 			set incrCol [lindex [split $cells ,] 1]
@@ -415,14 +415,91 @@ proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
 				"Horizontal"	{set txtVar [split [clipboard get] \t]}
 			}
 
+			${log}::debug SELECTED cell to PASTE INTO $cells
+			${log}::debug $txtVar [llength $txtVar]
+			${log}::debug Orientation $copy(orient)
+					
+			if {$copy(cellsCopied) >= 2} {
+				${log}::debug Cells Copied $copy(cellsCopied)
+				${log}::debug Cells Selected: [llength $cells]
+				# Find out if we copied multiple horizontal rows, and selected multiple vertical rows
+				if {$copy(cellsCopied) > 1 && [llength $cells] > 1} {set copy(orient) HorzVert}
+				set cell [lindex $cells 0] ;# compensate for when the user selects a range to paste into
+				set incrRow [lindex [split $cell ,] 0]
+				set incrCol [lindex [split $cell ,] 1]
+				set origCol $incrCol
+				
+				if {$copy(method) != "hotkey"} {set txtVar [join $txtVar]}
+				if {$copy(orient) != "HorzVert"} {
+					foreach val $txtVar {
+						${log}::debug single cell: $incrRow,$incrCol $val
+						job::db::write $job(db,Name) Addresses $val $tbl $incrRow,$incrCol
+						
+						if {$copy(orient) eq "Vertical"} {
+							incr incrRow
+						} else {
+							incr incrCol
+						}
+					}
+				} else {
+					${log}::debug We selected multiple cells Row and Column
+					#${log}::debug Raw Data: [split [clipboard get] \n]
+					foreach horzVal [split [clipboard get] \n] {
+						foreach vertVal [split $horzVal \t] {
+							# Moving vertically
+							for {set x 0} {[llength $cells] > $x} {incr x} {
+								# Moving horizontally
+								foreach val $vertVal {
+									${log}::debug Pasting Horz and Vert: [join $val] row: $incrRow, col: $incrCol
+									#$tbl cellconfigure $incrRow,$incrCol -text $vertVal
+									job::db::write $job(db,Name) Addresses [join $val] $tbl $incrRow,$incrCol
+									incr incrCol
+								}
+								set incrCol $origCol ;# reset since we need to move down a row; but go back to the starting column
+								incr incrRow
+							}
+						}
+					}
+				}
+			} elseif {[llength $cells] > 1} {
+				# We may copy one cell, but want to paste it multiple times
+				${log}::debug Copied one cell, pasting into MULTIPLE CELLS
+				foreach cell $cells {
+					${log}::debug cell $cell -text $txtVar
+					#$tbl cellconfigure $cell -text $txtVar
+					job::db::write $job(db,Name) Addresses $txtVar $tbl $cell
+				}
+			} else {
+				# Pasting a single cell
+				${log}::debug SINGLE CELL: $txtVar - $cells
+				job::db::write $job(db,Name) Addresses [join $txtVar] $tbl $cells
+			}
+	}
+
+} ;# eAssistHelper::insValuesToTableCells
+
+
+proc eAssistHelper::tmpPaste {} {
+	global log files txtVariable w copy job
+	
+	switch -- $copy(orient) {
+				"Vertical"		{set txtVar [split [clipboard get] \n]}
+				"Horizontal"	{set txtVar [split [clipboard get] \t]}
+			}
+
+			${log}::debug SELECTED cell to PASTE INTO $cells
+			${log}::debug $txtVar [llength $txtVar]
+			
 			set incrRow [lindex [split $cells ,] 0]
 			set incrCol [lindex [split $cells ,] 1]
 			set origCol $incrCol
+			
 			if {$copy(orient) != "HorzVert"} {
 				foreach val $txtVar {
 					#${log}::debug single cell: $incrRow,$incrCol $val
+					
 					#$tbl cellconfigure $incrRow,$incrCol -text $val
-					job::db::write $job(db,Name) Addresses $item $tbl $incrRow,$incrCol
+					job::db::write $job(db,Name) Addresses $val $tbl $incrRow,$incrCol
 					
 					if {$copy(orient) eq "Vertical"} {
 						incr incrRow
@@ -435,17 +512,15 @@ proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
 					foreach vertVal [split $horzVal \t] {
 						#${log}::debug Multiple Cells: $vertVal row: $incrRow, col: $incrCol
 						#$tbl cellconfigure $incrRow,$incrCol -text $vertVal
-						job::db::write $job(db,Name) Addresses $item $tbl $incrRow,$incrCol
+						job::db::write $job(db,Name) Addresses $val $tbl $incrRow,$incrCol
 						incr incrCol
 					}
 					set incrCol $origCol ;# reset since we need to move down a row; but go back to the starting column
 					incr incrRow
 				}
 			}
-	}
-
-} ;# eAssistHelper::insValuesToTableCells
-
+}
+	
 
 #proc eAssistHelper::multiCells {} {
 #    #****f* multiCells/eAssistHelper
@@ -608,3 +683,88 @@ proc eAssistHelper::checkProjSetup {} {
 		return 1
 	}
 } ;# eAssistHelper::checkProjSetup
+
+
+proc eAssistHelper::initShipOrderArray {} {
+    #****f* initShipOrderArray/eAssistHelper
+    # CREATION DATE
+    #   03/01/2015 (Sunday Mar 01)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssistHelper::initShipOrderArray  
+    #
+    # FUNCTION
+    #	Initializes shipOrder array; initially, or to clear it out
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log headerParent shipOrder
+
+    foreach name $headerParent(headerList) {
+        set shipOrder($name) ""
+    }
+   
+} ;# eAssistHelper::initShipOrderArray
+
+proc eAssistHelper::loadShipOrderArray {db dbTbl id} {
+    #****f* loadShipOrderArray/eAssistHelper
+    # CREATION DATE
+    #   03/02/2015 (Monday Mar 02)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssistHelper::loadShipOrderArray db dbTable id 
+    #
+    # FUNCTION
+    #	Populats the Ship Order array, based on the ID passed to the function (ID is Index in Database)
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log shipOrder headerParent
+	
+	set columnNames [join $headerParent(headerList) ,]
+	
+	$db eval "SELECT * FROM $dbTbl WHERE OrderNumber='$id'" {
+			foreach name [array name shipOrder] {
+				set shipOrder($name) [subst $$name]
+			}
+	}
+
+} ;# eAssistHelper::loadShipOrderArray
