@@ -76,7 +76,7 @@ proc customer::projSetup {{modify new}} {
         new     { set btnOKState normal; set btnIMPState normal
                     ${log}::debug NEW PROJECT - Clear all job text variables.
                     if {[info exists job(db,Name)]} {
-                        close $job(db,Name) ;# Close the db connection
+                        catch {close $job(db,Name)} ;# Close the db connection
                         foreach name [array names job] {
                             set job($name) ""
                         }
@@ -149,7 +149,7 @@ proc customer::projSetup {{modify new}} {
     ttk::button $f2.btn1 -text [mc "..."] -width 3 -command {customer::getFileSaveLocation}
     
     ttk::label $f2.txt2 -text [mc "Ship Date"]
-    ttk::entry $f2.entry2 -textvariable job(ShipDate)
+    ttk::entry $f2.entry2 -textvariable job(ShipDate) -state disabled
         tooltip::tooltip $f2.entry2 [mc "Enter the date that you want defaulted into all shipments - must be in MM/DD/YYYY format"]
     
     grid $f2.txt1     -column 0 -row 0 -sticky nes -pady 3p -pady 3p

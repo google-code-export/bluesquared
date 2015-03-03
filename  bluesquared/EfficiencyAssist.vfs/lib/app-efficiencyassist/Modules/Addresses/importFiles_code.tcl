@@ -53,7 +53,7 @@ proc importFiles::initVars {args} {
     #   
     #   
     #***
-    global log headerParent headerAddress dist carrierSetup packagingSetup
+    global log headerParent headerAddress dist carrierSetup packagingSetup shipOrder
 
     #set headerParent(headerList) [eAssist_db::dbSelectQuery -columnNames InternalHeaderName -table Headers]
     set headerParent(headerList) [db eval "SELECT InternalHeaderName FROM Headers ORDER BY DisplayOrder"]
@@ -78,6 +78,10 @@ proc importFiles::initVars {args} {
     
     set packagingSetup(ContainerType) [db eval "SELECT Container FROM Containers"]
     set packagingSetup(PackageType) [db eval "SELECT Package FROM Packages"]
+    
+    # Initialize the shipOrder array; we give it the same names as what is in the Header List
+    eAssistHelper::initShipOrderArray
+
 
 } ;# importFiles::initVars
 
@@ -382,7 +386,8 @@ proc importFiles::processFile {win} {
                                         lappend process(versionList) $listData
                                     }
                         }
-                    default     {set listData [string map $replaceBadChars $listData]}
+                    quantity    {set listData [join [string map $replaceBadChars $listData] ""] ;# Make sure we don't have any spaces after replacing chars.}
+                    default     {set listData [join [string map $replaceBadChars $listData]] }
                 }               
                 set listData [string trim $listData]
                 # Create the list of values

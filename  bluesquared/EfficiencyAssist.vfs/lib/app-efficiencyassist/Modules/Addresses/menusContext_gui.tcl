@@ -106,14 +106,15 @@ proc IFMenus::tblPopup {tbl mode mName} {
         # files(tab3f2).tbl / Main Table
         if {$mode eq "browse"} {
             $mName add command -label [mc "Quick Insert..."] -command {eAssistHelper::insertItems $files(tab3f2).tbl}
-            $mName add command -label [mc "Copy"] -command {IFMenus::copyCell $files(tab3f2).tbl}
-            $mName add command -label [mc "Paste"] -command {eAssistHelper::insValuesToTableCells -menu $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]}
-            #$mName add command -label [mc "Clear"] -command {IFMenus::clearItems $files(tab3f2).tbl}
+            $mName add command -label [mc "Destination..."] -command {eAssistHelper::addDestination $files(tab3f2).tbl [lindex [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]] 0]}
+            $mName add command -label [mc "Copy"] -command {IFMenus::copyCell $files(tab3f2).tbl Menu}
+            $mName add command -label [mc "Paste"] -command {eAssistHelper::insValuesToTableCells -hotkey $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]}
+            $mName add command -label [mc "Clear"] -command {IFMenus::clearItems $files(tab3f2).tbl}
             $mName add separator
             $mName add command -label [mc "Copy Row"] -command {IFMenus::copyRow $files(tab3f2).tbl}
             $mName add command -label [mc "Paste Row"] -command {IFMenus::pasteRow $files(tab3f2).tbl}
             #$mName add command -label [mc "Clear Row Contents"] -command {IFMenus::clearRowContents $files(tab3f2).tbl}
-            $mName add command -label [mc "Insert Row"] -command {catch [$files(tab3f2).tbl insert [$files(tab3f2).tbl curselection] ""] err}
+            #$mName add command -label [mc "Insert Row"] -command {catch [$files(tab3f2).tbl insert [$files(tab3f2).tbl curselection] ""] err}
             $mName add command -label [mc "Delete Row"] -command {IFMenus::deleteRow $files(tab3f2).tbl OrderNumber Addresses}
         } else {
             # Browse mode
@@ -128,6 +129,7 @@ proc IFMenus::tblPopup {tbl mode mName} {
 	
     #${log}::debug --END-- [info level 1]
 } ;# IFMenus::tblPopup
+
 
 
 proc IFMenus::clearRowContents {tbl} {
@@ -315,7 +317,7 @@ proc IFMenus::copyRow {tbl} {
 } ;# IFMenus::copyRow
 
 
-proc IFMenus::copyCell {tbl} {
+proc IFMenus::copyCell {tbl {method 0}} {
     #****f* copyCell/IFMenus
     # AUTHOR
     #	Casey Ackels
@@ -350,12 +352,20 @@ proc IFMenus::copyCell {tbl} {
     # 0,1 0,2
     # 1,1 1,2
     
-    set Copy [$tbl getcells [$tbl curcellselection]]    
+    set Copy [$tbl getcells [$tbl curcellselection]]
     set Cells [$tbl curcellselection]
     #${log}::debug Copied Cells: $Cells
+    #${log}::debug Copied Data: $Copy
+    #${log}::debug is List? [string is list $Copy]
+    
+    if {$method != 0} {${log}::debug $method; set copy(method) $method}
     
     clipboard clear
     clipboard append $Copy
+    #${log}::debug CLIPBOARD: [clipboard get]
+    #{220 3rd Ave S} {Suite 100} {} Seattle
+    #220 3rd Ave S	Seattle
+    
     
     #set Cells {0,1 0,2} ;# Same Row (1 Row, 2 Columns)
     #set Cells {0,1 1,1} ; #Same Column (2 Rows, 1 Column)

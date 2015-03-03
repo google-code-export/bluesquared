@@ -193,7 +193,7 @@ proc eAssist_db::dbInsert {args} {
                 for {set x 0} {$x < $y} {incr x} {
                     # bypass values that could contain only curly braces (typically checkboxes)
                     if {[join [lrange $data $x $x]] ne ""} {
-                        ${log}::debug Col/Val [join [lrange $colNames $x $x]]=[join [lrange $data $x $x]]
+                        #${log}::debug Col/Val [join [lrange $colNames $x $x]]=[join [lrange $data $x $x]]
                         lappend updateStatement [join [lrange $colNames $x $x]]=[join [lrange $data $x $x]]
                     }
                 }
@@ -213,15 +213,15 @@ proc eAssist_db::dbInsert {args} {
             # Only inserting into one column
             set colNames [join $colNames]
             set data [join $data] ;# Remove the braces (could be a list)
-            ${log}::debug Insert_COLS: $colNames
-            ${log}::debug Insert_TABLE: $tbl
-            ${log}::debug Insert_DATA: $data
-            ${log}::debug INSERT or ABORT INTO $tbl $colNames VALUES ($data)
+            #${log}::debug Insert_COLS: $colNames
+            #${log}::debug Insert_TABLE: $tbl
+            #${log}::debug Insert_DATA: $data
+            #${log}::debug INSERT or ABORT INTO $tbl $colNames VALUES ($data)
             db eval "INSERT or ABORT INTO $tbl ($colNames) VALUES ($data)"
             
         } else {
-            ${log}::debug Insert_COLS: [join $colNames ,]
-            ${log}::debug Insert_Data: [join $data ,]
+            #${log}::debug Insert_COLS: [join $colNames ,]
+            #${log}::debug Insert_Data: [join $data ,]
             set colNames [join $colNames ,]
             set data [join $data ,]
             db eval "INSERT or ABORT INTO $tbl ($colNames) VALUES ($data)"

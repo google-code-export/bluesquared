@@ -231,11 +231,14 @@ proc importFiles::eAssistGUI {} {
     
     bind $bodyTag <Control-v> {
         eAssistHelper::insValuesToTableCells -hotkey $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]
-        ${log}::debug Pressed <Control-V>
+        ${log}::debug CLIPBOARD _ CTRL+V t [split [clipboard get] \t]
+        #${log}::debug CLIPBOARD _ CTRL+V n [split [clipboard get] \n]
+        #${log}::debug CLIPBOARD _ CTRL+V _list [list [clipboard get]]
+        #${log}::debug Pressed <Control-V>
     }
     
     bind $bodyTag <Control-c> {
-        IFMenus::copyCell $files(tab3f2).tbl
+        IFMenus::copyCell $files(tab3f2).tbl hotkey
         ${log}::debug Pressed <Control-C>
     }
     

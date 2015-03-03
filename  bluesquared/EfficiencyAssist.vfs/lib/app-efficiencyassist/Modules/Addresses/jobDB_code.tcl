@@ -54,13 +54,13 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
 
     ${log}::notice Creating a new database for: $custID $jobTitle $jobName $jobNumber
 
-    set job(db,Name) [join [ea::tools::formatFileName] _]
+    set job(db,Name) [ea::tools::formatFileName]
     
     # Create the database
     sqlite3 $job(db,Name) [file join $saveFileLocation $job(db,Name).db] -create 1
     
     # Create the tables
-    set job(db,currentSchemaVers) 1
+    
     $job(db,Name) eval {        
         CREATE TABLE IF NOT EXISTS Notes (
             Notes_ID  INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -103,7 +103,7 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
     
     # Insert data into Sysinfo table
     $job(db,Name) eval "INSERT INTO SysInfo (ProgramVers, SchemaVers) VALUES ('$program(Version).$program(PatchLevel)', '$job(db,currentSchemaVers)')"
-    
+       
 } ;# job::db::createDB
 #job::db::createDB SAGMED {Meredith Hunter} TEST001 Febraury 303603
 
@@ -146,7 +146,7 @@ proc job::db::open {} {
         ${log}::debug Previous job is open. Closing current job: $job(Title) $job(Name)
         $job(db,Name) close
         
-        unset job
+        #unset job
         }
         
     set job(db,Name) [eAssist_Global::OpenFile [mc "Open Project"] $mySettings(sourceFiles) file -ext .db -filetype {{Efficiency Assist Project} {.db}}]
@@ -171,12 +171,15 @@ proc job::db::open {} {
     
     set job(CustName) [join [db eval "SELECT CustName From Customer where Cust_ID='$job(CustID)'"]]
 
-    set newHdr {$OrderNumber}
-    foreach header $headerParent(headerList) {
+    #set newHdr {$OrderNumber}
+    foreach header [job::db::retrieveHeaderNames $job(db,Name) Addresses] {
         lappend newHdr $$header
     }
     
     set headerParent(dbHeaderList) $newHdr
+    
+    ## Check db schema to see if it needs to be updated ...
+    job::db::updateDB
     
     ## Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
     if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
@@ -186,8 +189,11 @@ proc job::db::open {} {
     
     # Insert the data into the tablelist
     $job(db,Name) eval {SELECT * from Addresses} {
-        $files(tab3f2).tbl insert end [subst $newHdr]
+        #${log}::debug [$files(tab3f2).tbl insert end $newHdr]
+        catch {$files(tab3f2).tbl insert end [subst $newHdr]} err
     }
+    
+    if {[info exists err]} {${log}::debug ERROR: $err}
     
     set headerWhiteList "$headerParent(whiteList) OrderNumber"
     
@@ -269,3 +275,139 @@ proc job::db::write {db dbTbl dbTxt wid widCells {dbCol ""}} {
     set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
     
 } ;# job::db::write
+
+
+proc job::db::updateDB {} {
+    #****f* updateDB/job::db
+    # CREATION DATE
+    #   02/24/2015 (Tuesday Feb 24)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   job::db::updateDB
+    #
+    # FUNCTION
+    #	Verify's the db schema is the latest; if it isn't update the schema
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log job program
+
+    
+    set job(db,oldSchema) [$job(db,Name) eval "SELECT max(SchemaVers) FROM SysInfo WHERE ProgramVers = '$program(Version).$program(PatchLevel)'"]
+    
+    if {$job(db,currentSchemaVers) > $job(db,oldSchema)} {
+        ${log}::debug Current Schema: $job(db,currentSchemaVers)
+        ${log}::debug DB Schema: $job(db,oldSchema)
+        ${log}::debug Job Schema needs to be updated!
+        ${log}::debug Updates to apply: [expr {$job(db,currentSchemaVers) - $job(db,oldSchema)}]
+        
+        set updates [expr {$job(db,oldSchema) + 1}] ;# Add a number, because we will start applying updates before the number can be increased.
+        for {set x $updates} {$x <= $job(db,currentSchemaVers)} {incr x} {
+            ${log}::debug "Updating to schema $x"
+            job::db::update_$x
+        }
+    }
+} ;# job::db::updateDB
+
+
+proc job::db::update_2 {} {
+# Updates the schema
+    global log job program
+
+    $job(db,Name) eval "ALTER TABLE Addresses RENAME TO ea_temp_table"
+    
+    ## Grab the table fields from our main db.
+    set hdr [db eval {SELECT InternalHeaderName FROM Headers ORDER BY DisplayOrder}]
+    set cTable [list {OrderNumber INTEGER PRIMARY KEY AUTOINCREMENT}]
+    
+    # Dynamically build the Addresses table
+    foreach header $hdr {
+        switch -- $header {
+            Quantity    {set dataType INTEGER}
+            default     {set dataType TEXT}
+        }
+        lappend cTable "'$header' $dataType"
+    }
+    set cTable [join $cTable ,]
+    
+    $job(db,Name) eval "CREATE TABLE IF NOT EXISTS Addresses ( $cTable )"
+
+    set tmpHdr [job::db::retrieveHeaderNames $job(db,Name) Addresses]
+    
+    set tmpHdr [join $tmpHdr ,]
+    $job(db,Name) eval "INSERT INTO Addresses ($tmpHdr) SELECT $tmpHdr FROM ea_temp_table"
+    
+    $job(db,Name) eval "DROP TABLE ea_temp_table"
+    
+    # Insert data into Sysinfo table
+    $job(db,Name) eval "INSERT INTO SysInfo (ProgramVers, SchemaVers) VALUES ('$program(Version).$program(PatchLevel)', '$job(db,currentSchemaVers)')"
+    
+    ${log}::debug Job DB Schema is now: [$job(db,Name) eval "SELECT max(SchemaVers) FROM SysInfo WHERE ProgramVers = '$program(Version).$program(PatchLevel)'"]
+} ;# job::db::update_2
+
+
+proc job::db::retrieveHeaderNames {db dbTbl} {
+    #****f* retrieveHeaderNames/job::db
+    # CREATION DATE
+    #   02/24/2015 (Tuesday Feb 24)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   job::db::retrieveHeaderNames db dbTbl
+    #
+    # FUNCTION
+    #	Retrieves the header names from the db that we're opening
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+    
+    if {[info exists tmpHdr]} {unset tmpHdr}
+    set pragma [$db eval "PRAGMA table_info($dbTbl)"]
+    foreach item $pragma {
+        if {$item != "" && ![string is digit $item] && ![string is upper $item]} {
+            lappend tmpHdr $item
+        }
+        
+    }
+    
+return $tmpHdr
+    
+} ;# job::db::retrieveHeaderNames

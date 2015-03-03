@@ -751,8 +751,11 @@ proc ea::tools::formatFileName {} {
     foreach item {Title Name Number} {
         set item2 [string tolower $item]
         #puts [string map [list %$item2 $job($item)] $mySettings(job,fileName)]
-        set fileName [string map [list %$item2 $job($item)] $fileName]
+        set fileName [string map [list %$item2 [join $job($item) -]] $fileName]
     }
+	# sanitize
+	set fileName [string map {\\ _ / _ \" ""} $fileName]
+	set fileName [join $fileName _]
 
 	return $fileName
 } ;# ea::tools::formatFileName
