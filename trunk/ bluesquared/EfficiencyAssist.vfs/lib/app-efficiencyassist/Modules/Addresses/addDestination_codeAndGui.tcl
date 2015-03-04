@@ -334,7 +334,7 @@ proc eAssistHelper::addDestination {tblPath {id -1}} {
     pack $btnbar -pady 5 -padx 10p -anchor se
     
 	ttk::button $btnbar.close -text [mc "Cancel"] -command [list destroy $win]
-    ttk::button $btnbar.save -text [mc "Save"] -command [list eAssistHelper::saveNewDest -add $tblPath] -state disabled
+    ttk::button $btnbar.save -text [mc "Save"] -command [list eAssistHelper::saveDest $id $tblPath $job(db,Name) Addresses] -state disabled
 	
     #--------- Grid
     grid $btnbar.close -column 0 -row 0 -sticky news -padx 5p -pady 5p
@@ -354,11 +354,11 @@ proc eAssistHelper::addDestination {tblPath {id -1}} {
 			if {[winfo class $child] eq "TEntry"} {
 
 				if {[string match *.get* $child]} {
-					${log}::debug Adding a binding to: $child
+					#${log}::debug Adding a binding to: $child
 					bind $child <KeyRelease> [subst {eAssistHelper::detectData $child $btnbar.save "$parentWid"}]
 				}
 			} elseif {[winfo class $child] eq "TCombobox"} {
-				${log}::debug Adding a binding to: $child
+				#${log}::debug Adding a binding to: $child
 				bind $child <KeyRelease> [subst {eAssistHelper::detectData $child $btnbar.save "$parentWid"}]
 				bind $child <<ComboboxSelected>> [subst {eAssistHelper::detectData $child $btnbar.save "$parentWid"}]
 			}
@@ -503,14 +503,19 @@ proc eAssistHelper::initFGTextColor {args} {
     #***
     global log
 
+	# Cycle through each parent
     foreach wid $args {
 		#${log}::debug Looking at $wid
-		#set widChild [winfo children $wid]
+		# Cycle through the children per parent
 		foreach child [winfo children $wid] {
-			#${log}::debug Looking at $child
+			# Only look at children that have TLabel as their class
 			if {[winfo class $child] eq "TLabel"} {
-				if {[string match *.req* $child] && [$child get] == ""} {
-					$child configure -foreground red
+				# Ensure it is a label that we deem 'required' with 'req' in the name.
+				if {[string match *.req* $child]} {
+					# It's required, now lets see if the entry widget has any data. If it doesn't, set it to Red.
+					if {[[string map {req get} $child] get] == ""} {
+						$child configure -foreground red
+					}
 				}
 			}
 		}
@@ -520,8 +525,8 @@ proc eAssistHelper::initFGTextColor {args} {
 } ;# eAssistHelper::initFGTextColor
 
 
-proc eAssistHelper::saveNewDest {modify tblPath} {
-    #****f* saveNewDest/eAssistHelper
+proc eAssistHelper::saveDest {id tblPath db dbTbl} {
+    #****f* saveDest/eAssistHelper
     # AUTHOR
     #	Casey Ackels
     #
@@ -547,44 +552,37 @@ proc eAssistHelper::saveNewDest {modify tblPath} {
     #***
     global log program shipOrder job headerParent
 
-    # Gather the paths for the entry widgets, using the prefix of 'get'.
-    #foreach win1 [winfo children $win] {
-    #    if {[string match *get* $win1] == 1} {
-    #        lappend name [lindex [split $win1 .] 3]
-    #    }
-    #}
-    
-    # Set up Column info
-	#set ColumnName [db eval {SELECT InternalHeaderName FROM Headers ORDER BY DisplayOrder}]
+	if {$id != -1} {
+		## -- We are updating a record
+		#${log}::debug ID = $id
+		if {[info exists updateStatement] || [info exists headers]} {unset updateStatement; unset headers}
+		set headers [list \$OrderNumber] ;# Order Number is not part of the general header names, this perhaps, should be changed... It is our index in the Addresses Table
+		foreach hdr $headerParent(headerList) {
+			lappend updateStatement $hdr='$shipOrder($hdr)'
+			lappend headers $$hdr
+		}
+		#${log}::debug Update Statement: $db eval "UPDATE $dbTbl SET [join $updateStatement ,] WHERE rowid=$id"
+		$db eval "UPDATE $dbTbl SET [join $updateStatement ,] WHERE rowid=$id"
+		
+		set tblID [expr {$id - 1}]
+		foreach hdr $headerParent(headerList) {
+			$tblPath cellconfigure $tblID,$hdr -text $shipOrder($hdr)
+		}
 
+	} else {
+		## -- We are adding a new record
+		if {[info exists insertRow]} {unset insertRow}
+		foreach hdr $headerParent(headerList) {
+			lappend insertRow '$shipOrder($hdr)'
+		}
 	
-    # remove the 'get' prefix, match the widget name to the column name, if nothing matches append {} as a placeholder
-    # after cycling through all the widget names, insert the list of data.
-    
-    #foreach col $ColumnName {
-    #    if {[lsearch -nocase -glob $name *$col] != -1} {
-    #        set child [lindex $name [lsearch -nocase -glob $name *$col]]
-    #        #${log}::debug Data is: $col _ [lindex $name [lsearch -nocase -glob $name *$col]] _ [$win.$child get]
-    #        lappend insertRow '[$win.$child get]'
-    #    } else {
-    #        lappend insertRow ''
-    #    }
-    #}
+		$job(db,Name) eval "INSERT OR ABORT INTO $dbTbl ([join $headerParent(headerList) ,]) VALUES ([join $insertRow ,])"
 	
-	switch -- $modify {
-		-add		{${log}::debug "Adding an address/ship order to the DB"}
-		-edit	{${log}::debug "Modifying/Viewing an address in the DB"}
+		set rowID [$db last_insert_rowid]
+		$tblPath insert end [$db eval "SELECT * FROM $dbTbl where rowid=$rowID"]
 	}
 	
-	if {[info exists insertRow]} {unset insertRow}
-	foreach hdr $headerParent(headerList) {
-		lappend insertRow '$shipOrder($hdr)'
-	}
-
-	$job(db,Name) eval "INSERT OR ABORT INTO Addresses ([join $headerParent(headerList) ,]) VALUES ([join $insertRow ,])"
-
-	set rowID [$job(db,Name) last_insert_rowid]
-	$tblPath insert end [$job(db,Name) eval "SELECT * FROM Addresses where rowid=$rowID"]
-	
-} ;# eAssistHelper::saveNewDest
+	# Apply the highlights ... Technically we should also prevent the user from entering too much data into each field.
+	importFiles::highlightAllRecords $tblPath
+} ;# eAssistHelper::saveDest
 
