@@ -106,7 +106,7 @@ proc export::DataToExport {} {
         set fileName [join "$fName $file_Name" _]
         
         # don't open the file yet, because we may have canceled the Save As dialog...
-        set myFile(data) [file join [eAssist_Global::SaveFile $fileName]]
+        set myFile(data) [file join [eAssist_Global::SaveFile $fileName $job(SaveFileLocation)]]
         
             #${log}::debug myFile(data): $myFile(data)
 

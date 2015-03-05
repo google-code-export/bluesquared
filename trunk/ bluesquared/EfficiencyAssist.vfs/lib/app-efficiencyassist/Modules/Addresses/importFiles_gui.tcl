@@ -227,19 +227,29 @@ proc importFiles::eAssistGUI {} {
             $files(tab3f2).tbl configure -selecttype cell
         }
     }
+    
+    bind $bodyTag <Double-1> {
+        #${log}::debug Clicked on column %W %x %y
+        #${log}::debug Column Name: [$files(tab3f2).tbl containingcolumn %x]
+        #set colName [$files(tab3f2).tbl columncget [$files(tab3f2).tbl containingcolumn %x] -name]
+        #${log}::debug Column Name: $colName
+        if {$colName eq "OrderNumber"} {
+            eAssistHelper::addDestination $files(tab3f2).tbl [lindex [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]] 0]
+        }
+    }
    
     
     bind $bodyTag <Control-v> {
-        eAssistHelper::insValuesToTableCells -hotkey $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]
-        ${log}::debug CLIPBOARD _ CTRL+V t [split [clipboard get] \t]
+        #eAssistHelper::insValuesToTableCells -hotkey $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]
+        #${log}::debug CLIPBOARD _ CTRL+V t [split [clipboard get] \t]
         #${log}::debug CLIPBOARD _ CTRL+V n [split [clipboard get] \n]
         #${log}::debug CLIPBOARD _ CTRL+V _list [list [clipboard get]]
         #${log}::debug Pressed <Control-V>
     }
     
     bind $bodyTag <Control-c> {
-        IFMenus::copyCell $files(tab3f2).tbl hotkey
-        ${log}::debug Pressed <Control-C>
+        #IFMenus::copyCell $files(tab3f2).tbl hotkey
+        #${log}::debug Pressed <Control-C>
     }
     
     # Begin labelTag

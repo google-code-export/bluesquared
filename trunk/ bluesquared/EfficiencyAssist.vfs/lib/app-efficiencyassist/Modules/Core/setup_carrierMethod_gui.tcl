@@ -48,7 +48,7 @@ proc eAssistSetup::carrierMethod_GUI {} {
     # SEE ALSO
     #
     #***
-    global G_setupFrame log carrierSetup
+    global G_setupFrame log carrierSetup w
     global f1 f2 f3 f4 f5 ;# Used for bindings only
     
     eAssist_Global::resetSetupFrames ;# Reset all frames so we start clean
@@ -269,8 +269,8 @@ proc eAssistSetup::carrierMethod_GUI {} {
     
     ttk::label $f1S.txt3 -text [mc "Carrier"]
     ttk::combobox $f1S.03cbox1 -postcommand "$f1S.03cbox1 configure -values [list [eAssist_db::dbSelectQuery -columnNames Name -table Carriers]]"
-    bind $f1S.03cbox1 <FocusIn> "$f1S.03cbox1 configure -values [list [eAssist_db::dbSelectQuery -columnNames Name -table Carriers]]"
-    bind $f1S.03cbox1 <KeyRelease> [list AutoComplete::AutoCompleteComboBox $f1S.03cbox1 %K]
+        bind $f1S.03cbox1 <FocusIn> "$f1S.03cbox1 configure -values [list [eAssist_db::dbSelectQuery -columnNames Name -table Carriers]]"
+        bind $f1S.03cbox1 <KeyRelease> [list AutoComplete::AutoCompleteComboBox $f1S.03cbox1 %K]
     
     ttk::label $f1S.txt4 -text [mc "Payment Type"]
     ttk::combobox $f1S.04cbox2 -postcommand "$f1S.04cbox2 configure -values [list [eAssist_db::dbSelectQuery -columnNames Payer -table FreightPayer]]"

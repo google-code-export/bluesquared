@@ -44,7 +44,11 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
     #   
     #   
     # NOTES
-    #   
+    #   Schema Version Notes
+    #   v1. Tables: Address, Notes and JobInformation
+    #   v2. Altered Address table with proc [job::db::update_2]
+    #   v3. Added table: internalShipments, Modifications, UserNotes, JobNotes, VersNotes
+    #   v3. ShipDate and ArriveDate columns now use the DATE data type
     #   
     # SEE ALSO
     #   
@@ -60,11 +64,48 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
     sqlite3 $job(db,Name) [file join $saveFileLocation $job(db,Name).db] -create 1
     
     # Create the tables
+        # UserNotes; Used internally for the distribution person(s)
+        # JobNotes; per job (any notes that pertain to the whole job)
+        # VersNotes; per version (any notes that are version specific)
     
-    $job(db,Name) eval {        
-        CREATE TABLE IF NOT EXISTS Notes (
-            Notes_ID  INTEGER PRIMARY KEY AUTOINCREMENT,
-            UserNotes TEXT
+    $job(db,Name) eval {
+        
+        CREATE TABLE IF NOT EXISTS Modifications (
+            Mod_ID      INTEGER PRIMARY KEY AUTOINCREMENT,
+            Mod_User    TEXT,
+            Mod_Date    DATE,
+            Mod_Time    TIME,
+            Mod_SysLog  TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS UserNotes (
+            UserNotes_ID         INTEGER PRIMARY KEY AUTOINCREMENT,
+            ModID                INTEGER REFERENCES Modifications (Mod_ID),
+            UserNotes_Notes      TEXT
+        );
+        
+        CREATE TABLE IF NOT EXISTS JobNotes (
+            JobNotes_ID         INTEGER PRIMARY KEY AUTOINCREMENT,
+            ModID               INTEGER REFERENCES Modifications (Mod_ID),
+            JobNotes_Notes      TEXT
+        );
+        
+        CREATE TABLE IF NOT EXISTS VersNotes (
+            VersNotes_ID         INTEGER PRIMARY KEY AUTOINCREMENT,
+            ModID                INTEGER REFERENCES Modifications (Mod_ID),
+            VersNotes_Notes      TEXT,
+            VersNotes_Version    TEXT REFERENCES Addresses (Version)
+                                    ON DELETE CASCADE
+                                    ON UPDATE CASCADE
+        );
+        
+        CREATE TABLE IF NOT EXISTS JobSamples (
+            JobSamples_ID        INTEGER PRIMARY KEY AUTOINCREMENT,
+            ModID                INTEGER REFERENCES Modifications (Mod_ID),
+            JobSamples_Dest      TEXT,
+            JobSamples_Version   TEXT REFERENCES Addresses (Version)
+                                    ON DELETE CASCADE
+                                    ON UPDATE CASCADE
         );
         
         CREATE TABLE IF NOT EXISTS JobInformation (
@@ -83,6 +124,16 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
             ProgramVers TEXT,
             SchemaVers  TEXT
         );
+        
+        --# Added in DB Vers 3 (No update proc needed for this, since we aren't altering tables)
+        --# If intShp_shipment contains 1/YES, those destinations will NOT be included in the total
+        CREATE TABLE IF NOT EXISTS InternalShipments (
+            IntShp_ID   INTEGER PRIMARY KEY AUTOINCREMENT,
+            AddrID      INTEGER REFERENCES Addresses (OrderNumber)
+                            ON DELETE CASCADE
+                            ON UPDATE CASCADE,
+            IntShp_shipment BOOLEAN
+        );
     }
     
 
@@ -92,7 +143,13 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
     
     # Dynamically build the Addresses table
     foreach header $hdr {
-        lappend cTable "'$header' TEXT"
+        switch -- $header {
+            Quantity    {set dataType INTEGER}
+            ShipDate    {set dataType DATE}
+            ArriveDate  {set dataType DATE}
+            default     {set dataType TEXT}
+        }
+        lappend cTable "'$header' $dataType"
     }
     set cTable [join $cTable ,]
     
@@ -322,8 +379,19 @@ proc job::db::updateDB {} {
         
         set updates [expr {$job(db,oldSchema) + 1}] ;# Add a number, because we will start applying updates before the number can be increased.
         for {set x $updates} {$x <= $job(db,currentSchemaVers)} {incr x} {
-            ${log}::debug "Updating to schema $x"
-            job::db::update_$x
+            ${log}::info "Updating to schema $x"
+            
+            set updateProcs [info procs update_*]
+            ${log}::info Available update procs: $updateProcs
+            if {[lsearch $updateProcs _$x] != -1} {
+                ${log}::info "Applying updates to schema $x"
+                job::db::update_$x
+            } else {
+                ${log}::info "No updates to apply, must be adding a table ..."
+                # Insert data into Sysinfo table
+                $job(db,Name) eval "INSERT INTO SysInfo (ProgramVers, SchemaVers) VALUES ('$program(Version).$program(PatchLevel)', '$job(db,currentSchemaVers)')"
+                ${log}::info Job DB Schema is now: [$job(db,Name) eval "SELECT max(SchemaVers) FROM SysInfo WHERE ProgramVers = '$program(Version).$program(PatchLevel)'"]
+            }
         }
     }
 } ;# job::db::updateDB
@@ -361,7 +429,7 @@ proc job::db::update_2 {} {
     # Insert data into Sysinfo table
     $job(db,Name) eval "INSERT INTO SysInfo (ProgramVers, SchemaVers) VALUES ('$program(Version).$program(PatchLevel)', '$job(db,currentSchemaVers)')"
     
-    ${log}::debug Job DB Schema is now: [$job(db,Name) eval "SELECT max(SchemaVers) FROM SysInfo WHERE ProgramVers = '$program(Version).$program(PatchLevel)'"]
+    ${log}::info Job DB Schema is now: [$job(db,Name) eval "SELECT max(SchemaVers) FROM SysInfo WHERE ProgramVers = '$program(Version).$program(PatchLevel)'"]
 } ;# job::db::update_2
 
 
@@ -411,3 +479,42 @@ proc job::db::retrieveHeaderNames {db dbTbl} {
 return $tmpHdr
     
 } ;# job::db::retrieveHeaderNames
+
+
+proc job::db::tableExists {dbTbl} {
+    #****f* tableExists/job::db
+    # CREATION DATE
+    #   03/04/2015 (Wednesday Mar 04)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   job::db::tableExists dbTbl
+    #
+    # FUNCTION
+    #	Returns table name if found, otherwise returns nothing
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log job
+
+    $job(db,Name) eval "SELECT name FROM sqlite_master WHERE type='table' AND name='$dbTbl'"
+    
+} ;# job::db::tableExists

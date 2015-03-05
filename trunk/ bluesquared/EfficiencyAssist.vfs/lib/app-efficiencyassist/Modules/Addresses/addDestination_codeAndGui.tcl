@@ -176,14 +176,14 @@ proc eAssistHelper::addDestination {tblPath {id -1}} {
 	set w(dest,1) [ttk::labelframe $w(dest).frame1a -text [mc "Consignee"] -padding 10]
 	grid $w(dest,1) -column 0 -row 1 -padx 2p -sticky n
     
-    ttk::label $w(dest,1).txt1 -text [mc "Attention"]
-	ttk::entry $w(dest,1).getAttention -textvariable shipOrder(Attention)
-
-	focus $w(dest,1).getAttention
-	
 	ttk::label $w(dest,1).reqCompany -text [mc "Company"] ;#-foreground red
 	ttk::entry $w(dest,1).getCompany -textvariable shipOrder(Company)
+
+	focus $w(dest,1).getCompany
 	
+	ttk::label $w(dest,1).txt1 -text [mc "Attention"]
+	ttk::entry $w(dest,1).getAttention -textvariable shipOrder(Attention)
+
 	ttk::label $w(dest,1).reqAddress1 -text [mc "Address1"] ;#-foreground red
 	ttk::entry $w(dest,1).getAddress1 -textvariable shipOrder(Address1)
     
@@ -212,12 +212,12 @@ proc eAssistHelper::addDestination {tblPath {id -1}} {
     ttk::label $w(dest,1).txt8 -text [mc "Email"]
     ttk::entry $w(dest,1).email -textvariable shipOrder(Email)
 	
-	#----- Grid    
-	grid $w(dest,1).txt1 -column 0 -row 2 -padx 1p -pady 2p -sticky nes
-	grid $w(dest,1).getAttention -column 1 -row 2 -padx 1p -pady 1p -sticky news -columnspan 3 
-		
-	grid $w(dest,1).reqCompany -column 0 -row 3 -padx 1p -pady 1p -sticky nes
-	grid $w(dest,1).getCompany -column 1 -row 3 -padx 1p -pady 1p -sticky news -columnspan 3
+	#----- Grid
+	grid $w(dest,1).reqCompany -column 0 -row 2 -padx 1p -pady 1p -sticky nes
+	grid $w(dest,1).getCompany -column 1 -row 2 -padx 1p -pady 1p -sticky news -columnspan 3
+	
+	grid $w(dest,1).txt1 -column 0 -row 3 -padx 1p -pady 2p -sticky nes
+	grid $w(dest,1).getAttention -column 1 -row 3 -padx 1p -pady 1p -sticky news -columnspan 3 
 	
 	grid $w(dest,1).reqAddress1 -column 0 -row 4 -padx 1p -pady 1p -sticky nes
 	grid $w(dest,1).getAddress1 -column 1 -row 4 -padx 1p -pady 1p -sticky news -columnspan 3 
@@ -584,5 +584,8 @@ proc eAssistHelper::saveDest {id tblPath db dbTbl} {
 	
 	# Apply the highlights ... Technically we should also prevent the user from entering too much data into each field.
 	importFiles::highlightAllRecords $tblPath
+	
+    # Get total copies
+    set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
 } ;# eAssistHelper::saveDest
 
