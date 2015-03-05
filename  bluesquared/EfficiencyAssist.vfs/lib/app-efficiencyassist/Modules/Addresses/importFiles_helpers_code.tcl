@@ -475,6 +475,11 @@ proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
 				job::db::write $job(db,Name) Addresses [join $txtVar] $tbl $cells
 			}
 	}
+	# Apply the highlights ... Technically we should also prevent the user from entering too much data into each field.
+	importFiles::highlightAllRecords $tbl
+	
+	# Get total copies
+    set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
 
 } ;# eAssistHelper::insValuesToTableCells
 

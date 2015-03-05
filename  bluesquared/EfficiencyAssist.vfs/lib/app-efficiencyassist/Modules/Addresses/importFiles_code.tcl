@@ -74,7 +74,7 @@ proc importFiles::initVars {args} {
     set dist(distributionTypes) [db eval "SELECT DistTypeName FROM DistributionTypes"]
     
     set carrierSetup(ShippingClass) [db eval "SELECT ShippingClass FROM ShippingClasses"]
-    set carrierSetup(ShipViaName) [db eval "SELECT ShipViaName FROM ShipVia"]
+    set carrierSetup(ShipViaName) [db eval "SELECT ShipViaName FROM ShipVia ORDER BY ShipViaName"]
     
     set packagingSetup(ContainerType) [db eval "SELECT Container FROM Containers"]
     set packagingSetup(PackageType) [db eval "SELECT Package FROM Packages"]

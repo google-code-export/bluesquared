@@ -56,7 +56,7 @@ proc job::reports::Viewer {} {
 
     toplevel .rv
     wm transient .rv .
-    wm title .rv [mc "Report Viewer - By Distribution Type"]
+    wm title .rv [mc "Report Viewer"]
     
     set locX [expr {[winfo screenwidth . ] / 4 + [winfo x .]}]
     set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
@@ -95,126 +95,9 @@ proc job::reports::Viewer {} {
     ::autoscroll::autoscroll $f1.scrolly ;# Enable the 'autoscrollbar'
     
     $f1.txt delete 0.0 end
-    
-    
-    #job::reports::byVersion $f1.txt
+
     job::reports::Detailed $f1.txt
 } ;# job::reports::Viewer
-
-
-proc job::reports::byVersion {txt args} {
-    #****f* byVersion/job::reports
-    # CREATION DATE
-    #   02/16/2015 (Monday Feb 16)
-    #
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2015 Casey Ackels
-    #   
-    #
-    # SYNOPSIS
-    #   job::reports::byVersion <textWidget Path> ?args?
-    #
-    # FUNCTION
-    #	Produces a report on the UPS Imports. Switches determine how verbose the report is.
-    #   Options can be: -basic, or -detailed
-    #   
-    #   
-    # CHILDREN
-    #	N/A
-    #   
-    # PARENTS
-    #   
-    #   
-    # NOTES
-    #   
-    #   
-    # SEE ALSO
-    #   
-    #   
-    #***
-    global log job
-    ##
-    ## Job Overview
-    ##
-    $txt insert end "Job Number: $job(Number)\n"
-    $txt insert end "Job Title/Name: $job(Title) / $job(Name)\n\n"
-    
-    set numOfVersions [$job(db,Name) eval "SELECT count(distinct(Version)) FROM Addresses"]
-    $txt insert end "Number of Versions: $numOfVersions\n"
-
-    set numOfShipments [$job(db,Name) eval "SELECT count(*) FROM Addresses"]
-    $txt insert end "Number of Shipments: $numOfShipments\n"
-    
-    set totalQtyOfShipments [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses"]
-    $txt insert end "Total Quantity: $totalQtyOfShipments\n"
-
-    $txt insert end "----\n\n"
-    
-    ##
-    ## Detailed Information
-    ##
-    # Get unique versions
-    set versionNames [$job(db,Name) eval "SELECT distinct(Version) FROM Addresses"]
-    foreach vers $versionNames {
-    # Output Version Name
-        set versNumOfShipments [$job(db,Name) eval "SELECT count(*) FROM Addresses WHERE Version='$vers'"]
-        set versQuantity [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses WHERE Version='$vers'"]
-        $txt insert end "VERSION: $vers - Shipments: $versNumOfShipments - Quantity: $versQuantity\n"
-        
-        # Get unique distribution types, for current version
-        set DistTypes [$job(db,Name) eval "SELECT distinct(DistributionType) FROM addresses WHERE Version='$vers' ORDER BY DistributionType"]
-        foreach dist $DistTypes {
-            # DistType associated with current version
-            # Output Summary for Distribution Type
-            # Output Carrier, Company and Quantity
-            # Get total count for current distribution type
-            
-            set distTypeNumOfShipments [$job(db,Name) eval "SELECT count(*) from Addresses WHERE Version='$vers' AND DistributionType='$dist'"]
-            set distTypeQty [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses WHERE Version='$vers' AND DistributionType='$dist'"]
-            
-            $txt insert end "\t<$dist> $distTypeNumOfShipments Shipments - $distTypeQty\n\n"
-            
-            # If the distribution type matches, UPS IMPORT, lets provide a grouped breakdown instead of the individual shipment
-            if {$dist eq "07. UPS Import"} {
-                if {[info exists qty]} {unset qty}
-                $job(db,Name) eval "SELECT Quantity FROM Addresses WHERE Version='$vers' AND DistributionType='$dist'" {
-                    #${log}::debug $Quantity $Version
-                    lappend qty $Quantity
-                }
-            
-                foreach single [lindex [Shipping_Code::extractFromList $qty] 0] {
-                    #${log}::debug Singles: 1 Shipment of $single
-                    $txt insert end "\t  1 Shipment of $single\n"
-                }
-            
-                foreach groups [lrange [Shipping_Code::extractFromList $qty] 1 end] {
-                    #${log}::debug Groups: [llength $groups] shipments of [lindex $groups 0]
-                    $txt insert end "\t  [llength $groups] Shipments of [lindex $groups 0]\n"
-                }
-            } else {
-            
-                # Output detailed shipment information
-                $job(db,Name) eval "SELECT ShipVia, Company, Quantity FROM Addresses WHERE Version='$vers' AND DistributionType='$dist' ORDER BY Quantity" {
-                    # Error capturing: Set a default value if nothing was put into the db
-                    if {$ShipVia eq ""} {set ShipVia [mc "CARRIER NOT ASSIGNED"]}
-                    if {$Company eq ""} {set Company [mc "COMPANY NOT ASSIGNED"]}
-                    if {$Quantity eq ""} {set Quantity [mc "QUANTITY NOT ASSIGNED"]}
-                    
-                    $txt insert end "\t  $ShipVia, $Company - $Quantity\n"
-                }
-
-            }
-            # End of the Distribution Type
-            $txt insert end "---- EOD\n"
-        }
-        # End of the Version
-        $txt insert end "\n******** EOV\n"
-    }
-
-} ;# job::reports::byVersion
 
 
 proc job::reports::Detailed {txt args} {
@@ -249,7 +132,7 @@ proc job::reports::Detailed {txt args} {
     #   
     #   
     #***
-    global log job
+    global log job env
 
     # Should be a user defined list ...
     set col "Company Quantity ShipVia Notes PackageType"
@@ -282,7 +165,16 @@ proc job::reports::Detailed {txt args} {
     set totalQtyOfShipments [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses"]
     $txt insert end "Total Quantity: $totalQtyOfShipments\n"
 
-    $txt insert end \n
+    # Schema testing; this exists in version 3 and higher
+    #set errStr "no such table:"
+    if {[job::db::tableExists JobNotes] != ""} {
+        set jobNotes [join [$job(db,Name) eval "SELECT JobNotes_Notes FROM JobNotes"]]
+        if {$jobNotes != ""} {
+           $txt insert end "\nJob Notes: $jobNotes\n" 
+        }
+        $txt insert end \n
+    }
+    
 
     ## Create the matrices
     #struct::matrix::matrix m
@@ -308,6 +200,13 @@ proc job::reports::Detailed {txt args} {
         $txt insert end "====================\n\n"
         $txt insert end "VERSION: $vers\n"
         $txt insert end "Shipments: $versNumOfShipments - Quantity: $versQuantity\n"
+        
+        if {[job::db::tableExists VersNotes] != ""} {
+            set versNotes [join [$job(db,Name) eval "SELECT VersNotes_Notes FROM VersNotes WHERE VersNotes_Version = '$vers'"]]
+            if {$versNotes != ""} {
+               $txt insert end "Version Notes: $versNotes\n\n" 
+            }
+        }
         
         # Create the matrix
         struct::matrix::matrix m
@@ -388,14 +287,16 @@ proc job::reports::Detailed {txt args} {
     #$txt insert end [r printmatrix ::job::reports::m]
     set fd [open [file join $job(SaveFileLocation) [ea::tools::formatFileName]_report.txt] w+]
     puts $fd [$txt get 0.0 end]
+    
+    # Insert user and date/time stamp
+    puts $fd [mc {Report Generated by: %1$s} $env(USERNAME)]
+    puts $fd [clock format [clock seconds] -format "%A %D %I:%M %p"]
     chan close $fd
 
     #destroy ::job::reports::m
     #destroy r
 
 } ;# job::reports::Detailed
-
-
 
 
 proc job::reports::initReportTables {} {

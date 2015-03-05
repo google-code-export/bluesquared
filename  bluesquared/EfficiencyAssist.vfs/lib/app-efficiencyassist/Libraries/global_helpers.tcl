@@ -282,7 +282,7 @@ proc eAssist_Global::OpenFile {title initDir type args} {
 } ;# eAssist_Global::OpenFile
 
 
-proc eAssist_Global::SaveFile {fileName} {
+proc eAssist_Global::SaveFile {fileName {initDir 0}} {
     #****f* SaveFile/eAssist_Global
     # AUTHOR
     #	Casey Ackels
@@ -291,10 +291,10 @@ proc eAssist_Global::SaveFile {fileName} {
     #	(c) 2011-2014 Casey Ackels
     #
     # FUNCTION
-    #	Save file to specified directory
+    #	eAssist_Global::SaveFile <file name> ?directory?
     #
     # SYNOPSIS
-    #
+    #	Save file to specified directory
     #
     # CHILDREN
     #	N/A
@@ -308,12 +308,13 @@ proc eAssist_Global::SaveFile {fileName} {
     #
     #***
     global log mySettings
-    ${log}::debug --START-- [info level 1]
-	
-	if {$mySettings(outFilePath) == ""} {
-		set initDir [pwd]
-	} else {
-		set initDir $mySettings(outFilePath)
+    #${log}::debug --START-- [info level 1]
+	if {$initDir == 0} {
+		if {$mySettings(outFilePath) == ""} {
+			set initDir [pwd]
+		} else {
+			set initDir $mySettings(outFilePath)
+		}
 	}
 	
 	set types {
@@ -323,7 +324,7 @@ proc eAssist_Global::SaveFile {fileName} {
 	set filename [tk_getSaveFile \
 				  -filetypes $types \
 				  -defaultextension .csv \
-				  -initialdir $mySettings(outFilePath) \
+				  -initialdir $initDir \
 					-initialfile $fileName \
 					-parent . \
 					-title [mc "Choose where to save your file"] \
@@ -334,7 +335,7 @@ proc eAssist_Global::SaveFile {fileName} {
     if {$filename eq ""} {return}
 	
 	return $filename
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssist_Global::SaveFile
 
 proc eAssist_Global::detectWin {args} {

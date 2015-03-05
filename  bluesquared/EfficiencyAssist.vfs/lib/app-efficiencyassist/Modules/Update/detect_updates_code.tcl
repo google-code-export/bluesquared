@@ -76,7 +76,7 @@ proc vUpdate::saveCurrentVersion {} {
     set program(fullVersion) "$program(Version).$program(PatchLevel) $program(beta)"
     
     set program(dbVersion) "$program(Version).$program(PatchLevel)-1"
-    set job(db,currentSchemaVers) 2
+    set job(db,currentSchemaVers) 3
     
     set program(Name) "Efficiency Assist"
     set program(FullName) "$program(Name) - $program(fullVersion)"

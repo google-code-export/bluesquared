@@ -70,13 +70,13 @@ proc eAssistSetup::controlCarrierSetup {{modify add} {entryPath ""} {lboxPath ""
         add     { if {[$entryPath get] eq ""} {return}
                     set data [list [$entryPath get]]; $entryPath delete 0 end
                     #ADD/MODIFY to db
-                    ${log}::debug dbInsert -columnNames $cols -table $dbTable -data $data
+                    #${log}::debug dbInsert -columnNames $cols -table $dbTable -data $data
                     eAssist_db::dbInsert -columnNames $cols -table $dbTable -data $data
         }
         delete  { if {[$lboxPath curselection] eq ""} {return}
                     set data [$lboxPath get [$lboxPath curselection]]
                     #DELETE from DB
-                    ${log}::debug delete $dbTable $cols $data
+                    #${log}::debug delete $dbTable $cols $data
                     eAssist_db::delete $dbTable $cols $data
                 }
         query  {}
@@ -88,7 +88,7 @@ proc eAssistSetup::controlCarrierSetup {{modify add} {entryPath ""} {lboxPath ""
 
     #READ from DB
     $lboxPath delete 0 end
-    ${log}::debug $lboxPath insert end [eAssist_db::dbSelectQuery -columnNames $cols -table $dbTable]
+    #${log}::debug $lboxPath insert end [eAssist_db::dbSelectQuery -columnNames $cols -table $dbTable]
     #$lboxPath insert end [set list [eAssist_db::dbSelectQuery -columnNames $cols -table $dbTable]]
     foreach record [eAssist_db::dbSelectQuery -columnNames $cols -table $dbTable] {
         $lboxPath insert end $record

@@ -158,6 +158,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	source [file join [file dirname [info script]] Libraries saveSettings.tcl]
 	source [file join [file dirname [info script]] Libraries password_util.tcl]
 	source [file join [file dirname [info script]] Libraries AutoComplete.tcl]
+	source [file join [file dirname [info script]] Libraries dateFormatting.tcl]
     
 	loadSuffix ;# Initialize variables from StreetSuffixState.tcl
     
