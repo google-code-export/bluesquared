@@ -78,23 +78,25 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
             Mod_SysLog  TEXT
         );
 
-        CREATE TABLE IF NOT EXISTS UserNotes (
-            UserNotes_ID         INTEGER PRIMARY KEY AUTOINCREMENT,
-            ModID                INTEGER REFERENCES Modifications (Mod_ID),
-            UserNotes_Notes      TEXT
-        );
+        #CREATE TABLE IF NOT EXISTS UserNotes (
+        #    UserNotes_ID         INTEGER PRIMARY KEY AUTOINCREMENT,
+        #    ModID                INTEGER REFERENCES Modifications (Mod_ID),
+        #    UserNotes_Notes      TEXT
+        #);
         
-        CREATE TABLE IF NOT EXISTS JobNotes (
-            JobNotes_ID         INTEGER PRIMARY KEY AUTOINCREMENT,
-            ModID               INTEGER REFERENCES Modifications (Mod_ID),
-            JobNotes_Notes      TEXT
-        );
+        #CREATE TABLE IF NOT EXISTS JobNotes (
+        #    JobNotes_ID         INTEGER PRIMARY KEY AUTOINCREMENT,
+        #    ModID               INTEGER REFERENCES Modifications (Mod_ID),
+        #    JobNotes_Notes      TEXT
+        #);
+        DROP Table JobNotes
+        DROP Table UserNotes
         
-        CREATE TABLE IF NOT EXISTS VersNotes (
-            VersNotes_ID         INTEGER PRIMARY KEY AUTOINCREMENT,
-            ModID                INTEGER REFERENCES Modifications (Mod_ID),
-            VersNotes_Notes      TEXT,
-            VersNotes_Version    TEXT REFERENCES Addresses (Version)
+        CREATE TABLE IF NOT EXISTS Notes (
+            Notes_ID         INTEGER PRIMARY KEY AUTOINCREMENT,
+            ModID            INTEGER REFERENCES Modifications (Mod_ID),
+            Notes_Notes      TEXT,
+            Notes_Version    TEXT REFERENCES Addresses (Version)
                                     ON DELETE CASCADE
                                     ON UPDATE CASCADE
         );

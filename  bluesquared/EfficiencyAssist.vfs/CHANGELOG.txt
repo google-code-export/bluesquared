@@ -4,10 +4,10 @@
 * [NEW] If a version is not listed in an imported file, EA will automatically insert 'Version 1' (which is the default in EFI Monarch Planner)
 * [NEW] The display order of the columns are now configurable in SETUP.
 * [NEW] Customer, CSR, Job Name/Title and Number are now displayed in the header area of BM.
-* [NEW] Basic reporting has been implemented. Currently you need to select the text, press Ctrl-C and paste it into a text editor to print out.
+* [NEW] Basic reporting has been implemented. When you view the report, it automatically saves it to disk. You will find it in the same folder where you've told EA to save your other files.
 * [UPDATE] Log settings are now per user instead of global.
 * [UPDATE] Importing a file is now much faster than before.
-* [UPDATE] Some data cleansing happens upon importing a file. Quotes, Single Quotes, Slashes and Comma's are now automatically stripped out, and replaced with a space.
+* [UPDATE] Some data cleansing happens upon importing a file. Quotes, Single Quotes and Comma's are now automatically stripped out, and replaced with a space.
 * [UPDATE] Total Copies function now utilizes the sum() SQL command.
 
 == General
@@ -15,6 +15,7 @@
 
 == Development
 * [UPDATE] Updated Tablelist from 5.11 to 5.13
+* [UPDATE] Updated TWAPI from 4.0 to 4.1-dev
 
 --
 

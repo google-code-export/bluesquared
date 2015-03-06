@@ -299,12 +299,18 @@ proc eAssistSetup::controlShipVia {{control add} args} {
     
     
     # Refresh tbl and reread from db
-    $tbl delete 0 end
-    set recordList [eAssist_db::dbSelectQuery -columnNames "ShipViaCode ShipViaName CarrierName FreightPayerType ShipmentType" -table ShipVia]
+    #$tbl delete 0 end
+    ##set recordList [eAssist_db::dbSelectQuery -columnNames "ShipViaCode ShipViaName CarrierName FreightPayerType ShipmentType" -table ShipVia]
+    #db eval "SELECT ShipViaCode, ShipViaName, Carriers.Name AS CarrierName, FreightPayerType, ShipmentType FROM ShipVia INNER JOIN Carriers WHERE ShipVia.CarrierID = Carriers.Carrier_ID ORDER BY ShipViaName" {
+    #    #puts "$ShipViaCode $ShipViaName $CarrierName $FreightPayerType $ShipmentType"
+    #    $tbl insert end "{} [list $ShipViaCode] [list $ShipViaName] [list $CarrierName] [list $FreightPayerType] [list $ShipmentType]"
+    #}
+    
+    #$tbl insert end "{} $ShipViaCode $ShipViaName $Carriers.Name $FreightPayerType $ShipmentType"
     #$tbl insert end "{} $valueList"
-    foreach record $recordList {
-        $tbl insert end "{} $record"
-    }
+    #foreach record $recordList {
+    #    $tbl insert end "{} $record"
+    #}
     
     # Make sure the button text says 'add'.
     ea::tools::modifyButton $btns.btn1 -text [mc "Add"]
@@ -326,7 +332,7 @@ proc eAssistSetup::addShipVia {wid tbl} {
     #   
     #
     # SYNOPSIS
-    #   eAssistSetup::addShipVia wid tbl 
+    #   eAssistSetup::addShipVia wid tbl
     #
     # FUNCTION
     #	Adds the values from the entry/comboboxes to the db
@@ -346,8 +352,11 @@ proc eAssistSetup::addShipVia {wid tbl} {
     #   
     #***
     global log
-    if {[info exists childList]} {unset childList}
-    if {[info exists valueList]} {unset valueList}
+    
+    foreach var {childList valueList_wid valueList_db} {
+        if {[info exists $var]} {unset $var}
+    }
+
     
     foreach child [winfo children $wid] {
         if {[string match -nocase *entry* $child] == 1 || [string match -nocase *cbox* $child] == 1} {
@@ -356,27 +365,42 @@ proc eAssistSetup::addShipVia {wid tbl} {
     }
     
     set childList [lsort $childList]
-    ${log}::debug childList: $childList
+    #${log}::debug childList: $childList
     
 
     foreach child $childList {
         if {[$child get] eq ""} {
-            ${log}::debug $child is empty!
-            lappend valueList ""
+            #${log}::debug $child is empty!
+            #lappend valueList ""
+            ${log}::critical Missing a value when adding a new ship via! Widget: $child
             return
         } else {
-            ${log}::debug VALUES [$child get]
-            lappend valueList [$child get]
-            $child delete 0 end
+            #${log}::debug VALUES [$child get]
+            if {[string match *01cbox1 $child] == 1} {
+                lappend valueList_db '[db eval "SELECT Carrier_ID from Carriers where Name='[$child get]'"]'
+                lappend valueList_wid [$child get]
+                $child delete 0 end
+            } else {
+                    lappend valueList_db '[$child get]'
+                    lappend valueList_wid [$child get]
+                    $child delete 0 end
+            }
         }
     }
 
-    ${log}::debug values: $valueList
+    #${log}::debug values: $valueList_wid
+    ${log}::debug values: $valueList_db
     
-
-    # add to table and db
-    $tbl insert end "{} $valueList"
-    eAssist_db::dbInsert -columnNames "ShipViaCode ShipViaName CarrierName FreightPayerType ShipmentType" -table ShipVia -data $valueList
+    db eval "INSERT OR ABORT INTO ShipVia (CarrierID, ShipViaCode, FreightPayerType, ShipViaName, ShipmentType) VALUES ([join $valueList_db ,])"
+    
+    db eval "SELECT ShipViaCode, ShipViaName, Carriers.Name AS CarrierName, FreightPayerType, ShipmentType
+        FROM ShipVia
+            INNER JOIN Carriers
+        WHERE ShipVia.CarrierID = Carriers.Carrier_ID
+            AND ShipViaCode = [lrange $valueList_db 1 1]" {
+                ${log}::debug "$ShipViaCode $ShipViaName $CarrierName $FreightPayerType $ShipmentType"
+                $tbl insert end "{} [list $ShipViaCode] [list $ShipViaName] [list $CarrierName] [list $FreightPayerType] [list $ShipmentType]"
+        }
     
 } ;# eAssistSetup::addShipVia
 
