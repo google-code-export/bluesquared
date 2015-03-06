@@ -208,15 +208,16 @@ proc 'eAssist_bootStrap {} {
 	eAssist_db::loadDB
 	
 	# Check to see if the windows user is in the db, add if they aren't already there.
-	set userName [db eval "SELECT UserLogin FROM Users WHERE UserLogin='$env(USERNAME)'"]
+	set userName [db eval "SELECT UserLogin FROM Users WHERE UserLogin='[string tolower $env(USERNAME)]'"]
 	
 	if {$userName == ""} {
 		${log}::debug $env(USERNAME) is not in the Database. Adding ...
-		db eval "INSERT INTO Users (UserLogin) VALUES ('$env(USERNAME)')"
+		db eval "INSERT INTO Users (UserLogin) VALUES ('[string tolower $env(USERNAME)]')"
 	} else {
 		${log}::debug User $userName is in the database.
 	}
-	set program(userName) [db eval "SELECT UserLogin FROM Users WHERE UserLogin='$env(USERNAME)'"]
+	#set program(userName) [db eval "SELECT UserLogin FROM Users WHERE UserLogin='$env(USERNAME)'"]
+	
 
 } ;#'eAssist_bootStrap
 
@@ -246,7 +247,7 @@ proc 'eAssist_initVariables {} {
     # SEE ALSO
     #
     #***
-    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter logSettings auth options emailSetup emailEvent job
+    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter logSettings auth options emailSetup emailEvent job user
 
 	#-------- CORE SETTINGS
 	#if {$logSettings(displayConsole) == 1} {console show}
@@ -257,6 +258,23 @@ proc 'eAssist_initVariables {} {
 	# admin7954
 	set auth(adminPword) {$1$6JV2D0G7$RHuHLMxJuuQ3HWWG3wOML1}
 	set auth(adminSalt) {6JV2D0G7iPZ.xfGbLxnx}
+	
+	# Insert Setup into the Modules
+	eAssist_db::checkModuleName Setup
+
+	set user(id) [db eval "SELECT UserLogin FROM Users WHERE UserLogin='[string tolower $env(USERNAME)]'"]
+	
+	set user($user(id),group) [db eval {SELECT SecGroups.SecGrp_Name FROM Users
+											INNER JOIN SecGroups ON
+												Users.SecGrpID = SecGroups.SecGrp_ID
+											WHERE Users.Users_Status = 1}]
+	
+	set user($user(id),modules) [db eval "SELECT Modules.ModuleName FROM SecurityAccess 
+										INNER JOIN Modules ON
+											SecurityAccess.ModID = Modules.Mod_ID
+										INNER JOIN SecGroups ON
+											SecurityAccess.SecGrpID = SecGroups.SecGrp_ID
+										WHERE SecGroups.SecGrp_Name = '$user($user(id),group)'"]
 	
 	## Defaults
 	#

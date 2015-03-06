@@ -331,9 +331,9 @@ proc eAssist_db::checkModuleName {moduleName} {
 
     if {[lsearch -nocase $ModNames $moduleName] == -1} {
             ${log}::debug Couldn't find $moduleName, inserting ...
-                db eval {INSERT or ABORT INTO Modules (ModuleName EnableModNotification)
-                    VALUES ($moduleName $emailSetup(mod,Notification))
-                }
+                #db eval {INSERT or ABORT INTO Modules (ModuleName EnableModNotification)
+                #    VALUES ($moduleName $emailSetup(mod,Notification))}
+                db eval {INSERT or ABORT INTO Modules (ModuleName) VALUES ($moduleName)}
     } else {
             ${log}::debug Found $moduleName!
     }

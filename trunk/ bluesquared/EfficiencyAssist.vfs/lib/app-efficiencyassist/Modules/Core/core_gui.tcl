@@ -60,7 +60,7 @@ proc eAssist::parentGUI {} {
     #	N/A
     #
     #***
-    global program settings btn log mb options
+    global program settings btn log mb options user
     ${log}::debug Entering parentGUI
 
     set locX [expr {[winfo screenwidth . ] / 4 + [winfo x .]}]
@@ -91,12 +91,22 @@ proc eAssist::parentGUI {} {
 
 
     ## Modules
-    menu $mb.module -tearoff 0 -relief raised -bd 2
-    $mb add cascade -label [mc "Module"] -menu $mb.module
+    if {[llength $user($user(id),modules)] > 1} {
+        # Create the main menu item
+        menu $mb.module -tearoff 0 -relief raised -bd 2
+        $mb add cascade -label [mc "Module"] -menu $mb.module
+        
+        # Add in the sub-menus        
+        foreach mod $user($user(id),modules) {
+            switch -- $mod {
+                "Box Labels"    {$mb.module add command -label [mc "Box Labels"] -command {set options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]; eAssist::buttonBarGUI BoxLabels 0}}
+                "Batch Maker"   {$mb.module add command -label [mc "Batch Maker"] -command {set options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]; eAssist::buttonBarGUI BatchMaker 1}}
+                Setup           {$mb.module add command -label [mc "Setup"] -command {set options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]; eAssist::buttonBarGUI Setup 2}}
+                default         {${log}::critical "$mod: doesn't have a menu configuration setup."}
+            }
+        }
+    }
 
-    $mb.module add command -label [mc "Box Labels"] -command {set options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]; eAssist::buttonBarGUI BoxLabels 0}
-    $mb.module add command -label [mc "Batch Maker"] -command {set options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]; eAssist::buttonBarGUI BatchMaker 1}
-    $mb.module add command -label [mc "Setup"] -command {set options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]; eAssist::buttonBarGUI Setup 2}
 
     ## Help
     menu $mb.help -tearoff 0 -relief raised -bd 2
