@@ -48,7 +48,7 @@ proc lib::showPwordWindow {parent} {
     #
     #***
     global log
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
     toplevel .pwordLogin
     wm transient .pwordLogin $parent
@@ -66,14 +66,18 @@ proc lib::showPwordWindow {parent} {
     set f1 [ttk::frame .pwordLogin.f1 -padding 10]
     pack $f1 -expand yes -fill both
     
+    ttk::label $f1.txt0 -text [mc "User:"]
+    ttk::entry $f1.entry0 -width 20
     
     ttk::label $f1.txt1 -text [mc "Password:"]
     ttk::entry $f1.entry1 -width 20 -show *
     
     focus $f1.entry1
     
-    grid $f1.txt1 -column 0 -row 0 -padx 5p -pady 5p
-    grid $f1.entry1 -column 1 -row 0 -padx 5p -pady 5p
+    grid $f1.txt0 -column 0 -row 0 -padx 5p -pady 5p
+    grid $f1.entry0 -column 0 -row 1 -padx 5p -pady 5p
+    grid $f1.txt1 -column 0 -row 1 -padx 5p -pady 5p
+    grid $f1.entry1 -column 1 -row 1 -padx 5p -pady 5p
     
     ##
     ## Frame 2
@@ -81,18 +85,18 @@ proc lib::showPwordWindow {parent} {
     set f2 [ttk::frame .pwordLogin.f2 -padding 10]
     pack $f2 -expand yes -fill both
     
-    ttk::button $f2.btn1 -text [mc "OK"] -command "lib::pwordCompare $parent .pwordLogin"
+    ttk::button $f2.btn1 -text [mc "OK"] -command {lib::pwordCompare .pwordLogin}
     ttk::button $f2.btn2 -text [mc "Cancel"] -command {destroy .pwordLogin}
     
     grid $f2.btn1 -column 0 -row 0 -padx 5p
     grid $f2.btn2 -column 1 -row 0 -padx 5p    
     
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# lib::showPwordWindow
 
 
-proc lib::pwordCompare {parent win} {
+proc lib::pwordCompare {win} {
     #****f* pwordCompare/lib
     # AUTHOR
     #	Casey Ackels

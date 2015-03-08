@@ -204,14 +204,13 @@ proc job::db::open {} {
     if {[info exists job(db,Name)] == 1} {
         ${log}::debug Previous job is open. Closing current job: $job(Title) $job(Name)
         $job(db,Name) close
-        
-        #unset job
         }
         
     set job(db,Name) [eAssist_Global::OpenFile [mc "Open Project"] $mySettings(sourceFiles) file -ext .db -filetype {{Efficiency Assist Project} {.db}}]
     
     # Just in case the user cancels out of the open dialog.
     if {$job(db,Name) eq ""} {
+        unset job(db,Name)
         return
     }
     

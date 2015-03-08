@@ -80,7 +80,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.13]
 	#lappend ::auto_path [file join [file dirname [info script]] Libraries tcom3.9]
-	lappend ::auto_path [file join [file dirname [info script]] Libraries twapi]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries twapi_4.1-dev]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries about]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries debug] ;# Deprecated
@@ -206,18 +206,6 @@ proc 'eAssist_bootStrap {} {
 	
 	# load the DB
 	eAssist_db::loadDB
-	
-	# Check to see if the windows user is in the db, add if they aren't already there.
-	set userName [db eval "SELECT UserLogin FROM Users WHERE UserLogin='[string tolower $env(USERNAME)]'"]
-	
-	if {$userName == ""} {
-		${log}::debug $env(USERNAME) is not in the Database. Adding ...
-		db eval "INSERT INTO Users (UserLogin) VALUES ('[string tolower $env(USERNAME)]')"
-	} else {
-		${log}::debug User $userName is in the database.
-	}
-	#set program(userName) [db eval "SELECT UserLogin FROM Users WHERE UserLogin='$env(USERNAME)'"]
-	
 
 } ;#'eAssist_bootStrap
 
@@ -261,20 +249,51 @@ proc 'eAssist_initVariables {} {
 	
 	# Insert Setup into the Modules
 	eAssist_db::checkModuleName Setup
-
-	set user(id) [db eval "SELECT UserLogin FROM Users WHERE UserLogin='[string tolower $env(USERNAME)]'"]
 	
-	set user($user(id),group) [db eval {SELECT SecGroups.SecGrp_Name FROM Users
-											INNER JOIN SecGroups ON
-												Users.SecGrpID = SecGroups.SecGrp_ID
-											WHERE Users.Users_Status = 1}]
+	# init the user array
+	ea::sec::initUser
 	
-	set user($user(id),modules) [db eval "SELECT Modules.ModuleName FROM SecurityAccess 
-										INNER JOIN Modules ON
-											SecurityAccess.ModID = Modules.Mod_ID
-										INNER JOIN SecGroups ON
-											SecurityAccess.SecGrpID = SecGroups.SecGrp_ID
-										WHERE SecGroups.SecGrp_Name = '$user($user(id),group)'"]
+	# Check to see if the windows user is in the db, add if they aren't already there.
+	#set userName [db eval "SELECT UserLogin FROM Users WHERE UserLogin='[string tolower $env(USERNAME)]'"]
+	#
+	#if {$userName == ""} {
+	#	${log}::info $env(USERNAME) is not in the Database. Adding ...
+	#	# Default password is <space>
+	#	db eval "INSERT INTO Users (UserLogin, UserPwd) VALUES ('[string tolower $env(USERNAME)]', ' ')"
+	#} else {
+	#	${log}::info Found $userName in the database.
+	#}
+	#
+	#set user(id) [db eval "SELECT UserLogin FROM Users WHERE UserLogin='[string tolower $env(USERNAME)]'"]
+	#
+	#set user($user(id),group) [db eval "SELECT SecGroupNames.SecGroupName FROM SecGroups
+	#										-- get Group Name
+	#										INNER JOIN SecGroupNames ON SecGroups.SecGroupNameID = SecGroupNames.SecGroupName_ID
+	#										-- get User
+	#										INNER JOIN Users on SecGroups.UserID = Users.User_ID
+	#										WHERE Users.UserLogin = '$user(id)'
+	#											AND Users.Users_Status = 1"]
+	#
+	#set user($user(id),modules) [db eval "SELECT Modules.ModuleName FROM SecurityAccess
+	#										-- get Group ID
+	#										INNER JOIN SecGroups ON SecGroups.SecGrp_ID = SecurityAccess.SecGrpID
+	#										-- get Module Name
+	#										INNER JOIN Modules on Modules.Mod_ID = SecurityAccess.ModID
+	#										-- get Group Name
+	#										INNER JOIN SecGroupNames on SecGroupNames.SecGroupName_ID = SecGroups.SecGroupNameID
+	#										WHERE SecGroupNames.SecGroupName = '$user($user(id),group)'
+	#											AND SecGroupNames.Status = 1"]
+	##
+	## Get Module Permissions
+#SELECT Modules.ModuleName, SecAccess_Read, SecAccess_Write, SecAccess_Delete
+#FROM SecurityAccess
+#-- get Group Name
+#INNER JOIN SecGroups ON SecGroups.SecGrp_ID = SecurityAccess.SecGrpID
+#INNER JOIN SecGroupNames ON SecGroups.SecGroupNameID = SecGroupNames.SecGroupName_ID
+#-- get Module Name
+#INNER JOIN Modules ON Modules.Mod_ID = SecurityAccess.ModID
+#WHERE SecGroupNames.Status = 1 
+#AND SecGroupNames.SecGroupName = 'Admin'
 	
 	## Defaults
 	#
