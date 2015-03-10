@@ -138,8 +138,7 @@ proc lib::savePreferences {} {
     }
     
     # Update the geometry settings, just in case the user resized the window before saving.
-    set options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]
-    #${log}::debug options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]
+    set options(geom,$settings(currentModule_machine)) [wm geometry .]
     
     # Write out individual variables
     chan puts $fd "program(Version) $program(Version)"
@@ -161,7 +160,9 @@ proc lib::savePreferences {} {
         chan puts $fd "mySettings($value) $mySettings($value)"
     }
     
+    ${log}::debug --- OPTIONS ARRAY ---
     foreach value [array names options] {
+        ${log}::debug options($value) $options($value)
         chan puts $fd "options($value) $options($value)"
     }
     

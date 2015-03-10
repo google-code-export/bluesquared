@@ -97,9 +97,9 @@ proc eAssist_Global::resetSetupFrames {} {
         puts $child
     }
     
-    foreach child [winfo children .container.setup] {
-        destroy $child
-    }
+    #foreach child [winfo children .container.setup] {
+    #    destroy $child
+    #}
     
     #set savePage $args ;# Allows us to save what is on that page
 
@@ -134,11 +134,11 @@ proc eAssist_Global::checkVars {win {var ""}} {
     #
     #***
     global log program
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
 	
 	if {($var == "") || (![info exists $var])} {
-		${log}::debug Variable doesn't exist ... launching window.
+		#${log}::debug Variable doesn't exist ... launching window.
 	} else {
 		return $var
 	}
@@ -163,7 +163,7 @@ proc eAssist_Global::checkVars {win {var ""}} {
 	}
 					
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssist_Global::checkVars
 
 
@@ -455,7 +455,8 @@ proc eAssist_Global::getGeom {module args} {
     #
     #***
     global log options
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
+	#${log}::debug CURRENT OPTIONS: $options(geom,$settings(currentModule))
     
 	if {[info exists options(geom,$module)]} {
 		wm geometry . $options(geom,$module)
@@ -465,8 +466,8 @@ proc eAssist_Global::getGeom {module args} {
 		set dims [split $dims +]
 		
 		set dims [join $dims]
-		${log}::notice [winfo screenwidth .] == [lindex $dims 0]
-		${log}::notice [winfo screenheight . ] == [lindex $dims 1]
+		#${log}::notice [winfo screenwidth .] == [lindex $dims 0]
+		#${log}::notice [winfo screenheight . ] == [lindex $dims 1]
 
 	
 		if {[winfo screenheight . ] == [lindex $dims 1]} {
@@ -481,10 +482,9 @@ proc eAssist_Global::getGeom {module args} {
 		${log}::notice Geometry does NOT exist for $module - Using $args
 	}
 	
-
+	#lib::savePreferences
 	
-	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssist_Global::getGeom
 
 

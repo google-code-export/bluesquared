@@ -61,12 +61,17 @@ proc importFiles::eAssistGUI {} {
     #	
     #
     #***
-    global log program w headerParent files mySettings process dist filter w options csmpls CSR job
+    global log program w headerParent files mySettings process dist filter w options csmpls CSR job settings user
     
+    #${log}::debug $settings(currentModule)
+    #${log}::debug $user($user(id),modules) [lsearch $user($user(id),modules) [lindex $settings(currentModule) 0]]
+    #
+    #if {[lsearch $user($user(id),modules) [lindex $settings(currentModule) 0]] == -1} {
+    #    ${log}::debug [parray user]
+    #    ${log}::debug Permission Denied.
+    #}
     # Clear the frames before continuing
     eAssist_Global::resetFrames parent
-    
-    #wm geometry . 900x610 ;# Width x Height
     
     # Setup the Filter array
    # eAssist_Global::launchFilters

@@ -244,57 +244,15 @@ proc 'eAssist_initVariables {} {
 	}
 	
 	# admin7954
-	set auth(adminPword) {$1$6JV2D0G7$RHuHLMxJuuQ3HWWG3wOML1}
-	set auth(adminSalt) {6JV2D0G7iPZ.xfGbLxnx}
+	#set auth(adminPword) {$1$6JV2D0G7$RHuHLMxJuuQ3HWWG3wOML1}
+	#set auth(adminSalt) {6JV2D0G7iPZ.xfGbLxnx}
 	
 	# Insert Setup into the Modules
 	eAssist_db::checkModuleName Setup
 	
 	# init the user array
 	ea::sec::initUser
-	
-	# Check to see if the windows user is in the db, add if they aren't already there.
-	#set userName [db eval "SELECT UserLogin FROM Users WHERE UserLogin='[string tolower $env(USERNAME)]'"]
-	#
-	#if {$userName == ""} {
-	#	${log}::info $env(USERNAME) is not in the Database. Adding ...
-	#	# Default password is <space>
-	#	db eval "INSERT INTO Users (UserLogin, UserPwd) VALUES ('[string tolower $env(USERNAME)]', ' ')"
-	#} else {
-	#	${log}::info Found $userName in the database.
-	#}
-	#
-	#set user(id) [db eval "SELECT UserLogin FROM Users WHERE UserLogin='[string tolower $env(USERNAME)]'"]
-	#
-	#set user($user(id),group) [db eval "SELECT SecGroupNames.SecGroupName FROM SecGroups
-	#										-- get Group Name
-	#										INNER JOIN SecGroupNames ON SecGroups.SecGroupNameID = SecGroupNames.SecGroupName_ID
-	#										-- get User
-	#										INNER JOIN Users on SecGroups.UserID = Users.User_ID
-	#										WHERE Users.UserLogin = '$user(id)'
-	#											AND Users.Users_Status = 1"]
-	#
-	#set user($user(id),modules) [db eval "SELECT Modules.ModuleName FROM SecurityAccess
-	#										-- get Group ID
-	#										INNER JOIN SecGroups ON SecGroups.SecGrp_ID = SecurityAccess.SecGrpID
-	#										-- get Module Name
-	#										INNER JOIN Modules on Modules.Mod_ID = SecurityAccess.ModID
-	#										-- get Group Name
-	#										INNER JOIN SecGroupNames on SecGroupNames.SecGroupName_ID = SecGroups.SecGroupNameID
-	#										WHERE SecGroupNames.SecGroupName = '$user($user(id),group)'
-	#											AND SecGroupNames.Status = 1"]
-	##
-	## Get Module Permissions
-#SELECT Modules.ModuleName, SecAccess_Read, SecAccess_Write, SecAccess_Delete
-#FROM SecurityAccess
-#-- get Group Name
-#INNER JOIN SecGroups ON SecGroups.SecGrp_ID = SecurityAccess.SecGrpID
-#INNER JOIN SecGroupNames ON SecGroups.SecGroupNameID = SecGroupNames.SecGroupName_ID
-#-- get Module Name
-#INNER JOIN Modules ON Modules.Mod_ID = SecurityAccess.ModID
-#WHERE SecGroupNames.Status = 1 
-#AND SecGroupNames.SecGroupName = 'Admin'
-	
+		
 	## Defaults
 	#
 	
@@ -445,7 +403,7 @@ proc 'eAssist_checkPrefFile {} {
     #
     #***
     global log mySettings program env
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
 	set folderAccess ""
 	
@@ -517,7 +475,7 @@ proc 'eAssist_checkPrefFile {} {
 		return $state
 	}
 
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# 'eAssist_checkPrefFile
 
 
@@ -550,18 +508,7 @@ proc 'eAssist_loadSettings {} {
     #***
     global settings debug program header customer3P env mySettings international company shipVia3P tcl_platform setup logSettings log boxSettings boxLabelInfo intlSetup
 	global headerParent headerAddress headerParams headerBoxes GS_filePathSetup GS currentModule pref dist carrierSetup CSR packagingSetup options emailSetup
-	
 
-
-    # Set required configuration changes here, i.e.
-    # set cVersion(Setup,message) <informational message>
-    # set cVersion(Setup,newconfig) <setup page>, <setup page, ...
-    # set cVersion(Options,message) <informational message>
-    # set cVersion(Options,newconfig) <options page>, <options page>, ...
-    
-
-
-	
 	# Ensure we have proper permissions for the preferences file before continuing
 	'eAssist_checkPrefFile
 
@@ -578,7 +525,6 @@ proc 'eAssist_loadSettings {} {
 			set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
 			${log}::notice "Loaded variables ($myFile): $l_line"
 		}
-		
 		${log}::notice "Loaded variables ($myFile): Complete!"
 	}
     
@@ -596,7 +542,9 @@ proc 'eAssist_loadSettings {} {
                 if {$line == ""} {continue}
                 set l_line [split $line " "]
                 set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
+				${log}::notice "Loaded variables ($myFile): $l_line"
         }
+		${log}::notice "Loaded variables ($myFile): Complete!"
     }
 	
     # Initialize default values
@@ -607,26 +555,6 @@ proc 'eAssist_loadSettings {} {
 	option add *tearOff 0
 	
 	job::reports::initReportTables
-	
-#	# check for updates
-#    set fd "" ;# Make sure we are cleared out before reusing.
-#	set updateFile [file join $program(updateFilePath) $program(updateFileName)]
-#    if {[catch {open $updateFile r} fd]} {
-#        ${log}::notice "File doesn't exist $program(updateFileName); loading defaults"
-#
-#    } else {
-#        set updateFile [split [read $fd] \n]
-#        catch {chan close $fd}
-#        
-#        foreach line $updateFile {
-#                if {$line == ""} {continue}
-#                set l_line [split $line " "]
-#                set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
-#                #${log}::notice "line: $line"
-#        }
-#    }
-	
-	
 	# Get excel version
 	# Office 2003 = 11
 	# Office 2007 = 12

@@ -269,7 +269,7 @@ proc ea::sec::authUser {userName pass} {
     if {$UserPwd eq ""} {
         # user doesn't have a password, system default ...
         ea::sec::changeUser $userName
-        return
+        return 1
     }
     
     if {$passwd eq $enteredPass} {
@@ -283,3 +283,58 @@ proc ea::sec::authUser {userName pass} {
     }
    
 } ;# ea::sec::authUser
+
+
+proc ea::sec::modLauncher {args} {
+    #****f* modLauncher/ea::sec
+    # CREATION DATE
+    #   03/09/2015 (Monday Mar 09)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::sec::modLauncher args 
+    #
+    # FUNCTION
+    #	Ensures that the user has correct privleges before launching the module
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log user settings
+
+    lib::savePreferences ;# This will ensure that we saved the geometry to the module that we are coming from
+
+    if {[lsearch $user($user(id),modules) $settings(currentModule)] == -1} {
+        #${log}::debug [parray user]
+        #${log}::debug User does not have access to view this module, switching ...
+        eAssist::buttonBarGUI [lindex $user($user(id),modules) 0]
+        
+    } else {
+        if {$args == ""} {${log}::debug No args Provided; eAssist::buttonBarGUI [lindex $user($user(id),modules) 0]}
+        switch -nocase $args {
+            "Box Labels"    {eAssist::buttonBarGUI $args}
+            "Batch Maker"   {eAssist::buttonBarGUI $args}
+            Setup           {eAssist::buttonBarGUI $args}
+            default         {}
+        }
+    }
+
+    
+} ;# ea::sec::modLauncher

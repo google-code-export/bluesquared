@@ -59,7 +59,7 @@ proc shippingGUI {} {
     
     Shipping_Code::openHistory ;# Populate the variable so we don't get errors upon startup.
     
-    wm geometry . 450x475
+    #wm geometry . 450x475
     #set program(currentModule) BoxLabels
     #set currentModule BoxLabels
 
