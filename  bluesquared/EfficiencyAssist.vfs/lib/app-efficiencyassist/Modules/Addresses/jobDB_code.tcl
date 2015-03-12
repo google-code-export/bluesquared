@@ -54,7 +54,7 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
     #   
     #   
     #***
-    global log job mySettings program env
+    global log job mySettings program env user
 
     ${log}::notice Creating a new database for: $custID $jobTitle $jobName $jobNumber
 
@@ -70,59 +70,36 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
     
     $job(db,Name) eval {
         
-        CREATE TABLE IF NOT EXISTS Modifications (
-            Mod_ID      INTEGER PRIMARY KEY AUTOINCREMENT,
-            Mod_User    TEXT,
-            Mod_Date    DATE,
-            Mod_Time    TIME,
-            Mod_SysLog  TEXT
+        CREATE TABLE IF NOT EXISTS History (
+            Hist_ID     VARCHAR (36) PRIMARY KEY ON CONFLICT ROLLBACK
+                                     UNIQUE ON CONFLICT ROLLBACK
+                                     NOT NULL ON CONFLICT ROLLBACK,
+            Hist_User   TEXT,
+            Hist_Date   DATE,
+            Hist_Time   TIME,
+            Hist_SysLog TEXT
         );
-
-        #CREATE TABLE IF NOT EXISTS UserNotes (
-        #    UserNotes_ID         INTEGER PRIMARY KEY AUTOINCREMENT,
-        #    ModID                INTEGER REFERENCES Modifications (Mod_ID),
-        #    UserNotes_Notes      TEXT
-        #);
-        
-        #CREATE TABLE IF NOT EXISTS JobNotes (
-        #    JobNotes_ID         INTEGER PRIMARY KEY AUTOINCREMENT,
-        #    ModID               INTEGER REFERENCES Modifications (Mod_ID),
-        #    JobNotes_Notes      TEXT
-        #);
-        DROP Table JobNotes
-        DROP Table UserNotes
         
         CREATE TABLE IF NOT EXISTS Notes (
-            Notes_ID         INTEGER PRIMARY KEY AUTOINCREMENT,
-            ModID            INTEGER REFERENCES Modifications (Mod_ID),
-            Notes_Notes      TEXT,
-            Notes_Version    TEXT REFERENCES Addresses (Version)
-                                    ON DELETE CASCADE
-                                    ON UPDATE CASCADE
-        );
-        
-        CREATE TABLE IF NOT EXISTS JobSamples (
-            JobSamples_ID        INTEGER PRIMARY KEY AUTOINCREMENT,
-            ModID                INTEGER REFERENCES Modifications (Mod_ID),
-            JobSamples_Dest      TEXT,
-            JobSamples_Version   TEXT REFERENCES Addresses (Version)
-                                    ON DELETE CASCADE
-                                    ON UPDATE CASCADE
+            Notes_ID    INTEGER      PRIMARY KEY AUTOINCREMENT,
+            HistID      VARCHAR (36) REFERENCES History (Hist_ID) ON UPDATE CASCADE,
+            Notes_Notes TEXT
         );
         
         CREATE TABLE IF NOT EXISTS JobInformation (
             Job_ID      INTEGER PRIMARY KEY AUTOINCREMENT,
+            HistID      VARCHAR (36) REFERENCES History (Hist_ID) ON UPDATE CASCADE,
             CustID      TEXT,
             CSRName     TEXT,
             JobTitle    TEXT,
             JobNumber   TEXT,
-            JobName     TEXT,
-            CreatedDate DATE,
-            CreatedBy   TEXT
+            JobName     TEXT
+            
         );
         
         CREATE TABLE IF NOT EXISTS SysInfo (
             SysInfo_ID  INTEGER PRIMARY KEY AUTOINCREMENT,
+            HistID      VARCHAR (36) REFERENCES History (Hist_ID) ON UPDATE CASCADE,
             ProgramVers TEXT,
             SchemaVers  TEXT
         );
@@ -153,15 +130,20 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
         }
         lappend cTable "'$header' $dataType"
     }
-    set cTable [join $cTable ,]
-    
-    $job(db,Name) eval "CREATE TABLE IF NOT EXISTS Addresses ( $cTable )"
 
+
+    # Insert data into the History table
+    set currentGUID [ea::tools::getGUID]
+    $job(db,Name) eval "INSERT INTO History (Hist_ID, Hist_User, Hist_Date, Hist_Time, Hist_Syslog) VALUES ('$currentGUID', '$user(id)', '[ea::date::getTodaysDate]', '[ea::date::currentTime]', 'Initializing database')"
+    
     # Insert data into JobInformation table
-    $job(db,Name) eval "INSERT INTO JobInformation (CustID, CSRName, JobNumber, JobTitle, JobName, CreatedDate, CreatedBy) VALUES ('$custID', '$csrName', '$jobNumber', '$jobTitle', '$jobName', DATETIME('NOW'), '$env(USERNAME)')"
+    $job(db,Name) eval "INSERT INTO JobInformation (HistID, CustID, CSRName, JobNumber, JobTitle, JobName) VALUES ('$currentGUID','$custID', '$csrName', '$jobNumber', '$jobTitle', '$jobName')"
     
     # Insert data into Sysinfo table
-    $job(db,Name) eval "INSERT INTO SysInfo (ProgramVers, SchemaVers) VALUES ('$program(Version).$program(PatchLevel)', '$job(db,currentSchemaVers)')"
+    $job(db,Name) eval "INSERT INTO SysInfo (HistID, ProgramVers, SchemaVers) VALUES ('$currentGUID', '$program(Version).$program(PatchLevel)', '$job(db,currentSchemaVers)')"
+    
+    #set cTable [join $cTable ,]
+    $job(db,Name) eval "CREATE TABLE IF NOT EXISTS Addresses ( [join $cTable ,] )"
        
 } ;# job::db::createDB
 #job::db::createDB SAGMED {Meredith Hunter} TEST001 Febraury 303603
@@ -519,3 +501,113 @@ proc job::db::tableExists {dbTbl} {
     $job(db,Name) eval "SELECT name FROM sqlite_master WHERE type='table' AND name='$dbTbl'"
     
 } ;# job::db::tableExists
+
+proc job::db::insertNotes {job_wid log_wid} {
+    #****f* insertNotes/job::db
+    # CREATION DATE
+    #   03/11/2015 (Wednesday Mar 11)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   job::db::insertNotes args 
+    #
+    # FUNCTION
+    #	Inserts or updates the job notes
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log job user
+	
+    set currentGUID [ea::tools::getGUID]
+    
+    # Clean up notes first
+    set jobNotes [string map {' ''} [$job_wid get 0.0 end]]
+    set logNotes [string map {' ''} [$log_wid get 0.0 end]]
+    
+	# Insert into History table, then into Notes table
+    $job(db,Name) eval "INSERT INTO History (Hist_ID, Hist_User, Hist_Date, Hist_Time, Hist_Syslog) VALUES ('$currentGUID', '$user(id)', '[ea::date::getTodaysDate]', '[ea::date::currentTime]', '$logNotes')"
+	
+	$job(db,Name) eval "INSERT INTO Notes (HistID, Notes_Notes) VALUES ('$currentGUID', '$jobNotes')"
+
+} ;# job::db::insertNotes
+
+proc job::db::readNotes {cbox_wid job_wid log_wid} {
+    #****f* readNotes/job::db
+    # CREATION DATE
+    #   03/11/2015 (Wednesday Mar 11)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   job::db::readNotes id jobNotes logNotes 
+    #
+    # FUNCTION
+    #	Reads the database depending on the id passed
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log job hist
+    
+    set id [$cbox_wid get]
+    if {[info exists hist]} {unset hist}
+    
+    # Re-enable the widget
+    #$job_wid configure -state normal
+
+    # Read the Job notes ...
+    set jobNotes [join [$job(db,Name) eval "SELECT Notes_Notes FROM Notes WHERE Notes_ID = $id"]]
+    
+    # Read the log notes ...
+    set historyItems [join [$job(db,Name) eval "SELECT Hist_User, Hist_Date, Hist_Time, Hist_SysLog FROM History
+                                                INNER JOIN Notes ON Notes.HistID = History.Hist_ID
+                                            WHERE Notes.Notes_ID = $id"]]
+    set hist(log,User) [lindex $historyItems 0]
+    set hist(log,Date) [lindex $historyItems 1]
+    set hist(log,Time) [lindex $historyItems 2]
+    set hist(log,Log) [lrange $historyItems 3 end]
+    
+    
+    # Clear out the widgets
+    $job_wid delete 0.0 end
+    $job_wid insert end $jobNotes
+    #$job_wid configure -state disabled
+    
+    $log_wid delete 0.0 end
+    $log_wid insert end $hist(log,Log)
+
+} ;# job::db::readNotes

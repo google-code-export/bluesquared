@@ -244,13 +244,13 @@ proc 'eAssist_initVariables {} {
 	}
 	
 	# admin7954
-	#set auth(adminPword) {$1$6JV2D0G7$RHuHLMxJuuQ3HWWG3wOML1}
-	#set auth(adminSalt) {6JV2D0G7iPZ.xfGbLxnx}
+	set auth(adminPword) {$1$6JV2D0G7$RHuHLMxJuuQ3HWWG3wOML1}
+	set auth(adminSalt) {6JV2D0G7iPZ.xfGbLxnx}
 	
 	# Insert Setup into the Modules
 	eAssist_db::checkModuleName Setup
 	
-	# init the user array
+	# init the user array - This is reset on Change User!
 	ea::sec::initUser
 		
 	## Defaults
@@ -297,7 +297,8 @@ proc 'eAssist_initVariables {} {
 	
 	if {![info exists options(ClearExistingData)]} {
 		# Clears data from BatchMaker if it exists; this is useful if you want to overwrite what is already there.
-		set options(ClearExistingData) 1
+		# 3/11/15 - Defaults to 0, we now have 'projects', and save data to a database. If a new project is started, the GUI is cleared out, and a new database is created.
+		set options(ClearExistingData) 0
 	}
     
 

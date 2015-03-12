@@ -47,7 +47,7 @@ proc lib::showPwordWindow {} {
     # SEE ALSO
     #
     #***
-    global log
+    global log user
     
     toplevel .pwordLogin
     wm transient .pwordLogin .
@@ -65,6 +65,9 @@ proc lib::showPwordWindow {} {
     set f1 [ttk::frame .pwordLogin.f1 -padding 10]
     pack $f1 -expand yes -fill both
     
+    ttk::label $f1.txta -text [mc "Current User:"]
+    ttk::label $f1.txtb -textvariable user(id)
+    
     ttk::label $f1.txt0 -text [mc "User:"]
     ttk::entry $f1.entry0 -width 20
     
@@ -73,11 +76,14 @@ proc lib::showPwordWindow {} {
     
     focus $f1.entry0
     
-    grid $f1.txt0 -column 0 -row 0 -padx 5p -pady 5p
-    grid $f1.entry0 -column 1 -row 0 -padx 5p -pady 5p
+    grid $f1.txta -column 0 -row 0 -sticky nse
+    grid $f1.txtb -column 1 -row 0 -sticky nsw
     
-    grid $f1.txt1 -column 0 -row 1 -padx 5p -pady 5p
-    grid $f1.entry1 -column 1 -row 1 -padx 5p -pady 5p
+    grid $f1.txt0 -column 0 -row 1 -padx 5p -pady 5p -sticky nse
+    grid $f1.entry0 -column 1 -row 1 -padx 5p -pady 5p -sticky news
+     
+    grid $f1.txt1 -column 0 -row 2 -padx 5p -pady 5p -sticky nse
+    grid $f1.entry1 -column 1 -row 2 -padx 5p -pady 5p -sticky news
     
     ##
     ## Frame 2
@@ -85,11 +91,19 @@ proc lib::showPwordWindow {} {
     set f2 [ttk::frame .pwordLogin.f2 -padding 10]
     pack $f2 -expand yes -fill both
     
+    
     ttk::button $f2.btn1 -text [mc "OK"] -command [list lib::pwordCompare .pwordLogin $f1.entry0 $f1.entry1]
     ttk::button $f2.btn2 -text [mc "Cancel"] -command {destroy .pwordLogin}
+    ttk::button $f2.btn0 -text [mc "Revert"] -command {ea::sec::changeUser [ea::sec::userExist]; ea::sec::modLauncher; destroy .pwordLogin}
     
-    grid $f2.btn1 -column 0 -row 0 -padx 5p
-    grid $f2.btn2 -column 1 -row 0 -padx 5p    
+    grid $f2.btn0 -column 0 -row 0 -padx 5p
+    grid $f2.btn1 -column 1 -row 0 -padx 5p
+    grid $f2.btn2 -column 2 -row 0 -padx 5p
+    
+    ##
+    ## Bindings
+    ea::tools::bindings $f1.entry1 {Return KP_Enter} [list lib::pwordCompare .pwordLogin $f1.entry0 $f1.entry1]
+    
     
 } ;# lib::showPwordWindow
 

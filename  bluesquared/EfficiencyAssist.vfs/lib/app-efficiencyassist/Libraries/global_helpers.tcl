@@ -364,7 +364,7 @@ proc eAssist_Global::detectWin {args} {
     #
     #***
     global log
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
     set vSwitch [lindex $args 0]
     set vWindow [lindex $args 1]
@@ -385,7 +385,7 @@ proc eAssist_Global::detectWin {args} {
         
     return $vWindow
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssist_Global::detectWin
 
 proc eAssist_Global::at {time args} {
@@ -618,7 +618,7 @@ proc ea::tools::modifyButton {wid args} {
 } ;# ea::tools::modifyButton
 
 proc ea::tools::bindings {wid binding cmd} {
-    #****f* bindingsCarrierSetup/ea::tools
+    #****f* bindings/ea::tools
     # CREATION DATE
     #   10/28/2014 (Tuesday Oct 28)
     #
@@ -656,6 +656,7 @@ proc ea::tools::bindings {wid binding cmd} {
     }
 
 } ;# ea::tools::bindings
+
 
 proc ea::tools::populateListbox {modify entryWid lBoxWid dbTable dbCol} {
     #****f* populateListbox/ea::tools
@@ -760,6 +761,56 @@ proc ea::tools::formatFileName {} {
 
 	return $fileName
 } ;# ea::tools::formatFileName
+
+proc ea::tools::getGUID {args} {
+    #****f* getGUID/ea::tools
+    # CREATION DATE
+    #   03/11/2015 (Wednesday Mar 11)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::tools::convertGUID -new|-convert
+	#   The default is -new if no args are supplied.
+    #
+    # FUNCTION
+    #	Creates a GUID using the TWAPI package; and depending on the flag it will return a converted X'093090394039403094 number, or the typical
+	#	{E0EB36A4-CB17-4020-829C-56E6D243313C} format.
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    set guid [twapi::new_guid]
+	
+	if {$args eq "-convert"} {
+		# clean the guid up, then append it to the default first two chars needed (For sqlite)
+		set guid [string map { \{ "" \} "" - ""} $guid]
+		
+		append formattedGUID X' $guid
+		return $formattedGUID
+	} else {
+		return $guid
+	}
+
+} ;# ea::tools::getGUID
 
 
 proc eAssist_Global::launchFilters {} {

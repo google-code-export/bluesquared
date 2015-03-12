@@ -74,3 +74,83 @@ proc ea::date::formatDate {dateType str} {
     clock format [clock scan $str -format $dateFormat] -format %Y-%d-%m
  
 } ;# ea::date::formatDate
+
+proc ea::date::getTodaysDate {} {
+    #****f* getTodaysDate/ea::date
+    # CREATION DATE
+    #   03/11/2015 (Wednesday Mar 11)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::date::getTodaysDate  
+    #
+    # FUNCTION
+    #	Returns today's date in the format: yyy-dd-mm
+    #   2015-11-03
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    #set currentDate [clock format [clock seconds] -format %T]
+    
+    ea::date::formatDate -std [clock format [clock seconds] -format %D]
+
+    
+} ;# ea::date::getTodaysDate
+
+proc ea::date::currentTime {} {
+    #****f* currentTime/ea::date
+    # CREATION DATE
+    #   03/11/2015 (Wednesday Mar 11)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::date::currentTime  
+    #
+    # FUNCTION
+    #	Returns the current time HH:MM:SS
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    clock format [clock seconds] -format %T
+    
+} ;# ea::date::currentTime
