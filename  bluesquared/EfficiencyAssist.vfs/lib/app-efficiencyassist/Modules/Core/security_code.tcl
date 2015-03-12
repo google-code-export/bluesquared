@@ -61,30 +61,32 @@ proc ea::sec::initUser {{newUser 0}} {
     }
 
     set user(id) [db eval "SELECT UserLogin FROM Users WHERE UserLogin='$userName'"]
-    if {$user(id) eq ""} {${log}::debug $userName is not listed in the database; return}
-	
-	set user($user(id),group) [db eval "SELECT SecGroupNames.SecGroupName FROM SecGroups
-											-- get Group Name
-											INNER JOIN SecGroupNames ON SecGroups.SecGroupNameID = SecGroupNames.SecGroupName_ID
-											-- get User
-											INNER JOIN Users on SecGroups.UserID = Users.User_ID
-											WHERE Users.UserLogin = '$user(id)'
-												AND Users.Users_Status = 1"]
-	
-	set user($user(id),modules) [db eval "SELECT Modules.ModuleName FROM SecurityAccess
-											-- get Group ID
-											INNER JOIN SecGroups ON SecGroups.SecGrp_ID = SecurityAccess.SecGrpID
-											-- get Module Name
-											INNER JOIN Modules on Modules.Mod_ID = SecurityAccess.ModID
-											-- get Group Name
-											INNER JOIN SecGroupNames on SecGroupNames.SecGroupName_ID = SecGroups.SecGroupNameID
-											WHERE SecGroupNames.SecGroupName = '$user($user(id),group)'
-												AND SecGroupNames.Status = 1"]
-
-    if {$user($user(id),modules) == ""} {
-        ${log}::notice You have not yet been set up in the system.
-        Error_Message::errorMsg EA001
+    #if {$user(id) eq ""} {${log}::debug $userName is not listed in the database; return}
         
+        
+    set user($user(id),group) [db eval "SELECT SecGroupNames.SecGroupName FROM SecGroups
+                                            -- # get Group Name
+                                            INNER JOIN SecGroupNames ON SecGroups.SecGroupNameID = SecGroupNames.SecGroupName_ID
+                                            -- # get User
+                                            INNER JOIN Users on SecGroups.UserID = Users.User_ID
+                                            WHERE Users.UserLogin = '$user(id)'
+                                                AND Users.Users_Status = 1"]
+    if {$user($user(id),group) == ""} {
+        set user($user(id),group) NoGroup
+    }
+    
+    set user($user(id),modules) [db eval "SELECT Modules.ModuleName FROM SecurityAccess
+                                            -- # get Group ID
+                                            INNER JOIN SecGroups ON SecGroups.SecGrp_ID = SecurityAccess.SecGrpID
+                                            -- # get Module Name
+                                            INNER JOIN Modules on Modules.Mod_ID = SecurityAccess.ModID
+                                            -- # get Group Name
+                                            INNER JOIN SecGroupNames on SecGroupNames.SecGroupName_ID = SecGroups.SecGroupNameID
+                                            WHERE SecGroupNames.SecGroupName = '$user($user(id),group)'
+                                                AND SecGroupNames.Status = 1"]
+    if {$user($user(id),modules) == ""} {
+        Error_Message::errorMsg EA001 "ID: $user(id)\nGroups: $user($user(id),group)\n\nLet your system administrator know that you need to be put into a group."
+        exit
     }
     
 } ;# ea::sec::initUser
@@ -130,6 +132,14 @@ proc ea::sec::userExist {} {
 		${log}::info $env(USERNAME) is not in the Database. Adding ...
 		# Default password is <space>
 		db eval "INSERT INTO Users (UserLogin, UserPwd) VALUES ('[string tolower $env(USERNAME)]', ' ')"
+    
+        #set userID [db eval "SELECT UserID from Users where UserLogin='$env(USERNAME)'"]
+        
+        # Put them in the default NoGroup Group
+        #db eval "INSERT INTO SecGroups (SecGroupNameID, UserID) VALUES ('4','$userID')"
+        #set groupID [db eval "SELECT SecGrp_ID from SecGroups WHERE UserID='$userID'"]
+        ## using modID = 2; Batch Maker as a default
+        #db eval "INSERT INTO SecurityAccess (SecGrpID, ModID, SecAccess_Read, SecAccess_Modify, SecAccess_Delete) VALUES ('$groupID', '2', '1', '0', '0')"
 	} else {
 		${log}::info Found $userName in the database.
     }

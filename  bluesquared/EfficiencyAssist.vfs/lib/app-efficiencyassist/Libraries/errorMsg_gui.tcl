@@ -90,7 +90,7 @@ proc Error_Message::errorMsg {code args} {
                             set title [mc $defaultTitle]
                             set icon warning
                             }
-        EA001           {set message [mc "You have not yet been set up in the system."]
+        EA001           {set message [mc "You have not yet been set up in the system.\n$args"]
                             set message2 [mc "Error Location: %s" $code]
                             set title [mc $defaultTitle]
                             set icon warning}
