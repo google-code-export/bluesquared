@@ -350,7 +350,7 @@ proc importFiles::initMenu {} {
     #Add Cascade for Validation functions
     menu $mb.modMenu.validate
     $mb.modMenu add cascade -label [mc "Valdiation"] -menu $mb.modMenu.validate
-    $mb.modMenu.validate add command -label [mc "Check Country/Zip"] -command {ea::validate::checkCountryZip; importFiles::highlightAllRecords $files(tab3f2).tbl}
+    $mb.modMenu.validate add command -label [mc "Check Country against Zip"] -command {ea::validate::checkCountryAgainstZip; importFiles::highlightAllRecords $files(tab3f2).tbl}
     #$mb.modMenu add command -label [mc "Internal Samples"] -command {eAssistHelper::addCompanySamples} -state disable
     #$mb.modMenu add command -label [mc "Split"] -command {eAssistHelper::splitVersions}
     $mb.modMenu add command -label [mc "Manage Customers..."] -command {customer::manage}

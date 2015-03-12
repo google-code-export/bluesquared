@@ -68,6 +68,12 @@ proc eAssist::parentGUI {} {
     #wm geometry .wi 625x375+${locX}+${locY}
     wm geometry . 640x610+${locX}+${locY}
     
+    if {![info exists settings(currentModule)]} {
+        ${log}::debug currentModule not set!
+        set settings(currentModule) {Batch Maker}
+        set settings(currentModule_machine) [join $settings(currentModule) _]
+    }
+    
     wm protocol . WM_DELETE_WINDOW {eAssistSetup::SaveGlobalSettings; destroy .}
     wm protocol . WM_SAVE_YOURSELF {eAssistSetup::SaveGlobalSettings}
 
@@ -91,11 +97,6 @@ proc eAssist::parentGUI {} {
 
     # Start the gui
     # All frames that make up the GUI are children to .container  
-    if {![info exists settings(currentModule)]} {
-        ${log}::debug currentModule not set!
-        set settings(currentModule) {Batch Maker}
-        set settings(currentModule_machine) [join $settings(currentModule) _]
-    }
 
     ## Modules
     if {[llength $user($user(id),modules)] > 1} {
@@ -104,7 +105,6 @@ proc eAssist::parentGUI {} {
         $mb add cascade -label [mc "Module"] -menu $mb.module
         
         # Add in the sub-menus
-        # set options(geom,[join $mod _]) [wm geometry .]
         foreach mod [lsort $user($user(id),modules)] {
             switch -- $mod {
                 "Batch Maker"   {$mb.module add command -label [mc "Batch Maker"] -command "ea::sec::modLauncher $mod"}
@@ -137,18 +137,14 @@ proc eAssist::parentGUI {} {
     
     ttk::button $btn(Bar).btn1
     ttk::button $btn(Bar).btn2
-
-
     
-    ${log}::debug CurrentModule: $settings(currentModule)
+    #${log}::debug CurrentModule: $settings(currentModule)
     eAssist::buttonBarGUI $settings(currentModule)
 
     
     eAssist_GUI::editPopup
-    
-    bind all <F12> {lib::showPwordWindow}
 
-} ;# End of parentGUI
+} ;# End of eAssist::parentGUI
 
 
 proc eAssist::buttonBarGUI {Module} {
