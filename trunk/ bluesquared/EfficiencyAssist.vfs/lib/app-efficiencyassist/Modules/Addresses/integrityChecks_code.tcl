@@ -16,10 +16,10 @@
 ## - Overview
 # This file contains code that pertains to data checks.
 
-namespace eval ea::integrity {}
+namespace eval ea::validate {}
 
-proc ea::integrity::checkCountryZip {} {
-    #****f* checkCountryZip/ea::integrity
+proc ea::validate::checkCountryZip {} {
+    #****f* checkCountryZip/ea::validate
     # CREATION DATE
     #   03/11/2015 (Wednesday Mar 11)
     #
@@ -31,7 +31,7 @@ proc ea::integrity::checkCountryZip {} {
     #   
     #
     # SYNOPSIS
-    #   ea::integrity::checkCountryZip  
+    #   ea::validate::checkCountryZip  
     #
     # FUNCTION
     #	Ensures that the Country code is correct (or there is one), and populates the Country Column.
@@ -53,8 +53,8 @@ proc ea::integrity::checkCountryZip {} {
     #***
     global log job countryCode
 
-    #$job(db,Name) eval "ATTACH 'EA_setup.edb' AS db1"
-
+    catch {$job(db,Name) eval "ATTACH 'EA_setup.edb' AS db1"}
+    ${log}::info [mc "-- Starting validation checks on Country..."]
     if {[info exists countryCode]} {unset countryCode}
     $job(db,Name) eval "SELECT distinct(State), Zip, OrderNumber FROM Addresses" {
         set zipLength [string range $Zip 0 0]
@@ -63,26 +63,31 @@ proc ea::integrity::checkCountryZip {} {
                             WHERE ProvAbbr = '$State'
                         AND PostalCodeLowEnd LIKE '$zipLength%'"]
         
-        # Ensure we have a value, if we don't its probably because the zip/province doesn't match
+        # Ensure we have a value, if we don't its because the zip/province doesn't match
         if {$cCode eq ""} {
             ${log}::info "State and Zip do not match: $State $Zip"
             set byZip [$job(db,Name) eval "SELECT distinct(db1.Countries.CountryCode) as cCode, db1.Provinces.ProvAbbr as provAbbr from db1.Provinces 
                     INNER JOIN Countries ON Provinces.CountryID = Countries.Country_ID
                         WHERE PostalCodeLowEnd LIKE '$zipLength%'"]
-            puts "UPDATE Country AND State: $byZip ID: $OrderNumber"
+            #${log}::debug "UPDATE Country AND State: $byZip ID: $OrderNumber"
             #lappend countryCode($byZip) $OrderNumber
+            
+            # Launch another proc to change BOTH State AND Country
+            ${log}::info [mc "Found a mismatched Zip/Province ($byZip), attempting to correct..."]
         } else {
             lappend countryCode($cCode) $OrderNumber
-            puts "UPDATE $State = $cCode ID: $OrderNumber"
+            #puts "UPDATE $State = $cCode ID: $OrderNumber"
         }
     }
-    puts [array names countryCode]
-    parray countryCode
+    #puts [array names countryCode]
+    #parray countryCode
     foreach country [array names countryCode] {
+        ${log}::info [mc "Found the correct country code ($country); inserting ..."]
         set nums [join $countryCode($country) ,]
-        ${log}::debug UPDATE Addresses SET Country='$country' WHERE OrderNumber IN ($nums)
+        job::db::multiWrite $job(db,Name) Addresses Country $country OrderNumber $nums
+        #${log}::debug UPDATE Addresses SET Country='$country' WHERE OrderNumber IN ($nums)
     }
-    
-# UPDATE Addresses SET Address2='TEST' WHERE OrderNumber IN (1, 3, 4, 5, 9, 10)
-    
-} ;# ea::integrity::checkCountryZip
+
+
+    catch {$job(db,Name) eval "DETACH 'EA_setup.edb'"}
+} ;# ea::validate::checkCountryZip

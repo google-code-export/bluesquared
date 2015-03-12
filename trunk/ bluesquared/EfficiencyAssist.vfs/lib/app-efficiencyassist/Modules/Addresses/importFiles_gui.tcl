@@ -300,8 +300,8 @@ proc importFiles::initMenu {} {
     # SEE ALSO
     #
     #***
-    global log mb
-    ${log}::debug --START -- [info level 1]
+    global log mb files
+    #${log}::debug --START -- [info level 1]
     
     if {[winfo exists $mb.modMenu.quick]} {
         destroy $mb.modMenu.quick
@@ -336,7 +336,7 @@ proc importFiles::initMenu {} {
     # Change menu name
     #$mb entryconfigure Edit -label Distribution
     # Add cascade
-    menu $mb.modMenu.quick
+    #menu $mb.modMenu.quick
     #$mb.modMenu add cascade -label [mc "Quick Add"] -menu $mb.modMenu.quick 
     #$mb.modMenu.quick add command -label [mc "JG Mail"]
     #$mb.modMenu.quick add command -label [mc "JG Inventory"]
@@ -346,6 +346,11 @@ proc importFiles::initMenu {} {
     $mb.modMenu add command -label [mc "Notes"] -command {eAssistHelper::editNotes}
     $mb.modMenu add command -label [mc "Add Destination"] -command {eAssistHelper::addDestination $files(tab3f2).tbl}
     $mb.modMenu add command -label [mc "Filters..."] -command {eAssist_tools::FilterEditor} -state disable
+    
+    #Add Cascade for Validation functions
+    menu $mb.modMenu.validate
+    $mb.modMenu add cascade -label [mc "Valdiation"] -menu $mb.modMenu.validate
+    $mb.modMenu.validate add command -label [mc "Check Country/Zip"] -command {ea::validate::checkCountryZip; importFiles::highlightAllRecords $files(tab3f2).tbl}
     #$mb.modMenu add command -label [mc "Internal Samples"] -command {eAssistHelper::addCompanySamples} -state disable
     #$mb.modMenu add command -label [mc "Split"] -command {eAssistHelper::splitVersions}
     $mb.modMenu add command -label [mc "Manage Customers..."] -command {customer::manage}
@@ -354,5 +359,5 @@ proc importFiles::initMenu {} {
     
     $mb.modMenu add command -label [mc "Preferences"] -command {eAssistPref::launchPreferences}
 	
-    ${log}::debug --END -- [info level 1]
+    #${log}::debug --END -- [info level 1]
 } ;# importFiles::initMenu
