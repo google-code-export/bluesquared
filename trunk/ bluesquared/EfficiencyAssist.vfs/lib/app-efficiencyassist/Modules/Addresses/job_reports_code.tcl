@@ -167,10 +167,10 @@ proc job::reports::Detailed {txt args} {
 
     # Schema testing; this exists in version 3 and higher
     #set errStr "no such table:"
-    if {[job::db::tableExists JobNotes] != ""} {
-        set jobNotes [join [$job(db,Name) eval "SELECT JobNotes_Notes FROM JobNotes"]]
+    if {[job::db::tableExists Notes] != ""} {
+        set jobNotes [join [lindex [$job(db,Name) eval "SELECT max(Notes_ID), Notes_Notes FROM Notes"] 1]]
         if {$jobNotes != ""} {
-           $txt insert end "\nJob Notes: $jobNotes\n" 
+           $txt insert end "\nJob Notes: $jobNotes\n"
         }
         $txt insert end \n
     }
@@ -201,12 +201,12 @@ proc job::reports::Detailed {txt args} {
         $txt insert end "VERSION: $vers\n"
         $txt insert end "Shipments: $versNumOfShipments - Quantity: $versQuantity\n"
         
-        if {[job::db::tableExists VersNotes] != ""} {
-            set versNotes [join [$job(db,Name) eval "SELECT VersNotes_Notes FROM VersNotes WHERE VersNotes_Version = '$vers'"]]
-            if {$versNotes != ""} {
-               $txt insert end "Version Notes: $versNotes\n\n" 
-            }
-        }
+        #if {[job::db::tableExists VersNotes] != ""} {
+        #    set versNotes [join [$job(db,Name) eval "SELECT VersNotes_Notes FROM VersNotes WHERE VersNotes_Version = '$vers'"]]
+        #    if {$versNotes != ""} {
+        #       $txt insert end "Version Notes: $versNotes\n\n" 
+        #    }
+        #}
         
         # Create the matrix
         struct::matrix::matrix m

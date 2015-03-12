@@ -107,9 +107,9 @@ proc eAssist::parentGUI {} {
         # set options(geom,[join $mod _]) [wm geometry .]
         foreach mod [lsort $user($user(id),modules)] {
             switch -- $mod {
-                "Batch Maker"   {$mb.module add command -label [mc "Batch Maker"] -command "${log}::debug Coming From Module: $settings(currentModule); ea::sec::modLauncher $mod"}
-                "Box Labels"    {$mb.module add command -label [mc "Box Labels"] -command "${log}::debug Coming From Module: $settings(currentModule); ea::sec::modLauncher $mod"}
-                Setup           {$mb.module add command -label [mc "Setup"] -command "${log}::debug Coming From Module: $settings(currentModule); ea::sec::modLauncher $mod"}
+                "Batch Maker"   {$mb.module add command -label [mc "Batch Maker"] -command "ea::sec::modLauncher $mod"}
+                "Box Labels"    {$mb.module add command -label [mc "Box Labels"] -command "ea::sec::modLauncher $mod"}
+                Setup           {$mb.module add command -label [mc "Setup"] -command "ea::sec::modLauncher $mod"}
                 default         {${log}::critical "$mod: doesn't have a menu configuration setup."}
             }
         }
@@ -188,25 +188,22 @@ proc eAssist::buttonBarGUI {Module} {
     set menuCount [$mb.module index end]
     
     # Enable/Disable the menu items depending on which one is active.
+    # Cycle through the items in the menu, if they match the active module, disable it. If the module doesn't match their list of permissible modules, disable it.
     ${log}::debug User Modules: $user($user(id),modules)
     for {set x 0} {$menuCount >= $x} {incr x} {
-            #${log}::debug Module: $module
+            #${log}::debug Active Module: $module
+            #${log}::debug Module in list: [$mb.module entrycget $x -label]
             #${log}::debug String Match: [string match [$mb.module entrycget $x -label] $module]
             #${log}::debug LSEARCH: [lsearch $user($user(id),modules) $module]
-        if {[string match [$mb.module entrycget $x -label] $module] == 1 || [lsearch $user($user(id),modules) $module] == -1} {
+        if {[string match [$mb.module entrycget $x -label] $module] == 1 || [lsearch $user($user(id),modules) [$mb.module entrycget $x -label]] == -1} {
             $mb.module entryconfigure $x -state disable
         } else {
             $mb.module entryconfigure $x -state normal
         }
     }
     
-
-    
-    #${log}::debug INDEX: [lrange $args 1 1]
     $mb.modMenu delete 0 end
     $mb.file delete 0 end
-        
-    #${log}::debug Entering - $module
     switch -- $module {
         "Box Labels"   {
             ${log}::debug Entering $module mode
@@ -277,6 +274,14 @@ proc eAssist::buttonBarGUI {Module} {
         default     {${log}::debug Hit the default: $module}
     }
     
+    # If we do not have anything else in this menu; we don't need the separator bar. So lets skip it.
+    set fileMenuCount [$mb.file index end]
+    if {$fileMenuCount ne "none"} {
+        $mb.file add separator
+    }
+
+    # Adding menu items that should always be shown
+    $mb.file add command -label [mc "Change User"] -command {lib::showPwordWindow}
     $mb.file add command -label [mc "Exit"] -command {eAssistSetup::SaveGlobalSettings ; exit}
     
     # Check the versions

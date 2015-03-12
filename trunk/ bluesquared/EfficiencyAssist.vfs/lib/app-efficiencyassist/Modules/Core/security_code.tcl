@@ -81,6 +81,11 @@ proc ea::sec::initUser {{newUser 0}} {
 											WHERE SecGroupNames.SecGroupName = '$user($user(id),group)'
 												AND SecGroupNames.Status = 1"]
 
+    if {$user($user(id),modules) == ""} {
+        ${log}::notice You have not yet been set up in the system.
+        Error_Message::errorMsg EA001
+        
+    }
     
 } ;# ea::sec::initUser
 
@@ -177,10 +182,7 @@ proc ea::sec::changeUser {newUser} {
         ${log}::debug $newUser exists, retrieving groups and permissions...
         unset user
         ea::sec::initUser $newUser
-    }
-    
-    ## We should re-init menu's based on the new user values.
-    
+    }    
 } ;# ea::sec::changeUser
 
 
@@ -324,10 +326,11 @@ proc ea::sec::modLauncher {args} {
     if {[lsearch $user($user(id),modules) $settings(currentModule)] == -1} {
         #${log}::debug [parray user]
         #${log}::debug User does not have access to view this module, switching ...
-        eAssist::buttonBarGUI [lindex $user($user(id),modules) 0]
+        eAssist::buttonBarGUI [join [lindex $user($user(id),modules) 0]]
         
     } else {
-        if {$args == ""} {${log}::debug No args Provided; eAssist::buttonBarGUI [lindex $user($user(id),modules) 0]}
+        if {$args == ""} {${log}::debug No args Provided; eAssist::buttonBarGUI [join [lindex $user($user(id),modules) 0]]}
+        
         switch -nocase $args {
             "Box Labels"    {eAssist::buttonBarGUI $args}
             "Batch Maker"   {eAssist::buttonBarGUI $args}

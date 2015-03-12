@@ -160,9 +160,7 @@ proc lib::savePreferences {} {
         chan puts $fd "mySettings($value) $mySettings($value)"
     }
     
-    ${log}::debug --- OPTIONS ARRAY ---
     foreach value [array names options] {
-        ${log}::debug options($value) $options($value)
         chan puts $fd "options($value) $options($value)"
     }
     

@@ -5,6 +5,8 @@
 * [NEW] The display order of the columns are now configurable in SETUP.
 * [NEW] Customer, CSR, Job Name/Title and Number are now displayed in the header area of BM.
 * [NEW] Basic reporting has been implemented. When you view the report, it automatically saves it to disk. You will find it in the same folder where you've told EA to save your other files.
+* [NEW] There is now a Notes section which will print out on the Reports. There is an associated log section that you can write internal notes in. This does not print on the main report.
+* [NEW] Security - Anyone who launches EA will automatically be put into the db, and 'logged in'. If you have elevated privleges and are on someone else's computer, you can switch to your permissions.
 * [UPDATE] Log settings are now per user instead of global.
 * [UPDATE] Importing a file is now much faster than before.
 * [UPDATE] Some data cleansing happens upon importing a file. Quotes, Single Quotes and Comma's are now automatically stripped out, and replaced with a space.

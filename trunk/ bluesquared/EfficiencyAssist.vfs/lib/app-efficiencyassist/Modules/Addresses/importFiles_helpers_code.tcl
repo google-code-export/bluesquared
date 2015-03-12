@@ -773,3 +773,4 @@ proc eAssistHelper::loadShipOrderArray {db dbTbl id} {
 	}
 
 } ;# eAssistHelper::loadShipOrderArray
+
