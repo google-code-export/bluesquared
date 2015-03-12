@@ -504,6 +504,8 @@ proc importFiles::highlightAllRecords {tbl} {
                 $tbl cellconfigure $i_row,$x -bg $backGround
                 #puts "$tbl cellconfigure $i_row,$x -bg $backGround"
                 #puts "Name: $colName _ $maxLength _ DATA: $item index: $i_row,$x"
+            } else {
+                $tbl cellconfigure $i_row,$x -bg ""
             }
             incr i_row
         }

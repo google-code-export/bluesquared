@@ -316,6 +316,66 @@ proc job::db::write {db dbTbl dbTxt wid widCells {dbCol ""}} {
     
 } ;# job::db::write
 
+proc job::db::multiWrite {db dbTbl dbCol dbSearchColVal dbSearchCol dbIdxValues} {
+    #****f* multiWrite/job::db
+    # CREATION DATE
+    #   03/12/2015 (Thursday Mar 12)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   job::db::multiWrite db dbCol dbSearchCol dbIdxValues
+    #   db = Database Name
+    #   dbTbl = The DB Table that we are using
+    #   dbCol = The Database column where the change occurs
+    #   dbSearchCol = The column where the the dbSearchColVal exist
+    #   dbSearchColVal = The value that we are searching for in dbSearchCol
+    #   dbIdxValues = The records which we are changing
+    #   
+    #
+    # FUNCTION
+    #	Writes data to the DB and the tablelist widget at the same time. This is to be used if we have multiple cells to update.
+    #	This uses the WHERE clause and IN expression.
+    #   If multiple values are passed through dbIdxValues; they must be passed in, through a comma delimited list.
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log files
+
+    # Update the DB first, then update the tabelist widget.
+    #${log}::debug $db eval "UPDATE $dbTbl SET $dbCol='$dbSearchColVal' WHERE $dbSearchCol IN ($dbIdxValues)"
+    $db eval "UPDATE $dbTbl SET $dbCol='$dbSearchColVal' WHERE $dbSearchCol IN ($dbIdxValues)"
+    
+    
+    ## Test Data
+    #set nums [join {1 2 4 5 6} ,]
+    #set nums_split [split $nums ,]
+    set nums_split [split $dbIdxValues ,]
+    foreach row $nums_split {
+        set row [expr {$row - 1}] ;# Neccessary because the tablist widget starts at 0; db starts at 1.
+        #${log}::debug $files(tab3f2).tbl cellconfigure $row,$dbCol -text "$dbSearchColVal"
+        $files(tab3f2).tbl cellconfigure $row,$dbCol -text "$dbSearchColVal"
+    }
+    
+} ;# job::db::multiWrite
+
 
 proc job::db::updateDB {} {
     #****f* updateDB/job::db
